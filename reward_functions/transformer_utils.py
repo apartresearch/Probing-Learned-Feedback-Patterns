@@ -11,6 +11,7 @@ def batch(iterable, n=1):
 
 def classify_texts(model, tokenizer, texts: list[str], class_to_reward_mappings: Dict[int, str] = None, batch_size = 6, max_length=512):
     class_to_reward_mappings = class_to_reward_mappings or {}
+    all_logits = []
     all_rewards = []
     all_softmaxed = []
 
@@ -24,12 +25,18 @@ def classify_texts(model, tokenizer, texts: list[str], class_to_reward_mappings:
             tokenized = tokenized.to('cuda')
 
         results = model(**tokenized).logits
-        softmaxed = [torch.softmax(result, dim=0).cpu().detach().numpy().tolist() for result in results]
-        all_softmaxed.extend(softmaxed)
+
+        raw_logits = [item.cpu().detach().numpy().tolist() for item in results]
+        raw_logits = [item[1] for item in raw_logits]
         
+        softmaxed = [torch.softmax(result, dim=0).cpu().detach().numpy().tolist() for result in results]
+        
+        all_softmaxed.extend(softmaxed)
+        all_logits.extend(raw_logits)
+
     for item in all_softmaxed:
         max_label =  np.argmax(item)
         mapped_reward = class_to_reward_mappings.get(max_label, max_label)
         all_rewards.append(mapped_reward)
 
-    return all_rewards, all_softmaxed
+    return all_rewards, all_softmaxed, all_logits
