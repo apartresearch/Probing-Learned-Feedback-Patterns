@@ -1,4 +1,12 @@
 # Will increment hyperparameter sets as we try different ones.
+
+class ExperimentConfig:
+
+    def __init__(self, hyperparameters, base_model_name, policy_model_name):
+	self.hyperparameters = hyperparameters
+	self.base_model_name = base_model_name
+	self.policy_model_name = policy_model_name
+
 hyperparameters_1 = {
     'input_size': 512,
     'hidden_sizes': [512, 1024],
@@ -19,3 +27,7 @@ hyperparameters_2 = {
     'num_epochs': 50,
     'learning_rate': 1e-3
 }
+
+
+experiment_config_A
+experiment_config_B
