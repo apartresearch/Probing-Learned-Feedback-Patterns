@@ -29,5 +29,4 @@ hyperparameters_2 = {
 }
 
 
-experiment_config_A
-experiment_config_B
+experiment_config_A = ExperimentConfig(hyperparameters=hyperparameters_1,  base_model_name="eleutherai/pythia-70m", policy_model_name="amirabdullah19852020/pythia-70m_sentiment_reward")
