@@ -1,5 +1,7 @@
 import os
 import torch
+inport wandb
+from wandb import Artifact
 
 from models.sparse_autoencoder import SparseAutoencoder
 
@@ -19,6 +21,34 @@ def save_models_to_folder(model_dict, save_dir):
             torch.save([model.kwargs, model.state_dict()], model_path)
             print(f"Saved {model_name} to {model_path}")
 
+
+def save_autoencoders_for_artifact(
+        autoencoders_base_big, autoencoders_base_small, autoencoders_rlhf_big, autoencoders_rlhf_small,
+        policy_model_name, hyperparameters, alias, run
+    ):
+    '''
+    Saves the autoencoders from one run into memory. Note that these paths are to some extent hardcoded
+    '''
+    save_dir = 'saves'
+    save_models_to_folder(autoencoders_base_big, f'{save_dir}/base_big')
+    save_models_to_folder(autoencoders_base_small, f'{save_dir}/base_small')
+    save_models_to_folder(autoencoders_rlhf_big, f'{save_dir}/rlhf_big')
+    save_models_to_folder(autoencoders_rlhf_small, f'{save_dir}/rlhf_small')
+
+    artifact_name = f'autoencoders_{policy_model_name}'
+    saved_artifact = Artifact(artifact_name, metadata=hyperparameters, type='model')
+    saved_artifact.add_dir(save_dir, name=save_dir)
+
+    aliases = sorted(
+        list({policy_model_name, 'latest'}.add(alias))
+    )
+    run.log_artifact(artifact=saved_artifact, aliases=aliases)
+
+def load_autoencoder_for_artifact(run):
+    '''
+    Loads the autoencoders from one run into memory. Note that these paths are to some extent hardcoded
+    '''
+    pass
 
 def load_models_from_folder(load_dir):
     """
