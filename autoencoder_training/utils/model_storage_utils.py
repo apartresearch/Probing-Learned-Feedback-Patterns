@@ -41,7 +41,7 @@ def save_autoencoders_for_artifact(
     aliases = {policy_model_name, 'latest'}
     aliases.add(alias)
     aliases = sorted(list(aliases))
-    run.log_artifact(artifact=saved_artifact, aliases=aliases)
+    run.log_artifact(saved_artifact, aliases=aliases)
 
 def load_autoencoder_for_artifact(run):
     '''
