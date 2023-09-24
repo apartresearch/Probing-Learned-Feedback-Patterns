@@ -15,7 +15,7 @@ def save_models_to_folder(model_dict, save_dir):
 
     for model_name, model_list in model_dict.items():
         for i, model in enumerate(model_list):
-            model_path = os.path.join(save_dir, f'{model_name})
+            model_path = os.path.join(save_dir, f'{model_name}')
             torch.save([model.kwargs, model.state_dict()], model_path)
             print(f"Saved {model_name} to {model_path}")
 
