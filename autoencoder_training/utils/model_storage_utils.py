@@ -29,12 +29,12 @@ def save_autoencoders_for_artifact(
     Saves the autoencoders from one run into memory. Note that these paths are to some extent hardcoded
     '''
     save_dir = 'saves'
-    save_models_to_folder(autoencoders_base_big, f'{save_dir}/base_big')
-    save_models_to_folder(autoencoders_base_small, f'{save_dir}/base_small')
-    save_models_to_folder(autoencoders_rlhf_big, f'{save_dir}/rlhf_big')
-    save_models_to_folder(autoencoders_rlhf_small, f'{save_dir}/rlhf_small')
+    save_models_to_folder(autoencoders_base_big, save_dir=f'{save_dir}/base_big')
+    save_models_to_folder(autoencoders_base_small, save_dir=f'{save_dir}/base_small')
+    save_models_to_folder(autoencoders_rlhf_big, save_dir=f'{save_dir}/rlhf_big')
+    save_models_to_folder(autoencoders_rlhf_small, save_dir=f'{save_dir}/rlhf_small')
 
-    artifact_name = f'autoencoders_{policy_model_name}'
+    artifact_name = f'autoencoders_{policy_model_name}'.replace("-", "_").replace("/", "_")
     saved_artifact = Artifact(artifact_name, metadata=hyperparameters, type='model')
     saved_artifact.add_dir(save_dir, name=save_dir)
 
