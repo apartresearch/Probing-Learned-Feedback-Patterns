@@ -17,35 +17,20 @@ from circuitsvis.activations import text_neuron_activations
 from torch.utils.data import DataLoader, TensorDataset
 from itertools import product
 import openai
+
 from experiment_configs import ExperimentConfig, experiment_config_A
 
 import torch.nn as nn
 
-class SparseAutoencoder(nn.Module):
-    def __init__(self, input_size, hidden_size, l1_coef):
-        super(SparseAutoencoder, self).__init__()
-        self.encoder = nn.Sequential(
-            nn.Linear(input_size, hidden_size),
-            nn.ReLU(True)
-        )
+from models.sparse_autoencoder import SparseAutoencoder
+from network_helper_functions import find_layers, get_layer_activations
+from training import feature_representation
 
-        self.l1_coef = l1_coef
-
-        self.decoder_weight = nn.Parameter(torch.randn(hidden_size, input_size))
-        nn.init.orthogonal_(self.decoder_weight)
-
-    def forward(self, x):
-        features = self.encoder(x)
-
-        normalized_decoder_weight = F.normalize(self.decoder_weight, p=2, dim=1)
-        reconstruction = torch.matmul(features, normalized_decoder_weight)
-
-        return features, reconstruction
-
-    def decoder(self, features):
-        normalized_decoder_weight = F.normalize(self.decoder_weight, p=2, dim=1)
-
-        return torch.matmul(features, normalized_decoder_weight)
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+def preprocess(dataset, tokenizer, limit):
+    texts = [x['text'] for x in dataset.select(range(limit))]
+    inputs = tokenizer(texts, return_tensors='pt', padding=True, truncation=True, max_length=512)
+    return inputs
 
 def run_experiment(experiment_config: ExperimentConfig):
     '''
@@ -69,6 +54,14 @@ def run_experiment(experiment_config: ExperimentConfig):
     
     wandb.log({'base_model_name': base_model_name, 'policy_model_name': policy_model_name})
 
+    m_base = AutoModel.from_pretrained(base_model_name).to(device)
+    m_rlhf = AutoModel.from_pretrained(policy_model_name).to(device)
+
+    tokenizer = AutoTokenizer.from_pretrained(base_model_name)
+    tokenizer.pad_token = tokenizer.eos_token
+
+    tokenizer_rlhf = AutoTokenizer.from_pretrained(policy_model_name)
+    tokenizer_rlhf.pad_token = tokenizer_rlhf.eos_token
     train_dataset = load_dataset("imdb", split="train")
     test_dataset = load_dataset("imdb", split="test")
 
@@ -79,30 +72,44 @@ def run_experiment(experiment_config: ExperimentConfig):
     sorted_layers = find_layers(m_base, m_rlhf)[:3]
     all_autoencoders = {}
 
+    train_dataset_base = preprocess(load_dataset("imdb", split="train"), tokenizer, 96)
+    input_data_base = {'input_ids': train_dataset_base['input_ids'].to(device)}
+    train_dataset_rlhf = preprocess(load_dataset("imdb", split="train"), tokenizer_rlhf, 96)
+    input_data_rlhf = {'input_ids': train_dataset_rlhf['input_ids'].to(device)}
+
+    sorted_layers = find_layers(m_base, m_rlhf)
+
+    autoencoders_base_big = {}
+    autoencoders_base_small = {}
+
+    autoencoders_rlhf_big = {}
+    autoencoders_rlhf_small = {}
+
+    orig_hidden_size = hyperparameters['hidden_size']
+
     for layer_index in sorted_layers:
-        layer_name = f"layers.{layer_index}.mlp"
-        print(f"Layer: {layer_name}")
+        print(layer_index)
+        for hidden_size in [hyperparameters['hidden_size'], (hyperparameters['hidden_size'] * 2)]:
+            hyperparameters['hidden_size'] = hidden_size
+            print(hyperparameters['hidden_size'])
 
-        for hidden_size in hidden_sizes:
-            print(f"Training autoencoder with hidden size: {hidden_size}")
-            hyperparameters_clone['hidden_size'] = hidden_size
+            autoencoder_base = feature_representation(m_base, f'layers.{sorted_layers[layer_index]}.mlp',
+                                                      input_data_base, hyperparameters, device)
 
-            autoencoders = feature_representation(m_base, layer_name, input_data, hyperparameters_clone, device)
+            if hyperparameters['hidden_size'] > orig_hidden_size:
+                autoencoders_base_big[str(layer_index)] = autoencoder_base
+            else:
+                autoencoders_base_small[str(layer_index)] = autoencoder_base
 
-            if layer_name not in all_autoencoders:
-                all_autoencoders[layer_name] = []
+            autoencoder_rlhf = feature_representation(m_rlhf, f'layers.{sorted_layers[layer_index]}.mlp',
+                                                      input_data_rlhf, hyperparameters, device)
 
-            all_autoencoders[layer_name].extend(autoencoders)
+            if hyperparameters['hidden_size'] > orig_hidden_size:
+                autoencoders_rlhf_big[str(layer_index)] = autoencoder_rlhf
+            else:
+                autoencoders_rlhf_small[str(layer_index)] = autoencoder_rlhf
 
-            test_activations = get_layer_activations(m_base, layer_name, test_data, device)
-            test_activations_tensor = test_activations.detach().clone().to(device)
-            test_activations_tensor = test_activations_tensor.squeeze(1)
-            test_dataset = TensorDataset(test_activations_tensor)
-            test_data_loader = DataLoader(test_dataset, batch_size=hyperparameters['batch_size'], shuffle=False)
-
-            for autoencoder in autoencoders:
-                test_loss = measure_performance(autoencoder, test_data_loader, device)
-                print(f'Test Loss for Autoencoder with hidden size {hidden_size}: {test_loss:.4f}')
+            hyperparameters['hidden_size'] = orig_hidden_size
 
 
 run_experiment(experiment_config=experiment_config_A)
