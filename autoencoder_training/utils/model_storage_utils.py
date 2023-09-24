@@ -1,6 +1,5 @@
 import os
 import torch
-inport wandb
 from wandb import Artifact
 
 from models.sparse_autoencoder import SparseAutoencoder
