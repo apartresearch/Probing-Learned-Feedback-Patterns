@@ -46,11 +46,6 @@ def run_experiment(experiment_config: ExperimentConfig):
 
     tokenizer_rlhf = AutoTokenizer.from_pretrained(policy_model_name)
     tokenizer_rlhf.pad_token = tokenizer_rlhf.eos_token
-    train_dataset = load_dataset("imdb", split="train")
-    test_dataset = load_dataset("imdb", split="test")
-
-    input_data = preprocess(train_dataset, tokenizer, 960).to(device)
-    test_data = preprocess(test_dataset, tokenizer, 960).to(device)
 
     train_dataset_base = preprocess(load_dataset("imdb", split="train"), tokenizer, 96)
     input_data_base = {'input_ids': train_dataset_base['input_ids'].to(device)}

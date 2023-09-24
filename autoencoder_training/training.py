@@ -50,6 +50,7 @@ def train_autoencoder(autoencoder, data_loader, hyperparameters, device, label):
             print(f"Epoch [{epoch+1}/{hyperparameters['num_epochs']}], Loss: {loss.item():.4f}")
             print("Reconstruction Loss: ", reconstruction_loss.item())
             print("Sparsity Loss: ", sparsity_loss.item())
+            print("True sparsity loss: ", true_sparsity_loss.item())
 
 
 def train_decoder(autoencoder, data_loader, encoded_data_loader, hyperparameters, device):
