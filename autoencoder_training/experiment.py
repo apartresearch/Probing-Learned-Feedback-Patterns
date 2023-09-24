@@ -70,7 +70,7 @@ def run_experiment(experiment_config: ExperimentConfig):
     autoencoders_rlhf_small = {}
 
     hidden_sizes = sorted(hyperparameters['hidden_sizes']).copy()
-    orig_hidden_size = hidden_sizes[0]
+    small_hidden_size = hidden_sizes[0]
 
     for layer_index in sorted_layers:
         print(layer_index)
@@ -85,18 +85,16 @@ def run_experiment(experiment_config: ExperimentConfig):
                 input_data_base, hyperparameters_copy, device
             )
 
-            if hidden_size > orig_hidden_size:
-                autoencoders_base_big[str(layer_index)] = autoencoder_base
-            else:
-                autoencoders_base_small[str(layer_index)] = autoencoder_base
+            target_autoencoders_base = autoencoders_base_big if hidden_size > small_hidden_size else autoencoders_base_small
+
+            target_autoencoders_base[str(layer_index)] = autoencoder_base
 
             autoencoder_rlhf = feature_representation(m_rlhf, f'layers.{sorted_layers[layer_index]}.mlp',
                                                       input_data_rlhf, hyperparameters_copy, device)
 
-            if hidden_size > orig_hidden_size:
-                autoencoders_rlhf_big[str(layer_index)] = autoencoder_rlhf
-            else:
-                autoencoders_rlhf_small[str(layer_index)] = autoencoder_rlhf
+            target_autoencoders_rlhf = autoencoders_rlhf_big if hidden_size > small_hidden_size else autoencoders_rlhf_small
+
+            target_autoencoders_rlhf[str(layer_index)] = autoencoder_rlhf
 
 
 run_experiment(experiment_config=experiment_config_A)
