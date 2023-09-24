@@ -9,7 +9,7 @@ class ExperimentConfig:
 
 hyperparameters_1 = {
     'input_size': 512,
-    'hidden_sizes': [512, 1024],
+    'hidden_size': [512, 1024],
     'sparsity_target': 0.1,
     'sparsity_weight': 1e-2,
     'batch_size': 32,

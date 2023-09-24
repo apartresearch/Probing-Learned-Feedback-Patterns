@@ -5,18 +5,6 @@ from transformers import AutoTokenizer
 from datasets import load_dataset
 import numpy as np
 import torch
-import torch.nn as nn
-import torch.optim as optim
-import torch.nn.functional as F
-from torch.utils.data import DataLoader, TensorDataset
-from collections import defaultdict
-from scipy.optimize import linear_sum_assignment
-import matplotlib.pyplot as plt
-from einops import rearrange
-from circuitsvis.activations import text_neuron_activations
-from torch.utils.data import DataLoader, TensorDataset
-from itertools import product
-import openai
 
 from experiment_configs import ExperimentConfig, experiment_config_A
 
@@ -85,18 +73,23 @@ def run_experiment(experiment_config: ExperimentConfig):
     autoencoders_rlhf_big = {}
     autoencoders_rlhf_small = {}
 
-    orig_hidden_size = hyperparameters['hidden_size']
+    hidden_sizes = sorted(hyperparameters['hidden_sizes']).copy()
+    orig_hidden_size = hidden_sizes[0]
 
     for layer_index in sorted_layers:
         print(layer_index)
-        for hidden_size in [hyperparameters['hidden_size'], (hyperparameters['hidden_size'] * 2)]:
-            hyperparameters['hidden_size'] = hidden_size
-            print(hyperparameters['hidden_size'])
+        for hidden_size in hidden_sizes:
+            print(hidden_size)
 
-            autoencoder_base = feature_representation(m_base, f'layers.{sorted_layers[layer_index]}.mlp',
-                                                      input_data_base, hyperparameters, device)
+            hyperparameters_copy = hyperparameters.copy()
+            hyperparameters_copy['hidden_size'] = hidden_size
 
-            if hyperparameters['hidden_size'] > orig_hidden_size:
+            autoencoder_base = feature_representation(
+                m_base, f'layers.{sorted_layers[layer_index]}.mlp',
+                input_data_base, hyperparameters_copy, device
+            )
+
+            if hidden_size > orig_hidden_size:
                 autoencoders_base_big[str(layer_index)] = autoencoder_base
             else:
                 autoencoders_base_small[str(layer_index)] = autoencoder_base
@@ -104,12 +97,10 @@ def run_experiment(experiment_config: ExperimentConfig):
             autoencoder_rlhf = feature_representation(m_rlhf, f'layers.{sorted_layers[layer_index]}.mlp',
                                                       input_data_rlhf, hyperparameters, device)
 
-            if hyperparameters['hidden_size'] > orig_hidden_size:
+            if hidden_size > orig_hidden_size:
                 autoencoders_rlhf_big[str(layer_index)] = autoencoder_rlhf
             else:
                 autoencoders_rlhf_small[str(layer_index)] = autoencoder_rlhf
-
-            hyperparameters['hidden_size'] = orig_hidden_size
 
 
 run_experiment(experiment_config=experiment_config_A)
