@@ -31,10 +31,10 @@ def train_autoencoder(autoencoder, data_loader, hyperparameters, device, layer_n
             reconstruction_loss = criterion(reconstruction, data)
             loss = reconstruction_loss + sparsity_loss
 
-            all_losses.append(loss.cpu().numpy())
-            all_reconstruction_losses.append(reconstruction_loss.cpu().numpy())
-            all_sparsity_losses.append(sparsity_loss.cpu().numpy())
-            all_true_sparsity_losses.append(true_sparsity_loss.cpu().numpy())
+            all_losses.append(loss.cpu().detach().numpy())
+            all_reconstruction_losses.append(reconstruction_loss.cpu().detach().numpy())
+            all_sparsity_losses.append(sparsity_loss.cpu().detach().numpy())
+            all_true_sparsity_losses.append(true_sparsity_loss.cpu().detach().numpy())
 
             loss.backward()
             optimizer.step()
