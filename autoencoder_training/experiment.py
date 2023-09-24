@@ -91,7 +91,7 @@ def run_experiment(experiment_config: ExperimentConfig):
                 autoencoders_base_small[str(layer_index)] = autoencoder_base
 
             autoencoder_rlhf = feature_representation(m_rlhf, f'layers.{sorted_layers[layer_index]}.mlp',
-                                                      input_data_rlhf, hyperparameters, device)
+                                                      input_data_rlhf, hyperparameters_copy, device)
 
             if hidden_size > orig_hidden_size:
                 autoencoders_rlhf_big[str(layer_index)] = autoencoder_rlhf
