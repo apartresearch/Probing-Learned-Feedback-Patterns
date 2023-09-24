@@ -1,5 +1,6 @@
 import wandb
 
+from datasets import load_dataset
 from experiment_configs import ExperimentConfig, experiment_config_A
 
 def run_experiment(experiment_config: ExperimentConfig):
@@ -16,7 +17,7 @@ def run_experiment(experiment_config: ExperimentConfig):
     wandb.login()
     run = wandb.init(project=wandb_project_name)
 
-    hyperparamters = experiment_config.hyperparameters
+    hyperparameters = experiment_config.hyperparameters
     wandb.log(**hyperparameters)
 
     base_model_name = experiment_config.base_model_name
@@ -60,4 +61,4 @@ def run_experiment(experiment_config: ExperimentConfig):
                 print(f'Test Loss for Autoencoder with hidden size {hidden_size}: {test_loss:.4f}')
 
 
-run_experiment
+run_experiment(experiment_config=experiment_config_A)
