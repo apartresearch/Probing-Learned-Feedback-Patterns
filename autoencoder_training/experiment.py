@@ -88,6 +88,8 @@ def run_experiment(experiment_config: ExperimentConfig):
 
             target_autoencoders_rlhf[str(layer_index)] = autoencoder_rlhf
 
+    wandb.finish()
+
 for experiment_config in all_experiment_configs:
     print(f'Running experiment now for config {experiment_config}')
     run_experiment(experiment_config=experiment_config)
