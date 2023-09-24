@@ -9,6 +9,7 @@ from experiment_configs import ExperimentConfig, all_experiment_configs
 
 from network_helper_functions import find_layers, get_layer_activations
 from training import feature_representation
+from utils.model_storage_utils import load_models_from_folder, save_models_to_folder
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 def preprocess(dataset, tokenizer, limit):
@@ -88,10 +89,12 @@ def run_experiment(experiment_config: ExperimentConfig):
 
             target_autoencoders_rlhf[str(layer_index)] = autoencoder_rlhf
 
+            save_models_to_folder(autoencoders_base_big, 'saves/base_big')
+            save_models_to_folder(autoencoders_base_small, 'saves/base_small')
+            save_models_to_folder(autoencoders_rlhf_big, 'saves/rlhf_big')
+            save_models_to_folder(autoencoders_rlhf_small, 'saves/rlhf_small')
+
     wandb.finish()
-
-def save_autoencoders_dict(directory, autoencoders_dict):
-
 
 for experiment_config in all_experiment_configs:
     print(f'Running experiment now for config {experiment_config}')

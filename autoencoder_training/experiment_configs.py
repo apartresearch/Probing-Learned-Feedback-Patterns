@@ -27,7 +27,7 @@ hyperparameters_2 = {
     'hidden_sizes': [512, 1024],
     'l1_coef': 0.01,
     'batch_size': 32,
-    'num_epochs': 50,
+    'num_epochs': 5,
     'learning_rate': 1e-3
 }
 
