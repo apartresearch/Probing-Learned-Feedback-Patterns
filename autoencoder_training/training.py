@@ -20,7 +20,6 @@ def train_autoencoder(autoencoder, data_loader, hyperparameters, device, layer_n
         all_reconstruction_losses = []
         all_true_sparsity_losses = []
         for batch in data_loader:
-
             data = batch[0].to(device)
 
             optimizer.zero_grad()
@@ -32,10 +31,10 @@ def train_autoencoder(autoencoder, data_loader, hyperparameters, device, layer_n
             reconstruction_loss = criterion(reconstruction, data)
             loss = reconstruction_loss + sparsity_loss
 
-            all_losses.append(loss)
-            all_reconstruction_losses.append(reconstruction_loss)
-            all_sparsity_losses.append(sparsity_loss)
-            all_true_sparsity_losses.append(true_sparsity_loss)
+            all_losses.append(loss.cpu().numpy())
+            all_reconstruction_losses.append(reconstruction_loss.cpu().numpy())
+            all_sparsity_losses.append(sparsity_loss.cpu().numpy())
+            all_true_sparsity_losses.append(true_sparsity_loss.cpu().numpy())
 
             loss.backward()
             optimizer.step()

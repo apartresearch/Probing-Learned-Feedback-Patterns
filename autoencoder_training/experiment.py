@@ -25,12 +25,15 @@ def run_experiment(experiment_config: ExperimentConfig):
     4. Measure loss of the autoencoder on the IMDb test dataset.
     '''
 
-    wandb_project_name = 'Autoencoder training'
+    wandb_project_name = 'Autoencoder_training'
 
     wandb.login()
     hyperparameters = experiment_config.hyperparameters
     base_model_name = experiment_config.base_model_name
+    simplified_base_model_name = base_model_name.split('/')[-1]
+
     policy_model_name = experiment_config.policy_model_name
+    wandb_project_name = f'Autoencoder_training_{simplified_base_model_name}'
 
     hyperparameters.update({'base_model_name': base_model_name, 'policy_model_name': policy_model_name})
     run = wandb.init(project=wandb_project_name, config=hyperparameters)
