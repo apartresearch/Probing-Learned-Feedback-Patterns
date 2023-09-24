@@ -3,9 +3,9 @@
 class ExperimentConfig:
 
     def __init__(self, hyperparameters, base_model_name, policy_model_name):
-	self.hyperparameters = hyperparameters
-	self.base_model_name = base_model_name
-	self.policy_model_name = policy_model_name
+        self.hyperparameters = hyperparameters
+        self.base_model_name = base_model_name
+        self.policy_model_name = policy_model_name
 
 hyperparameters_1 = {
     'input_size': 512,
