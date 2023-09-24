@@ -5,7 +5,7 @@ from transformers import AutoTokenizer
 from datasets import load_dataset
 import torch
 
-from experiment_configs import ExperimentConfig, experiment_config_A
+from experiment_configs import ExperimentConfig, all_experiment_configs
 
 from network_helper_functions import find_layers, get_layer_activations
 from training import feature_representation
@@ -24,16 +24,13 @@ def run_experiment(experiment_config: ExperimentConfig):
     3. Train autoencoders on the extracted activations.
     4. Measure loss of the autoencoder on the IMDb test dataset.
     '''
-
-    wandb_project_name = 'Autoencoder_training'
-
     wandb.login()
     hyperparameters = experiment_config.hyperparameters
     base_model_name = experiment_config.base_model_name
     simplified_base_model_name = base_model_name.split('/')[-1]
 
     policy_model_name = experiment_config.policy_model_name
-    wandb_project_name = f'Autoencoder_training_{simplified_base_model_name}'
+    wandb_project_name = f'Autoencoder_training_{simplified_policy_model_name}'
 
     hyperparameters.update({'base_model_name': base_model_name, 'policy_model_name': policy_model_name})
     run = wandb.init(project=wandb_project_name, config=hyperparameters)
@@ -80,7 +77,7 @@ def run_experiment(experiment_config: ExperimentConfig):
 
             autoencoder_base = feature_representation(
                 m_base, f'layers.{sorted_layers[layer_index]}.mlp',
-                input_data_base, hyperparameters_copy, device, label=label
+                input_data_base, hyperparameters_copy, device, label=f'base_{label}'
             )
 
             target_autoencoders_base = autoencoders_base_big if hidden_size > small_hidden_size else autoencoders_base_small
@@ -89,11 +86,13 @@ def run_experiment(experiment_config: ExperimentConfig):
 
             autoencoder_rlhf = feature_representation(
                 m_rlhf, f'layers.{sorted_layers[layer_index]}.mlp',
-                input_data_rlhf, hyperparameters_copy, device, label=label
+                input_data_rlhf, hyperparameters_copy, device, label=f'rlhf_{label}'
             )
 
             target_autoencoders_rlhf = autoencoders_rlhf_big if hidden_size > small_hidden_size else autoencoders_rlhf_small
 
             target_autoencoders_rlhf[str(layer_index)] = autoencoder_rlhf
 
-run_experiment(experiment_config=experiment_config_A)
+for experiment_config in all_experiment_configs:
+    print(f'Running experiment now for config {experiment_config}')
+    run_experiment(experiment_config=experiment_config)
