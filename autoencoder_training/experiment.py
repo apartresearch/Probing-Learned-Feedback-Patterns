@@ -56,10 +56,6 @@ def run_experiment(experiment_config: ExperimentConfig):
     input_data = preprocess(train_dataset, tokenizer, 960).to(device)
     test_data = preprocess(test_dataset, tokenizer, 960).to(device)
 
-    hyperparameters_clone = hyperparameters.copy()
-    sorted_layers = find_layers(m_base, m_rlhf)[:3]
-    all_autoencoders = {}
-
     train_dataset_base = preprocess(load_dataset("imdb", split="train"), tokenizer, 96)
     input_data_base = {'input_ids': train_dataset_base['input_ids'].to(device)}
     train_dataset_rlhf = preprocess(load_dataset("imdb", split="train"), tokenizer_rlhf, 96)
