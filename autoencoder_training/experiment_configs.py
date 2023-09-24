@@ -8,9 +8,8 @@ class ExperimentConfig:
         self.policy_model_name = policy_model_name
 
     def __str__(self):
-        printable = self.hyperparameters.copy().update(
-            {'base_model_name': self.base_model_name, 'policy_model_name': self.policy_model_name}
-        )
+        printable = self.hyperparameters.copy()
+        printable.update({'base_model_name': self.base_model_name, 'policy_model_name': self.policy_model_name})
         return str(printable)
 
 hyperparameters_1 = {
