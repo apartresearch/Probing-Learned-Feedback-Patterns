@@ -39,7 +39,7 @@ def save_autoencoders_for_artifact(
     save_models_to_folder(autoencoders_rlhf_small, save_dir=f'{save_dir}/rlhf_small')
 
     simplified_policy_name = policy_model_name.split('/')[-1].replace("-", "_")
-    artifact_name = f'autoencoders_{simplified_policy_model_name}'
+    artifact_name = f'autoencoders_{simplified_policy_name}'
     saved_artifact = Artifact(artifact_name, metadata=hyperparameters, type='model')
     saved_artifact.add_dir(save_dir, name=save_dir)
 
