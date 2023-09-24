@@ -26,7 +26,7 @@ def train_autoencoder(autoencoder, data_loader, hyperparameters, device, label):
             features, reconstruction = autoencoder(data)
 
             sparsity_loss = autoencoder.l1_coef * torch.norm(features, 1, dim=-1).mean()
-            true_sparsity_loss = autoencoder.l1_coef * torch.norm(features, 0, dim=-1).mean()
+            true_sparsity_loss = torch.norm(features, 0, dim=-1).mean()
 
             reconstruction_loss = criterion(reconstruction, data)
             loss = reconstruction_loss + sparsity_loss
