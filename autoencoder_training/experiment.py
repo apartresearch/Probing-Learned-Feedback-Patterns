@@ -1,6 +1,22 @@
 import wandb
 
+from transformers import AutoModel
+from transformers import AutoTokenizer
 from datasets import load_dataset
+import numpy as np
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import torch.nn.functional as F
+from torch.utils.data import DataLoader, TensorDataset
+from collections import defaultdict
+from scipy.optimize import linear_sum_assignment
+import matplotlib.pyplot as plt
+from einops import rearrange
+from circuitsvis.activations import text_neuron_activations
+from torch.utils.data import DataLoader, TensorDataset
+from itertools import product
+import openai
 from experiment_configs import ExperimentConfig, experiment_config_A
 
 import torch.nn as nn
@@ -30,6 +46,7 @@ class SparseAutoencoder(nn.Module):
         normalized_decoder_weight = F.normalize(self.decoder_weight, p=2, dim=1)
 
         return torch.matmul(features, normalized_decoder_weight)
+
 def run_experiment(experiment_config: ExperimentConfig):
     '''
     Part 1 of IMDb experiment:
