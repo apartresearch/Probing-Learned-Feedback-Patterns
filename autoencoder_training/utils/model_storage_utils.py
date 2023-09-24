@@ -38,9 +38,9 @@ def save_autoencoders_for_artifact(
     saved_artifact = Artifact(artifact_name, metadata=hyperparameters, type='model')
     saved_artifact.add_dir(save_dir, name=save_dir)
 
-    aliases = sorted(
-        list({policy_model_name, 'latest'}.add(alias))
-    )
+    aliases = {policy_model_name, 'latest'}
+    aliases.add(alias)
+    aliases = sorted(list(aliases))
     run.log_artifact(artifact=saved_artifact, aliases=aliases)
 
 def load_autoencoder_for_artifact(run):
