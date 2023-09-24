@@ -13,10 +13,11 @@ def save_models_to_folder(model_dict, save_dir):
     """
     os.makedirs(save_dir, exist_ok=True)
 
-    for model_name, model in model_dict.items():
-        model_path = os.path.join(save_dir, model_name)
-        torch.save([model.kwargs, model.state_dict()], model_path)
-        print(f"Saved {model_name} to {model_path}")
+    for model_name, model_list in model_dict.items():
+        for i, model in enumerate(model_list):
+            model_path = os.path.join(save_dir, model_name)
+            torch.save([model.kwargs, model.state_dict()], model_path)
+            print(f"Saved {model_name} to {model_path}")
 
 
 def load_models_from_folder(load_dir):
@@ -31,7 +32,7 @@ def load_models_from_folder(load_dir):
     """
     model_dict = {}
 
-    for model_name in os.listdir(load_dir):
+    for model_name in sorted(os.listdir(load_dir)):
         model_path = os.path.join(load_dir, model_name)
         if os.path.isdir(model_path):
             kwargs, state = torch.load(model_path)
