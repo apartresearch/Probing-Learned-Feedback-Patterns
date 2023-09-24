@@ -89,10 +89,10 @@ def run_experiment(experiment_config: ExperimentConfig):
 
             target_autoencoders_rlhf[str(layer_index)] = autoencoder_rlhf
 
-            save_models_to_folder(autoencoders_base_big, 'saves/base_big')
-            save_models_to_folder(autoencoders_base_small, 'saves/base_small')
-            save_models_to_folder(autoencoders_rlhf_big, 'saves/rlhf_big')
-            save_models_to_folder(autoencoders_rlhf_small, 'saves/rlhf_small')
+    save_models_to_folder(autoencoders_base_big, 'saves/base_big')
+    save_models_to_folder(autoencoders_base_small, 'saves/base_small')
+    save_models_to_folder(autoencoders_rlhf_big, 'saves/rlhf_big')
+    save_models_to_folder(autoencoders_rlhf_small, 'saves/rlhf_small')
 
     wandb.finish()
 
