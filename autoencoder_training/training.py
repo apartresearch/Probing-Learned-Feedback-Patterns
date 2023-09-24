@@ -1,30 +1,51 @@
 
+import numpy as np
+
 from torch.utils.data import DataLoader, TensorDataset
 import torch
 import torch.optim as optim
 import torch.nn as nn
+import wandb
 
 from network_helper_functions import get_layer_activations
 from models.sparse_autoencoder import SparseAutoencoder
 
-def train_autoencoder(autoencoder, data_loader, hyperparameters, device):
+def train_autoencoder(autoencoder, data_loader, hyperparameters, device, layer_name):
     criterion = nn.MSELoss()
     optimizer = optim.Adam(autoencoder.parameters(), lr=hyperparameters['learning_rate'])
 
     for epoch in range(hyperparameters['num_epochs']):
+        all_losses = []
+        all_sparsity_losses = []
+        all_reconstruction_losses = []
+        all_true_sparsity_losses = []
         for batch in data_loader:
+
             data = batch[0].to(device)
 
             optimizer.zero_grad()
             features, reconstruction = autoencoder(data)
 
             sparsity_loss = autoencoder.l1_coef * torch.norm(features, 1, dim=-1).mean()
+            true_sparsity_loss = autoencoder.l1_coef * torch.norm(features, 0, dim=-1).mean()
 
             reconstruction_loss = criterion(reconstruction, data)
             loss = reconstruction_loss + sparsity_loss
 
+            all_losses.append(loss)
+            all_reconstruction_losses.append(reconstruction_loss)
+            all_sparsity_losses.append(sparsity_loss)
+            all_true_sparsity_losses.append(true_sparsity_loss)
+
             loss.backward()
             optimizer.step()
+
+        wandb.log({
+            f"loss_{layer_name}": np.mean(all_losses),
+            f"reconstruction_loss_{layer_name}": np.mean(all_reconstruction_losses),
+            f"sparsity_loss_{layer_name}": np.mean(all_sparsity_losses),
+            f"true_sparsity_loss_{layer_name}": np.mean(all_true_sparsity_losses)
+        })
 
         print(f"Epoch [{epoch+1}/{hyperparameters['num_epochs']}], Loss: {loss.item():.4f}")
         print("Reconstruction Loss: ", reconstruction_loss.item())
@@ -45,6 +66,8 @@ def train_decoder(autoencoder, data_loader, encoded_data_loader, hyperparameters
             reconstruction_loss = criterion(features, original_data)
 
             loss = reconstruction_loss
+
+            wandb.log({"reconstruction_loss": reconstruction_loss})
             loss.backward()
             optimizer.step()
 
@@ -66,6 +89,8 @@ def train_encoder(autoencoder, data_loader, hyperparameters, device):
             loss.backward()
             optimizer.step()
 
+            wandb.log({"sparsity_loss": sparsity_loss})
+
         print(f"Encoder Epoch [{epoch+1}/{hyperparameters['num_epochs']}], Loss: {loss.item():.4f}")
 
 def feature_representation(m_base, layer_name, input_data, hyperparameters, device, num_autoencoders=1):
@@ -81,7 +106,7 @@ def feature_representation(m_base, layer_name, input_data, hyperparameters, devi
     autoencoders = []
     for i in range(num_autoencoders):
         autoencoder = SparseAutoencoder(input_size, hyperparameters['hidden_size'], hyperparameters['l1_coef']).to(device)
-        train_autoencoder(autoencoder, base_data_loader, hyperparameters, device)
+        train_autoencoder(autoencoder, base_data_loader, hyperparameters, device, layer_name=layer_name)
         autoencoders.append(autoencoder)
 
     return autoencoders

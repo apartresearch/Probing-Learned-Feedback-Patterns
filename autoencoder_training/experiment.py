@@ -3,14 +3,10 @@ import wandb
 from transformers import AutoModel
 from transformers import AutoTokenizer
 from datasets import load_dataset
-import numpy as np
 import torch
 
 from experiment_configs import ExperimentConfig, experiment_config_A
 
-import torch.nn as nn
-
-from models.sparse_autoencoder import SparseAutoencoder
 from network_helper_functions import find_layers, get_layer_activations
 from training import feature_representation
 
@@ -32,15 +28,15 @@ def run_experiment(experiment_config: ExperimentConfig):
     wandb_project_name = 'Autoencoder training'
 
     wandb.login()
-    run = wandb.init(project=wandb_project_name)
-
     hyperparameters = experiment_config.hyperparameters
-    wandb.log(hyperparameters)
+    base_model_name = experiment_config.base_model_name
+    policy_model_name = experiment_config.policy_model_name
+
+    hyperparameters.update({'base_model_name': base_model_name, 'policy_model_name': policy_model_name})
+    run = wandb.init(project=wandb_project_name, config=hyperparameters)
 
     base_model_name = experiment_config.base_model_name
     policy_model_name = experiment_config.policy_model_name
-    
-    wandb.log({'base_model_name': base_model_name, 'policy_model_name': policy_model_name})
 
     m_base = AutoModel.from_pretrained(base_model_name).to(device)
     m_rlhf = AutoModel.from_pretrained(policy_model_name).to(device)
