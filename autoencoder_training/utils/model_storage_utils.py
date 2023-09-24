@@ -38,11 +38,11 @@ def save_autoencoders_for_artifact(
     save_models_to_folder(autoencoders_rlhf_big, save_dir=f'{save_dir}/rlhf_big')
     save_models_to_folder(autoencoders_rlhf_small, save_dir=f'{save_dir}/rlhf_small')
 
-    artifact_name = f'autoencoders_{policy_model_name}'.replace("-", "_").replace("/", "_")
+    simplified_policy_name = policy_model_name.split('/')[-1].replace("-", "_")
+    artifact_name = f'autoencoders_{simplified_policy_model_name}'
     saved_artifact = Artifact(artifact_name, metadata=hyperparameters, type='model')
     saved_artifact.add_dir(save_dir, name=save_dir)
 
-    simplified_policy_name = policy_model_name.replace('/', '')
     aliases = {simplified_policy_name, 'latest'}
     aliases.add(alias)
     aliases = sorted(list(aliases))
