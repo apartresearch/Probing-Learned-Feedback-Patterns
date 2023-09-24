@@ -11,6 +11,8 @@ class SparseAutoencoder(nn.Module):
             nn.ReLU(True)
         )
 
+        self.kwargs = {'input_size': input_size, 'hidden_size': hidden_size, 'l1_coef': l1_coef}
+
         self.l1_coef = l1_coef
 
         self.decoder_weight = nn.Parameter(torch.randn(hidden_size, input_size))

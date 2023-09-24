@@ -90,6 +90,9 @@ def run_experiment(experiment_config: ExperimentConfig):
 
     wandb.finish()
 
+def save_autoencoders_dict(directory, autoencoders_dict):
+
+
 for experiment_config in all_experiment_configs:
     print(f'Running experiment now for config {experiment_config}')
     run_experiment(experiment_config=experiment_config)
