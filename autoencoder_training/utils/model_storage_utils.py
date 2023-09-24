@@ -7,6 +7,7 @@ from wandb import Api
 
 entity_name = 'nlp_and_interpretability'
 default_project_name = 'Autoencoder_training'
+artifact_prefix = 'autoencoders'
 
 def save_models_to_folder(model_dict, save_dir):
     """
@@ -39,7 +40,7 @@ def save_autoencoders_for_artifact(
     save_models_to_folder(autoencoders_rlhf_small, save_dir=f'{save_dir}/rlhf_small')
 
     simplified_policy_name = policy_model_name.split('/')[-1].replace("-", "_")
-    artifact_name = f'autoencoders_{simplified_policy_name}'
+    artifact_name = f'{artifact_prefix}_{simplified_policy_name}'
     saved_artifact = Artifact(artifact_name, metadata=hyperparameters, type='model')
     saved_artifact.add_dir(save_dir, name=save_dir)
 
@@ -51,6 +52,7 @@ def save_autoencoders_for_artifact(
 def load_autoencoders_for_artifact(policy_model_name, alias='latest'):
     '''
     Loads the autoencoders from one run into memory. Note that these paths are to some extent hardcoded
+    For example, try autoencoders_dict = load_autoencoders_for_artifact('pythia_70m_sentiment_reward')
     '''
     api = Api()
     project_name = 'Autoencoder_train'

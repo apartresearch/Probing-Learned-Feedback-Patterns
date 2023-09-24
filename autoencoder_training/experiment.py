@@ -30,7 +30,7 @@ def run_experiment(experiment_config: ExperimentConfig):
     base_model_name = experiment_config.base_model_name
     policy_model_name = experiment_config.policy_model_name
 
-    simplified_policy_model_name = policy_model_name.split('/')[-1]
+    simplified_policy_model_name = policy_model_name.split('/')[-1].replace('-', '_')
     wandb_project_name = f'Autoencoder_training_{simplified_policy_model_name}'
 
     hyperparameters.update({'base_model_name': base_model_name, 'policy_model_name': policy_model_name})
