@@ -3,6 +3,10 @@ import torch
 from wandb import Artifact
 
 from models.sparse_autoencoder import SparseAutoencoder
+from wandb import Api
+
+entity_name = 'nlp_and_interpretability'
+default_project_name = 'Autoencoder_training'
 
 def save_models_to_folder(model_dict, save_dir):
     """
@@ -38,16 +42,31 @@ def save_autoencoders_for_artifact(
     saved_artifact = Artifact(artifact_name, metadata=hyperparameters, type='model')
     saved_artifact.add_dir(save_dir, name=save_dir)
 
-    aliases = {policy_model_name, 'latest'}
+    simplified_policy_name = policy_model_name.replace('/', '')
+    aliases = {simplified_policy_name, 'latest'}
     aliases.add(alias)
     aliases = sorted(list(aliases))
     run.log_artifact(saved_artifact, aliases=aliases)
 
-def load_autoencoder_for_artifact(run):
+def load_autoencoders_for_artifact(policy_model_name, alias='latest'):
     '''
     Loads the autoencoders from one run into memory. Note that these paths are to some extent hardcoded
     '''
-    pass
+    api = Api()
+    project_name = 'Autoencoder_train'
+    artifact = api.artifact(f'{entity_name}/{project_name}_{policy_model_name}')
+    directory = artifact.download_dir()
+
+    save_dir = f'{directory}/saves'
+    autoencoders_base_big = load_models_from_folder(f'{save_dir}/base_big')
+    autoencoders_base_small = load_models_from_folder(f'{save_dir}/base_small')
+    autoencoders_rlhf_big = load_models_from_folder(f'{save_dir}/rlhf_big')
+    autoencoders_rlhf_small = load_models_from_folder(f'{save_dir}/rlhf_small')
+
+    return {
+        'base_big': autoencoders_base_big, 'base_small': autoencoders_base_small,
+        'rlhf_big': autoencoders_rlhf_big, 'rlhf_small': autoencoders_rlhf_small
+    }
 
 def load_models_from_folder(load_dir):
     """
@@ -63,12 +82,11 @@ def load_models_from_folder(load_dir):
 
     for model_name in sorted(os.listdir(load_dir)):
         model_path = os.path.join(load_dir, model_name)
-        if os.path.isdir(model_path):
-            kwargs, state = torch.load(model_path)
-            model = SparseAutoencoder(**kwargs)
-            model.load_state_dict(state)
-            model.eval()
-            model_dict[model_name] = model
-            print(f"Loaded {model_name} from {model_path}")
+        kwargs, state = torch.load(model_path)
+        model = SparseAutoencoder(**kwargs)
+        model.load_state_dict(state)
+        model.eval()
+        model_dict[model_name] = model
+        print(f"Loaded {model_name} from {model_path}")
 
     return model_dict
