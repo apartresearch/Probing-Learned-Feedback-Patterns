@@ -60,7 +60,7 @@ def load_autoencoders_for_artifact(policy_model_name, alias='latest'):
     print(f'Loading artifact from {full_path}')
 
     artifact = api.artifact(full_path)
-    directory = artifact.download_dir()
+    directory = artifact.download()
 
     save_dir = f'{directory}/saves'
     autoencoders_base_big = load_models_from_folder(f'{save_dir}/base_big')
