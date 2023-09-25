@@ -6,7 +6,7 @@ from models.sparse_autoencoder import SparseAutoencoder
 from wandb import Api
 
 entity_name = 'nlp_and_interpretability'
-default_project_name = 'Autoencoder_training'
+project_prefix = 'Autoencoder_training'
 artifact_prefix = 'autoencoders'
 
 def save_models_to_folder(model_dict, save_dir):
@@ -55,8 +55,11 @@ def load_autoencoders_for_artifact(policy_model_name, alias='latest'):
     For example, try autoencoders_dict = load_autoencoders_for_artifact('pythia_70m_sentiment_reward')
     '''
     api = Api()
-    project_name = 'Autoencoder_train'
-    artifact = api.artifact(f'{entity_name}/{project_name}_{policy_model_name}')
+    simplified_policy_model_name = policy_model_name.split('/')[-1].replace('-', '_')
+    full_path = f'{entity_name}/{project_prefix}_{policy_model_name}/{artifact_prefix}_{simplified_policy_model_name}'
+    print(f'Loading artifact from {full_path}')
+
+    artifact = api.artifact(full_path)
     directory = artifact.download_dir()
 
     save_dir = f'{directory}/saves'
