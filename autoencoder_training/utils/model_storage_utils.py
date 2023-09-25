@@ -56,7 +56,7 @@ def load_autoencoders_for_artifact(policy_model_name, alias='latest'):
     '''
     api = Api()
     simplified_policy_model_name = policy_model_name.split('/')[-1].replace('-', '_')
-    full_path = f'{entity_name}/{project_prefix}_{policy_model_name}/{artifact_prefix}_{simplified_policy_model_name}'
+    full_path = f'{entity_name}/{project_prefix}_{policy_model_name}/{artifact_prefix}_{simplified_policy_model_name}:{alias}'
     print(f'Loading artifact from {full_path}')
 
     artifact = api.artifact(full_path)
