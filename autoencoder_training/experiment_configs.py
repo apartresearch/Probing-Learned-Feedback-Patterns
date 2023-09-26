@@ -20,7 +20,7 @@ hyperparameters_1 = {
     'learning_rate': 1e-3,
     'fast': False,
     'split': 'test',
-    'device': '0'
+    'device': '4'
 }
 
 
@@ -30,9 +30,9 @@ hyperparameters_2 = {
     'batch_size': 32,
     'num_epochs': 50,
     'learning_rate': 1e-3,
-    'fast': True,
+    'fast': False,
     'split': 'test',
-    'device': '3'
+    'device': '4'
 }
 
 all_models = ['eleutherai/pythia-70m', 'eleutherai/pythia-160m', 'eleutherai/pythia-410m']
@@ -47,7 +47,6 @@ def generate_experiment_configs(hyperparameters):
             new_config = ExperimentConfig(hyperparameters=hyperparameters, base_model_name=model_name, policy_model_name=policy_model_name)
             all_experiment_configs.append(new_config)
     return all_experiment_configs
-
 
 all_experiment_configs = generate_experiment_configs(hyperparameters_2)
 
