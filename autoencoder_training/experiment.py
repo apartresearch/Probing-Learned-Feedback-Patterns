@@ -54,6 +54,7 @@ def run_experiment(experiment_config: ExperimentConfig):
     tokenizer_rlhf.pad_token = tokenizer_rlhf.eos_token
 
     split = hyperparameters['split']
+    print('Processing texts')
 
     if is_fast:
         test_dataset_base = preprocess(load_dataset("imdb", split=split), tokenizer, 96)

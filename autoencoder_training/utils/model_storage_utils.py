@@ -1,9 +1,10 @@
 import os
 import torch
+
+from wandb import Api
 from wandb import Artifact
 
 from models.sparse_autoencoder import SparseAutoencoder
-from wandb import Api
 
 entity_name = 'nlp_and_interpretability'
 project_prefix = 'Autoencoder_training'
