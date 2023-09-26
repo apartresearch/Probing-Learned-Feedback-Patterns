@@ -53,6 +53,10 @@ def run_experiment(experiment_config: ExperimentConfig):
     m_base = AutoModel.from_pretrained(base_model_name).to(device)
     m_rlhf = AutoModel.from_pretrained(policy_model_name).to(device)
 
+    debug_device = m_base.device
+
+    print(f'Model is is on {debug_device}')
+
     tokenizer = AutoTokenizer.from_pretrained(base_model_name)
     tokenizer.pad_token = tokenizer.eos_token
 
