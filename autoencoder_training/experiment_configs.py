@@ -21,6 +21,7 @@ hyperparameters_1 = {
     'fast': False,
     'split': 'test',
     'device': '0'
+    'device': '3'
 }
 
 
