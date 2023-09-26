@@ -7,7 +7,7 @@ import torch.optim as optim
 import torch.nn as nn
 import wandb
 
-from network_helper_functions import get_layer_activations
+from network_helper_functions import get_layer_activations_batched
 from models.sparse_autoencoder import SparseAutoencoder
 
 def train_autoencoder(autoencoder, data_loader, hyperparameters, device, label):
@@ -91,7 +91,7 @@ def train_encoder(autoencoder, data_loader, hyperparameters, device):
         print(f"Encoder Epoch [{epoch+1}/{hyperparameters['num_epochs']}], Loss: {loss.item():.4f}")
 
 def feature_representation(m_base, layer_name, input_data, hyperparameters, device, num_autoencoders=1, label='default'):
-    base_activations = get_layer_activations(m_base, layer_name, input_data, device)
+    base_activations = get_layer_activations_batched(m_base, layer_name, input_data, device)
     base_activations_tensor = base_activations.detach().clone()
     base_activations_tensor = base_activations_tensor.squeeze(1)
 

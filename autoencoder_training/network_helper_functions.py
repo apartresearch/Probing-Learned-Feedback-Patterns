@@ -31,7 +31,34 @@ def find_layers(base, rlhf):
 
     return sorted_layer_numbers
 
-def get_layer_activations(model, layer_name, input_data, device):
+def get_layer_activations_batched(model, layer_name, input_data, device):
+    all_activations = []
+    input_ids = input_data['input_ids'].to(device)
+    attention_mask = input_data.get('attention_mask', None)
+
+    if attention_mask is not None:
+        input_and_attention = zip(input_ids, attention_mask)
+        for input_batch in batch(input_and_attention, 32):
+            local_input_ids = input_batch[0]
+            local_attention_mask = input_batch[1]
+            local_activations = get_layer_activations(
+                model, layer_name, input_ids=local_input_ids, attention_mask=local_attention_mask
+            )
+            print(f'local activations are of dimension {local_activations.shape}')
+            all_activations.append(local_activations)
+
+    else:
+        for local_input_ids in batch(input_ids, 32):
+            local_activations = get_layer_activations(
+                model, layer_name, input_ids=local_input_ids, attention_mask=None
+            )
+            print(f'local activations are of dimension {local_activations.shape}')
+            all_activations.append(local_activations)
+
+    return torch.concat(all_activations, dim=0)
+
+
+def get_layer_activations(model, layer_name, input_ids, attention_mask, device):
     """
     Gets the activations of a specified layer for a given input data.
 
@@ -45,7 +72,6 @@ def get_layer_activations(model, layer_name, input_data, device):
     """
 
     activations = None
-    all_activations = []
 
     def hook_fn(module, input, output):
         nonlocal activations
@@ -54,23 +80,10 @@ def get_layer_activations(model, layer_name, input_data, device):
     layer = dict(model.named_modules())[layer_name]
     hook = layer.register_forward_hook(hook_fn)
 
-    input_ids = input_data['input_ids'].to(device)
-    attention_mask = input_data.get('attention_mask', None)
-
-    has_attention = attention_mask is not None
-    if has_attention:
+    if attention_mask is not None:
         attention_mask = attention_mask.to(device)
-        zipped_inputs_and_attentions = list(zip(input_ids, attention_mask))
-        with torch.no_grad():
-            for input_and_attention_batch in batch(zipped_inputs_and_attentions, 32):
-                input_ids = input_and_attention_batch[0]
-                attention_mask = input_and_attention_batch[1]
-                local_activations = model(input_ids, attention_mask=attention_mask)
-                all_activations.append(local_activations)
-    else:
-        with torch.no_grad():
-            for input_batch in batch(input_ids, 32):
-                local_activations = model(input_batch, attention_mask=None)
-                all_activations.append(local_activations)
+
+    with torch.no_grad():
+        model(input_ids, attention_mask=attention_mask)
 
     return activations
