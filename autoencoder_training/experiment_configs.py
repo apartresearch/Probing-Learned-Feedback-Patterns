@@ -19,7 +19,8 @@ hyperparameters_1 = {
     'num_epochs': 50,
     'learning_rate': 1e-3,
     'fast': False,
-    'split': 'test'
+    'split': 'test',
+    'device': '0'
 }
 
 
@@ -30,7 +31,8 @@ hyperparameters_2 = {
     'num_epochs': 50,
     'learning_rate': 1e-3,
     'fast': False,
-    'split': 'test'
+    'split': 'test',
+    'device': '3'
 }
 
 all_models = ['eleutherai/pythia-70m', 'eleutherai/pythia-160m', 'eleutherai/pythia-410m']
