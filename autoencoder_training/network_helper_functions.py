@@ -1,4 +1,5 @@
 import torch
+from tqdm import tqdm
 
 from collections import defaultdict
 
@@ -47,7 +48,7 @@ def get_layer_activations_batched(model, layer_name, input_data, device):
             all_activations.append(local_activations)
 
     else:
-        for local_input_ids in batch(input_ids, 32):
+        for local_input_ids in tqdm(batch(input_ids, 32)):
             local_activations = get_layer_activations(
                 model, layer_name, input_ids=local_input_ids, attention_mask=None, device=device
             )
