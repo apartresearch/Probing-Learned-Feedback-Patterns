@@ -11,7 +11,6 @@ from network_helper_functions import find_layers
 from training import feature_representation
 from utils.model_storage_utils import save_autoencoders_for_artifact
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 def preprocess(dataset, tokenizer, limit=None):
     if limit:
         texts = [x['text'] for x in dataset.select(range(limit))]
@@ -34,6 +33,13 @@ def run_experiment(experiment_config: ExperimentConfig):
     policy_model_name = experiment_config.policy_model_name
 
     is_fast = hyperparameters['fast']
+
+    if 'device' in hyperparameters:
+        device = 'cuda:' + hyperparameters['device']
+    else:
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    print(f'device is {device}')
 
     simplified_policy_model_name = policy_model_name.split('/')[-1].replace('-', '_')
     wandb_project_name = f'Autoencoder_training_{simplified_policy_model_name}'
