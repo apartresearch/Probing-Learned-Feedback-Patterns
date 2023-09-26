@@ -12,8 +12,11 @@ from training import feature_representation
 from utils.model_storage_utils import save_autoencoders_for_artifact
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-def preprocess(dataset, tokenizer, limit):
-    texts = [x['text'] for x in dataset.select(range(limit))]
+def preprocess(dataset, tokenizer, limit=None):
+    if limit:
+        texts = [x['text'] for x in dataset.select(range(limit))]
+    else:
+        texts = [x['text'] for x in dataset]
     inputs = tokenizer(texts, return_tensors='pt', padding=True, truncation=True, max_length=512)
     return inputs
 
@@ -29,6 +32,8 @@ def run_experiment(experiment_config: ExperimentConfig):
     hyperparameters = experiment_config.hyperparameters
     base_model_name = experiment_config.base_model_name
     policy_model_name = experiment_config.policy_model_name
+
+    is_fast = hyperparameters['fast']
 
     simplified_policy_model_name = policy_model_name.split('/')[-1].replace('-', '_')
     wandb_project_name = f'Autoencoder_training_{simplified_policy_model_name}'
@@ -48,11 +53,21 @@ def run_experiment(experiment_config: ExperimentConfig):
     tokenizer_rlhf = AutoTokenizer.from_pretrained(policy_model_name)
     tokenizer_rlhf.pad_token = tokenizer_rlhf.eos_token
 
-    train_dataset_base = preprocess(load_dataset("imdb", split="train"), tokenizer, 96)
-    input_data_base = {'input_ids': train_dataset_base['input_ids'].to(device)}
-    train_dataset_rlhf = preprocess(load_dataset("imdb", split="train"), tokenizer_rlhf, 96)
-    input_data_rlhf = {'input_ids': train_dataset_rlhf['input_ids'].to(device)}
+    split = hyperparameters['split']
 
+    if is_fast:
+        test_dataset_base = preprocess(load_dataset("imdb", split=split), tokenizer, 96)
+        test_dataset_rlhf = preprocess(load_dataset("imdb", split=split), tokenizer_rlhf, 96)
+    else:
+        test_dataset_base = preprocess(load_dataset("imdb", split=split), tokenizer)
+        test_dataset_rlhf = preprocess(load_dataset("imdb", split=split), tokenizer_rlhf)
+
+    input_data_base = {'input_ids': test_dataset_base['input_ids'].to(device)}
+    input_data_rlhf = {'input_ids': test_dataset_rlhf['input_ids'].to(device)}
+
+    num_examples = len(test_dataset_base)
+    wandb.run.config['num_examples'] = num_examples
+    hyperparameters['num_examples'] = num_examples
     sorted_layers = find_layers(m_base, m_rlhf)
 
     autoencoders_base_big = {}
@@ -61,23 +76,22 @@ def run_experiment(experiment_config: ExperimentConfig):
     autoencoders_rlhf_big = {}
     autoencoders_rlhf_small = {}
 
-    hidden_sizes = sorted(hyperparameters['hidden_sizes']).copy()
-    small_hidden_size = hidden_sizes[0]
+    hidden_size_multiples = sorted(hyperparameters['hidden_size_multiples'].copy())
+    small_hidden_size_multiple = hidden_size_multiples[0]
 
     for layer_index in sorted_layers:
-        for hidden_size in hidden_sizes:
+        for hidden_size_multiple in hidden_size_multiples:
             hyperparameters_copy = hyperparameters.copy()
-            hyperparameters_copy['hidden_size'] = hidden_size
+            hyperparameters_copy['hidden_size_multiple'] = hidden_size_multiple
 
-            label = 'big' if hidden_size > small_hidden_size else 'small'
+            label = 'big' if hidden_size_multiple > small_hidden_size_multiple else 'small'
 
             autoencoder_base = feature_representation(
                 m_base, f'layers.{sorted_layers[layer_index]}.mlp',
                 input_data_base, hyperparameters_copy, device, label=f'base_{label}'
             )
 
-            target_autoencoders_base = autoencoders_base_big if hidden_size > small_hidden_size else autoencoders_base_small
-
+            target_autoencoders_base = autoencoders_base_big if hidden_size_multiple > small_hidden_size_multiple else autoencoders_base_small
             target_autoencoders_base[str(layer_index)] = autoencoder_base
 
             autoencoder_rlhf = feature_representation(
@@ -85,8 +99,7 @@ def run_experiment(experiment_config: ExperimentConfig):
                 input_data_rlhf, hyperparameters_copy, device, label=f'rlhf_{label}'
             )
 
-            target_autoencoders_rlhf = autoencoders_rlhf_big if hidden_size > small_hidden_size else autoencoders_rlhf_small
-
+            target_autoencoders_rlhf = autoencoders_rlhf_big if hidden_size_multiple > small_hidden_size_multiple else autoencoders_rlhf_small
             target_autoencoders_rlhf[str(layer_index)] = autoencoder_rlhf
 
     save_autoencoders_for_artifact(

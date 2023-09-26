@@ -13,22 +13,24 @@ class ExperimentConfig:
         return str(printable)
 
 hyperparameters_1 = {
-    'input_size': 512,
-    'hidden_sizes': [512, 1024],
+    'hidden_size_multiples': [1, 2],
     'l1_coef': 0.1,
     'batch_size': 32,
     'num_epochs': 50,
-    'learning_rate': 1e-3
+    'learning_rate': 1e-3,
+    'fast': False,
+    'split': 'test'
 }
 
 
 hyperparameters_2 = {
-    'input_size': 512,
-    'hidden_sizes': [512, 1024],
+    'hidden_size_multiples': [1, 2],
     'l1_coef': 0.01,
     'batch_size': 32,
     'num_epochs': 50,
-    'learning_rate': 1e-3
+    'learning_rate': 1e-3,
+    'fast': False,
+    'split': 'test'
 }
 
 all_models = ['eleutherai/pythia-70m', 'eleutherai/pythia-160m', 'eleutherai/pythia-410m']

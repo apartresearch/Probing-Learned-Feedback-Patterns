@@ -95,15 +95,15 @@ def feature_representation(m_base, layer_name, input_data, hyperparameters, devi
     base_activations_tensor = base_activations.detach().clone()
     base_activations_tensor = base_activations_tensor.squeeze(1)
 
-    input_size = base_activations_tensor.size(1)
-
+    input_size = base_activations_tensor.size(-1)
     base_dataset = TensorDataset(base_activations_tensor)
     base_data_loader = DataLoader(base_dataset, batch_size=hyperparameters['batch_size'], shuffle=True)
 
     autoencoders = []
     for i in range(num_autoencoders):
         local_label = f'{layer_name}_{label}_{i}'
-        autoencoder = SparseAutoencoder(input_size, hyperparameters['hidden_size'], hyperparameters['l1_coef']).to(device)
+        hidden_size = input_size * hyperparameters['hidden_size_multiple']
+        autoencoder = SparseAutoencoder(input_size, hidden_size=hidden_size, l1_coef=hyperparameters['l1_coef']).to(device)
         train_autoencoder(autoencoder, base_data_loader, hyperparameters, device, label=local_label)
         autoencoders.append(autoencoder)
 
