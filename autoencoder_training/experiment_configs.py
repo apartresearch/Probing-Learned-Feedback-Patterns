@@ -20,7 +20,7 @@ hyperparameters_1 = {
     'learning_rate': 1e-3,
     'fast': False,
     'split': 'test',
-    'device': '3'
+    'device': '0'
 }
 
 
