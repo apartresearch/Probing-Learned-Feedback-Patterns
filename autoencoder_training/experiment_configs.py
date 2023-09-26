@@ -30,7 +30,7 @@ hyperparameters_2 = {
     'batch_size': 32,
     'num_epochs': 50,
     'learning_rate': 1e-3,
-    'fast': False,
+    'fast': True,
     'split': 'test',
     'device': '3'
 }
