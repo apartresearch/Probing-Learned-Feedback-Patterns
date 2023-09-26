@@ -50,7 +50,7 @@ def get_layer_activations_batched(model, layer_name, input_data, device):
     else:
         for local_input_ids in batch(input_ids, 32):
             local_activations = get_layer_activations(
-                model, layer_name, input_ids=local_input_ids, attention_mask=None
+                model, layer_name, input_ids=local_input_ids, attention_mask=None, device=device
             )
             print(f'local activations are of dimension {local_activations.shape}')
             all_activations.append(local_activations)
