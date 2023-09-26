@@ -44,7 +44,6 @@ def get_layer_activations_batched(model, layer_name, input_data, device):
             local_activations = get_layer_activations(
                 model, layer_name, input_ids=local_input_ids, attention_mask=local_attention_mask
             )
-            print(f'local activations are of dimension {local_activations.shape}')
             all_activations.append(local_activations)
 
     else:
@@ -52,10 +51,12 @@ def get_layer_activations_batched(model, layer_name, input_data, device):
             local_activations = get_layer_activations(
                 model, layer_name, input_ids=local_input_ids, attention_mask=None, device=device
             )
-            print(f'local activations are of dimension {local_activations.shape}')
             all_activations.append(local_activations)
 
-    return torch.concat(all_activations, dim=0)
+    print(f'last batch was of dimension {local_activations.shape} and there are {len(all_activations)} tensors')
+    final_tensor = torch.concat(all_activations, dim=0)
+    print(f'FInal tensor has shape {final_tensor.shape}.')
+    return final_tensor
 
 
 def get_layer_activations(model, layer_name, input_ids, attention_mask, device):

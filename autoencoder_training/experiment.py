@@ -76,7 +76,7 @@ def run_experiment(experiment_config: ExperimentConfig):
     input_data_base = {'input_ids': test_dataset_base['input_ids'].to(device)}
     input_data_rlhf = {'input_ids': test_dataset_rlhf['input_ids'].to(device)}
 
-    num_examples = len(test_dataset_base)
+    num_examples = len(test_dataset_base['input_ids'])
 
     print(f'Finished processing {num_examples} texts.')
     wandb.run.config['num_examples'] = num_examples
