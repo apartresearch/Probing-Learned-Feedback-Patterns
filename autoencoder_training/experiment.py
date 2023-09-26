@@ -73,6 +73,8 @@ def run_experiment(experiment_config: ExperimentConfig):
     input_data_rlhf = {'input_ids': test_dataset_rlhf['input_ids'].to(device)}
 
     num_examples = len(test_dataset_base)
+
+    print(f'Finished processing {num_examples} texts.')
     wandb.run.config['num_examples'] = num_examples
     hyperparameters['num_examples'] = num_examples
     sorted_layers = find_layers(m_base, m_rlhf)
