@@ -48,7 +48,7 @@ def get_layer_activations(model, layer_name, input_texts, tokenizer, device):
     activations = None
 
     inputs = tokenizer(input_texts, return_tensors='pt', padding=True, truncation=True, max_length=512)
-    input_ids = inputs['input_ids']
+    input_ids = inputs['input_ids'].to(device)
     attention_mask = inputs['attention_mask']
 
     def hook_fn(module, input, output):
