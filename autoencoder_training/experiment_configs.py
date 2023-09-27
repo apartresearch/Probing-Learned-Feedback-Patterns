@@ -29,7 +29,7 @@ hyperparameters_2 = {
     'hidden_size_multiples': [1, 2],
     'l1_coef': 0.01,
     'batch_size': 32,
-    'num_epochs': 30,
+    'num_epochs': 3,
     'learning_rate': 1e-3,
     'fast': False,
     'split': 'test'
