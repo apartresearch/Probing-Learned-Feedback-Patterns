@@ -5,22 +5,29 @@ from torch.utils.data import DataLoader, TensorDataset
 import torch
 import torch.optim as optim
 import torch.nn as nn
+from tqdm import tqdm
 import wandb
 
 from network_helper_functions import get_layer_activations
 from models.sparse_autoencoder import SparseAutoencoder
+from utils.helper_functions import batch
 
-def train_autoencoder(autoencoder, data_loader, hyperparameters, device, label, model, layer_name):
+
+def train_autoencoder(autoencoder, input_texts, hyperparameters, device, label, model, tokenizer, layer_name):
     criterion = nn.MSELoss()
+    batch_size = hyperparameters['batch_size']
     optimizer = optim.Adam(autoencoder.parameters(), lr=hyperparameters['learning_rate'])
+    num_batches = int(len(input_texts) / batch_size)
 
     for epoch in range(hyperparameters['num_epochs']):
         all_losses = []
         all_sparsity_losses = []
         all_reconstruction_losses = []
         all_true_sparsity_losses = []
-        for batch in data_loader:
-            activations_batch = get_layer_activations(model=model, layer_name=layer_name, input_data=batch, device=device)
+        for input_batch in tqdm(batch(input_texts, num_batches)):
+            activations_batch = get_layer_activations(
+                model=model, layer_name=layer_name, input_texts=input_batch, tokenizer=tokenizer, device=device
+            )
             print(f'activations_batch is of shape {activations_batch.shape}')
             data = activations_batch[0].to(device)
 
@@ -92,7 +99,10 @@ def train_encoder(autoencoder, data_loader, hyperparameters, device):
 
         print(f"Encoder Epoch [{epoch+1}/{hyperparameters['num_epochs']}], Loss: {loss.item():.4f}")
 
-def feature_representation(model, layer_name, input_data, hyperparameters, device, num_autoencoders=1, label='default'):
+def feature_representation(
+        model, tokenizer, layer_name, input_texts, hyperparameters,
+        device, num_autoencoders=1, label='default'
+):
     '''
     base_activations = get_layer_activations_batched(m_base, layer_name, input_data, device)
     base_activations_tensor = base_activations.detach().clone()
@@ -102,14 +112,16 @@ def feature_representation(model, layer_name, input_data, hyperparameters, devic
     base_dataset = TensorDataset(base_activations_tensor)
     base_data_loader = DataLoader(base_dataset, batch_size=hyperparameters['batch_size'], shuffle=True)
     '''
+    batch_size = hyperparameters['batch_size']
     print('\nBatch size is ' + str(hyperparameters['batch_size']) + '\n')
-    base_data_loader = DataLoader(input_data, batch_size=hyperparameters['batch_size'], shuffle=True)
 
     # Get batch without popping
-    first_batch = next(iter(base_data_loader))
-    print('\nFirst batch has attention mask:\n' + str(first_batch['attention_mask']) + f"\n\n Length: {len(first_batch['attention_mask'])}")
+    first_batch = input_texts[:batch_size].copy()
 
-    first_activations_tensor = get_layer_activations(model, layer_name, first_batch, device).detach().clone().squeeze(1)
+    first_activations_tensor = get_layer_activations(
+        model=model, tokenizer=tokenizer, layer_name=layer_name, input_texts=first_batch, device=device
+    ).detach().clone().squeeze(1)
+
     input_size = first_activations_tensor.size(-1)
     print(f'Input size is {input_size}.')
 
@@ -119,7 +131,10 @@ def feature_representation(model, layer_name, input_data, hyperparameters, devic
         local_label = f'{layer_name}_{label}_{i}'
         hidden_size = input_size * hyperparameters['hidden_size_multiple']
         autoencoder = SparseAutoencoder(input_size, hidden_size=hidden_size, l1_coef=hyperparameters['l1_coef']).to(device)
-        train_autoencoder(autoencoder, base_data_loader, hyperparameters, device, label=local_label, model=model, layer_name=layer_name)
+        train_autoencoder(
+            autoencoder=autoencoder, input_texts=input_texts, hyperparameters=hyperparameters,
+            device=device, label=local_label,
+            model=model, tokenizer=tokenizer, layer_name=layer_name)
         autoencoders.append(autoencoder)
 
     return autoencoders

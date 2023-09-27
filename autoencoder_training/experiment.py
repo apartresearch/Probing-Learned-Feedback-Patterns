@@ -11,26 +11,6 @@ from network_helper_functions import find_layers
 from training import feature_representation
 from utils.model_storage_utils import save_autoencoders_for_artifact
 
-from functools import partial
-
-def tokenize_and_process(example, tokenizer):
-    # Tokenize the text using the provided tokenizer
-    tokenized = tokenizer(example['text'], return_tensors='pt', truncation=True, padding="max_length", max_length=512)
-
-    # You can modify the structure of 'tokenized' as needed
-    return {
-        'input_ids': tokenized['input_ids'],
-        'attention_mask': tokenized['attention_mask']
-    }
-
-def preprocess(dataset, tokenizer, limit=None):
-    if limit:
-        texts = [x['text'] for x in dataset.select(range(limit))]
-    else:
-        texts = [x['text'] for x in dataset]
-    inputs = tokenizer(texts, return_tensors='pt', padding=True, truncation=True, max_length=512)
-    return inputs
-
 def run_experiment(experiment_config: ExperimentConfig):
     '''
     Part 1 of IMDb experiment:
@@ -78,19 +58,18 @@ def run_experiment(experiment_config: ExperimentConfig):
     split = hyperparameters['split']
     print('Processing texts')
 
-    tokenize_fn = partial(tokenize_and_process, tokenizer=tokenizer)
-
     if is_fast:
         hyperparameters['batch_size'] = 4
-        test_dataset_base = (load_dataset("imdb", split=split).select(range(12))).map(tokenize_fn, batched=True)
-        test_dataset_rlhf = (load_dataset("imdb", split=split).select(range(12))).map(tokenize_fn, batched=True)
+        test_dataset_base = load_dataset("imdb", split=split).select(range(12))
+        test_dataset_base = [x['text'] for x in test_dataset_base]
+        test_dataset_rlhf = test_dataset_base.copy()
     else:
-        test_dataset_base = load_dataset("imdb", split=split).map(tokenize_fn, batched=True)
-        test_dataset_rlhf = load_dataset("imdb", split=split).map(tokenize_fn, batched=True)
+        test_dataset_base = load_dataset("imdb", split=split)
+        test_dataset_base = [x['text'] for x in test_dataset_base]
+        test_dataset_rlhf = test_dataset_base.copy()
 
     num_examples = len(test_dataset_base)
 
-    print(f'Finished processing {num_examples} texts.')
     wandb.run.config['num_examples'] = num_examples
     hyperparameters['num_examples'] = num_examples
     sorted_layers = find_layers(m_base, m_rlhf)
@@ -112,16 +91,16 @@ def run_experiment(experiment_config: ExperimentConfig):
             label = 'big' if hidden_size_multiple > small_hidden_size_multiple else 'small'
 
             autoencoder_base = feature_representation(
-                m_base, f'layers.{sorted_layers[layer_index]}.mlp',
-                input_data=test_dataset_base, hyperparameters=hyperparameters_copy, device=device, label=f'base_{label}'
+                model=m_base, tokenizer=tokenizer, layer_name=f'layers.{sorted_layers[layer_index]}.mlp',
+                input_texts= test_dataset_base, hyperparameters=hyperparameters_copy, device=device, label=f'base_{label}'
             )
 
             target_autoencoders_base = autoencoders_base_big if hidden_size_multiple > small_hidden_size_multiple else autoencoders_base_small
             target_autoencoders_base[str(layer_index)] = autoencoder_base
 
             autoencoder_rlhf = feature_representation(
-                m_rlhf, f'layers.{sorted_layers[layer_index]}.mlp',
-                input_data=test_dataset_rlhf, hyperparameters=hyperparameters_copy, device=device, label=f'rlhf_{label}'
+                model=m_rlhf, tokenizer=tokenizer, layer_name=f'layers.{sorted_layers[layer_index]}.mlp',
+                input_texts=test_dataset_rlhf, hyperparameters=hyperparameters_copy, device=device, label=f'rlhf_{label}'
             )
 
             target_autoencoders_rlhf = autoencoders_rlhf_big if hidden_size_multiple > small_hidden_size_multiple else autoencoders_rlhf_small

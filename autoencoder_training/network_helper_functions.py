@@ -32,7 +32,7 @@ def find_layers(base, rlhf):
 
     return sorted_layer_numbers
 
-def get_layer_activations(model, layer_name, input_data, device):
+def get_layer_activations(model, layer_name, input_texts, tokenizer, device):
     """
     Gets the activations of a specified layer for a given input data.
 
@@ -47,8 +47,9 @@ def get_layer_activations(model, layer_name, input_data, device):
 
     activations = None
 
-    input_ids = input_data['input_ids']
-    attention_mask = input_data['attention_mask']
+    inputs = tokenizer(input_texts, return_tensors='pt', padding=True, truncation=True, max_length=512)
+    input_ids = inputs['input_ids']
+    attention_mask = inputs['attention_mask']
 
     def hook_fn(module, input, output):
         nonlocal activations
