@@ -47,18 +47,18 @@ def train_autoencoder(autoencoder, input_texts, hyperparameters, device, label, 
             loss.backward()
             optimizer.step()
 
-        wandb.log({
-            f"loss_{label}": np.mean(all_losses),
-            f"reconstruction_loss_{label}": np.mean(all_reconstruction_losses),
-            f"sparsity_loss_{label}": np.mean(all_sparsity_losses),
-            f"true_sparsity_loss_{label}": np.mean(all_true_sparsity_losses)
-        })
+            wandb.log({
+                f"loss_{label}": loss,
+                f"reconstruction_loss_{label}": reconstruction_loss,
+                f"sparsity_loss_{label}": sparsity_loss,
+                f"true_sparsity_loss_{label}": true_sparsity_loss
+            })
 
-        if epoch % 10 == 0:
-            print(f"Epoch [{epoch+1}/{hyperparameters['num_epochs']}], Loss: {loss.item():.4f}")
-            print("Reconstruction Loss: ", reconstruction_loss.item())
-            print("Sparsity Loss: ", sparsity_loss.item())
-            print("True sparsity loss: ", true_sparsity_loss.item())
+
+        print(f"Epoch [{epoch+1}/{hyperparameters['num_epochs']}], Loss: {loss.item():.4f}")
+        print("Reconstruction Loss: ", reconstruction_loss.item())
+        print("Sparsity Loss: ", sparsity_loss.item())
+        print("True sparsity loss: ", true_sparsity_loss.item())
 
 
 def train_decoder(autoencoder, data_loader, encoded_data_loader, hyperparameters, device):

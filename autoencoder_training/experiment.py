@@ -3,9 +3,11 @@ import wandb
 from transformers import AutoModel
 from transformers import AutoTokenizer
 from datasets import load_dataset
-import torch
 
-from experiment_configs import ExperimentConfig, all_experiment_configs, experiment_config_A, experiment_config_B, experiment_config_C
+from experiment_configs import (
+    ExperimentConfig, all_experiment_configs, experiment_config_A, experiment_config_B,
+    experiment_config_C, experiment_config_D, experiment_config_E, experiment_config_F
+)
 
 from network_helper_functions import find_layers
 from training import feature_representation
@@ -111,6 +113,6 @@ def run_experiment(experiment_config: ExperimentConfig):
     )
     wandb.finish()
 
-chosen_experiment_config = experiment_config_A
+chosen_experiment_config = experiment_config_D
 print(f'Running experiment now for config {chosen_experiment_config}')
 run_experiment(experiment_config=chosen_experiment_config)
