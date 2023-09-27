@@ -70,6 +70,8 @@ def run_experiment(experiment_config: ExperimentConfig):
 
     num_examples = len(test_dataset_base)
 
+    print(f'Working with {num_examples} texts.')
+
     wandb.run.config['num_examples'] = num_examples
     hyperparameters['num_examples'] = num_examples
     sorted_layers = find_layers(m_base, m_rlhf)

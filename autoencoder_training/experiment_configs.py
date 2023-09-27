@@ -27,10 +27,10 @@ hyperparameters_1 = {
 hyperparameters_2 = {
     'hidden_size_multiples': [1, 2],
     'l1_coef': 0.01,
-    'batch_size': 2,
-    'num_epochs': 3,
+    'batch_size': 32,
+    'num_epochs': 30,
     'learning_rate': 1e-3,
-    'fast': True,
+    'fast': False,
     'split': 'test',
     'device': '4'
 }

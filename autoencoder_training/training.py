@@ -29,7 +29,7 @@ def train_autoencoder(autoencoder, input_texts, hyperparameters, device, label, 
                 model=model, layer_name=layer_name, input_texts=input_batch, tokenizer=tokenizer, device=device
             )
             print(f'activations_batch is of shape {activations_batch.shape}')
-            data = activations_batch[0].to(device)
+            data = activations_batch.to(device)
 
             optimizer.zero_grad()
             features, reconstruction = autoencoder(data)
@@ -68,8 +68,8 @@ def train_decoder(autoencoder, data_loader, encoded_data_loader, hyperparameters
 
     for epoch in range(hyperparameters['num_epochs']):
         for (encoded_data_batch, original_data_batch) in zip(encoded_data_loader, data_loader):
-            encoded_data = encoded_data_batch[0].to(device)
-            original_data = original_data_batch[0].to(device)
+            encoded_data = encoded_data_batch.to(device)
+            original_data = original_data_batch.to(device)
 
             optimizer.zero_grad()
             features = autoencoder.decoder(encoded_data)
@@ -86,7 +86,7 @@ def train_encoder(autoencoder, data_loader, hyperparameters, device):
 
     for epoch in range(hyperparameters['num_epochs']):
         for batch in data_loader:
-            data = batch[0].to(device)
+            data = batch.to(device)
 
             optimizer.zero_grad()
             features = autoencoder.encoder(data)
