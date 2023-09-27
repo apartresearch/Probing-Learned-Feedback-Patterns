@@ -7,10 +7,10 @@ import torch.optim as optim
 import torch.nn as nn
 import wandb
 
-from network_helper_functions import get_layer_activations_batched
+from network_helper_functions import get_layer_activations
 from models.sparse_autoencoder import SparseAutoencoder
 
-def train_autoencoder(autoencoder, data_loader, hyperparameters, device, label):
+def train_autoencoder(autoencoder, data_loader, hyperparameters, device, label, model, layer_name):
     criterion = nn.MSELoss()
     optimizer = optim.Adam(autoencoder.parameters(), lr=hyperparameters['learning_rate'])
 
@@ -20,7 +20,9 @@ def train_autoencoder(autoencoder, data_loader, hyperparameters, device, label):
         all_reconstruction_losses = []
         all_true_sparsity_losses = []
         for batch in data_loader:
-            data = batch[0].to(device)
+            activations_batch = get_layer_activations(model=model, layer_name=layer_name, input_data=batch, device=device)
+            print(f'activations_batch is of shape {activations_batch.shape}')
+            data = activations_batch[0].to(device)
 
             optimizer.zero_grad()
             features, reconstruction = autoencoder(data)
@@ -90,7 +92,7 @@ def train_encoder(autoencoder, data_loader, hyperparameters, device):
 
         print(f"Encoder Epoch [{epoch+1}/{hyperparameters['num_epochs']}], Loss: {loss.item():.4f}")
 
-def feature_representation(m_base, layer_name, input_data, hyperparameters, device, num_autoencoders=1, label='default'):
+def feature_representation(model, layer_name, input_data, hyperparameters, device, num_autoencoders=1, label='default'):
     '''
     base_activations = get_layer_activations_batched(m_base, layer_name, input_data, device)
     base_activations_tensor = base_activations.detach().clone()
@@ -100,6 +102,15 @@ def feature_representation(m_base, layer_name, input_data, hyperparameters, devi
     base_dataset = TensorDataset(base_activations_tensor)
     base_data_loader = DataLoader(base_dataset, batch_size=hyperparameters['batch_size'], shuffle=True)
     '''
+    base_data_loader = DataLoader(input_data, batch_size=hyperparameters['batch_size'], shuffle=True)
+
+    # Get batch without popping
+    first_batch = next(iter(base_data_loader))
+    print(f'First batch is {first_batch}')
+
+    first_activations_tensor = get_layer_activations(model, layer_name, first_batch, device).detach().clone().squeeze(1)
+    input_size = first_activations_tensor.size(-1)
+    print(f'Input size is {input_size}.')
 
     autoencoders = []
 
@@ -107,7 +118,7 @@ def feature_representation(m_base, layer_name, input_data, hyperparameters, devi
         local_label = f'{layer_name}_{label}_{i}'
         hidden_size = input_size * hyperparameters['hidden_size_multiple']
         autoencoder = SparseAutoencoder(input_size, hidden_size=hidden_size, l1_coef=hyperparameters['l1_coef']).to(device)
-        train_autoencoder(autoencoder, base_data_loader, hyperparameters, device, label=local_label)
+        train_autoencoder(autoencoder, base_data_loader, hyperparameters, device, label=local_label, model=model, layer_name=layer_name)
         autoencoders.append(autoencoder)
 
     return autoencoders

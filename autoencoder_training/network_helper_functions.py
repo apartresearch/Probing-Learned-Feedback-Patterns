@@ -32,35 +32,7 @@ def find_layers(base, rlhf):
 
     return sorted_layer_numbers
 
-def get_layer_activations_batched(model, layer_name, input_data, device):
-    all_activations = []
-    input_ids = input_data['input_ids'].to(device)
-    attention_mask = input_data.get('attention_mask', None)
-
-    if attention_mask is not None:
-        input_and_attention = zip(input_ids, attention_mask)
-        for input_batch in batch(input_and_attention, 32):
-            local_input_ids = input_batch[0]
-            local_attention_mask = input_batch[1]
-            local_activations = get_layer_activations(
-                model, layer_name, input_ids=local_input_ids, attention_mask=local_attention_mask
-            )
-            all_activations.append(local_activations)
-
-    else:
-        for local_input_ids in tqdm(batch(input_ids, 32)):
-            local_activations = get_layer_activations(
-                model, layer_name, input_ids=local_input_ids, attention_mask=None, device=device
-            )
-            all_activations.append(local_activations)
-
-    print(f'last batch was of dimension {local_activations.shape} and there are {len(all_activations)} tensors')
-    final_tensor = torch.concat(all_activations, dim=0)
-    print(f'FInal tensor has shape {final_tensor.shape}.')
-    return final_tensor
-
-
-def get_layer_activations(model, layer_name, input_ids, attention_mask, device):
+def get_layer_activations(model, layer_name, input_data, device):
     """
     Gets the activations of a specified layer for a given input data.
 
@@ -74,6 +46,9 @@ def get_layer_activations(model, layer_name, input_ids, attention_mask, device):
     """
 
     activations = None
+
+    input_ids = input_data['input_ids']
+    attention_mask = input_data['attention_mask']
 
     def hook_fn(module, input, output):
         nonlocal activations

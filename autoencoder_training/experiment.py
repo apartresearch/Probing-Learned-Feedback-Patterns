@@ -20,8 +20,7 @@ def tokenize_and_process(example, tokenizer):
     # You can modify the structure of 'tokenized' as needed
     return {
         'input_ids': tokenized['input_ids'],
-        'attention_mask': tokenized['attention_mask'],
-        'label': example['label']  # You might need to adjust the field names
+        'attention_mask': tokenized['attention_mask']
     }
 
 def preprocess(dataset, tokenizer, limit=None):
@@ -82,13 +81,9 @@ def run_experiment(experiment_config: ExperimentConfig):
     tokenize_fn = partial(tokenize_and_process, tokenizer=tokenizer)
 
     if is_fast:
-        #test_dataset_base = preprocess(load_dataset("imdb", split=split), tokenizer, 96)
-        #test_dataset_rlhf = preprocess(load_dataset("imdb", split=split), tokenizer_rlhf, 96)
-        test_dataset_base = load_dataset("imdb", split=split).map(tokenize_fn, batched=True)
-        test_dataset_rlhf = load_dataset("imdb", split=split).map(tokenize_fn, batched=True)
+        test_dataset_base = load_dataset("imdb", split=split)[:96].map(tokenize_fn, batched=True)
+        test_dataset_rlhf = load_dataset("imdb", split=split)[:96].map(tokenize_fn, batched=True)
     else:
-        #test_dataset_base = preprocess(load_dataset("imdb", split=split), tokenizer)
-        #test_dataset_rlhf = preprocess(load_dataset("imdb", split=split), tokenizer_rlhf)
         test_dataset_base = load_dataset("imdb", split=split).map(tokenize_fn, batched=True)
         test_dataset_rlhf = load_dataset("imdb", split=split).map(tokenize_fn, batched=True)
 
@@ -117,7 +112,7 @@ def run_experiment(experiment_config: ExperimentConfig):
 
             autoencoder_base = feature_representation(
                 m_base, f'layers.{sorted_layers[layer_index]}.mlp',
-                input_data_base, hyperparameters_copy, device, label=f'base_{label}'
+                input_data=test_dataset_base, hyperparameters=hyperparameters_copy, device=device, label=f'base_{label}'
             )
 
             target_autoencoders_base = autoencoders_base_big if hidden_size_multiple > small_hidden_size_multiple else autoencoders_base_small
@@ -125,7 +120,7 @@ def run_experiment(experiment_config: ExperimentConfig):
 
             autoencoder_rlhf = feature_representation(
                 m_rlhf, f'layers.{sorted_layers[layer_index]}.mlp',
-                input_data_rlhf, hyperparameters_copy, device, label=f'rlhf_{label}'
+                input_data=test_dataset_rlhf, hyperparameters=hyperparameters_copy, device=device, label=f'rlhf_{label}'
             )
 
             target_autoencoders_rlhf = autoencoders_rlhf_big if hidden_size_multiple > small_hidden_size_multiple else autoencoders_rlhf_small
