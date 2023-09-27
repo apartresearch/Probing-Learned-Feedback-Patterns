@@ -15,7 +15,7 @@ from functools import partial
 
 def tokenize_and_process(example, tokenizer):
     # Tokenize the text using the provided tokenizer
-    tokenized = tokenizer(example['text'], return_tensors='pt', truncation=True, padding=True, max_length=512)
+    tokenized = tokenizer(example['text'], return_tensors='pt', truncation=True, padding="max_length", max_length=512)
 
     # You can modify the structure of 'tokenized' as needed
     return {
@@ -81,8 +81,9 @@ def run_experiment(experiment_config: ExperimentConfig):
     tokenize_fn = partial(tokenize_and_process, tokenizer=tokenizer)
 
     if is_fast:
-        test_dataset_base = (load_dataset("imdb", split=split).select(range(96))).map(tokenize_fn, batched=True)
-        test_dataset_rlhf = (load_dataset("imdb", split=split).select(range(96))).map(tokenize_fn, batched=True)
+        hyperparameters['batch_size'] = 4
+        test_dataset_base = (load_dataset("imdb", split=split).select(range(12))).map(tokenize_fn, batched=True)
+        test_dataset_rlhf = (load_dataset("imdb", split=split).select(range(12))).map(tokenize_fn, batched=True)
     else:
         test_dataset_base = load_dataset("imdb", split=split).map(tokenize_fn, batched=True)
         test_dataset_rlhf = load_dataset("imdb", split=split).map(tokenize_fn, batched=True)
