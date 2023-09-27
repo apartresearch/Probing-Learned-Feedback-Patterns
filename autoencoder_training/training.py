@@ -91,6 +91,7 @@ def train_encoder(autoencoder, data_loader, hyperparameters, device):
         print(f"Encoder Epoch [{epoch+1}/{hyperparameters['num_epochs']}], Loss: {loss.item():.4f}")
 
 def feature_representation(m_base, layer_name, input_data, hyperparameters, device, num_autoencoders=1, label='default'):
+    '''
     base_activations = get_layer_activations_batched(m_base, layer_name, input_data, device)
     base_activations_tensor = base_activations.detach().clone()
     base_activations_tensor = base_activations_tensor.squeeze(1)
@@ -98,8 +99,10 @@ def feature_representation(m_base, layer_name, input_data, hyperparameters, devi
     input_size = base_activations_tensor.size(-1)
     base_dataset = TensorDataset(base_activations_tensor)
     base_data_loader = DataLoader(base_dataset, batch_size=hyperparameters['batch_size'], shuffle=True)
+    '''
 
     autoencoders = []
+
     for i in range(num_autoencoders):
         local_label = f'{layer_name}_{label}_{i}'
         hidden_size = input_size * hyperparameters['hidden_size_multiple']

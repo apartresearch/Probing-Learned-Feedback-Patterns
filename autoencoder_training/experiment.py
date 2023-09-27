@@ -11,6 +11,19 @@ from network_helper_functions import find_layers
 from training import feature_representation
 from utils.model_storage_utils import save_autoencoders_for_artifact
 
+from functools import partial
+
+def tokenize_and_process(example, tokenizer):
+    # Tokenize the text using the provided tokenizer
+    tokenized = tokenizer(example['text'], truncation=True, padding='max_length', max_length=64)
+
+    # You can modify the structure of 'tokenized' as needed
+    return {
+        'input_ids': tokenized['input_ids'],
+        'attention_mask': tokenized['attention_mask'],
+        'label': example['label']  # You might need to adjust the field names
+    }
+
 def preprocess(dataset, tokenizer, limit=None):
     if limit:
         texts = [x['text'] for x in dataset.select(range(limit))]
@@ -66,17 +79,20 @@ def run_experiment(experiment_config: ExperimentConfig):
     split = hyperparameters['split']
     print('Processing texts')
 
+    tokenize_fn = partial(tokenize_and_process, tokenizer=tokenizer)
+
     if is_fast:
-        test_dataset_base = preprocess(load_dataset("imdb", split=split), tokenizer, 96)
-        test_dataset_rlhf = preprocess(load_dataset("imdb", split=split), tokenizer_rlhf, 96)
+        #test_dataset_base = preprocess(load_dataset("imdb", split=split), tokenizer, 96)
+        #test_dataset_rlhf = preprocess(load_dataset("imdb", split=split), tokenizer_rlhf, 96)
+        test_dataset_base = load_dataset("imdb", split=split).map(tokenize_fn, batched=True)
+        test_dataset_rlhf = load_dataset("imdb", split=split).map(tokenize_fn, batched=True)
     else:
-        test_dataset_base = preprocess(load_dataset("imdb", split=split), tokenizer)
-        test_dataset_rlhf = preprocess(load_dataset("imdb", split=split), tokenizer_rlhf)
+        #test_dataset_base = preprocess(load_dataset("imdb", split=split), tokenizer)
+        #test_dataset_rlhf = preprocess(load_dataset("imdb", split=split), tokenizer_rlhf)
+        test_dataset_base = load_dataset("imdb", split=split).map(tokenize_fn, batched=True)
+        test_dataset_rlhf = load_dataset("imdb", split=split).map(tokenize_fn, batched=True)
 
-    input_data_base = {'input_ids': test_dataset_base['input_ids'].to(device)}
-    input_data_rlhf = {'input_ids': test_dataset_rlhf['input_ids'].to(device)}
-
-    num_examples = len(test_dataset_base['input_ids'])
+    num_examples = len(test_dataset_base)
 
     print(f'Finished processing {num_examples} texts.')
     wandb.run.config['num_examples'] = num_examples
