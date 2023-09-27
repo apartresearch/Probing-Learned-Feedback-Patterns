@@ -25,11 +25,7 @@ def run_experiment(experiment_config: ExperimentConfig):
     policy_model_name = experiment_config.policy_model_name
 
     is_fast = hyperparameters['fast']
-
-    if 'device' in hyperparameters:
-        device = 'cuda:' + hyperparameters['device']
-    else:
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = experiment_config.device
 
     print(f'device is {device}')
 
