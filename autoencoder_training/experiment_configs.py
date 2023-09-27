@@ -15,7 +15,7 @@ class ExperimentConfig:
 
 hyperparameters_1 = {
     'hidden_size_multiples': [1, 2],
-    'l1_coef': 0.1,
+    'l1_coef': 0.001,
     'batch_size': 32,
     'num_epochs': 3,
     'learning_rate': 1e-3,
@@ -27,7 +27,7 @@ hyperparameters_1 = {
 hyperparameters_2 = {
     'max_input_length': 256,
     'hidden_size_multiples': [1, 2],
-    'l1_coef': 0.01,
+    'l1_coef': 0.001,
     'batch_size': 32,
     'num_epochs': 3,
     'learning_rate': 1e-3,
