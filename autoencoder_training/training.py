@@ -1,7 +1,6 @@
 
 import numpy as np
 
-from torch.utils.data import DataLoader, TensorDataset
 import torch
 import torch.optim as optim
 import torch.nn as nn
@@ -24,7 +23,7 @@ def train_autoencoder(autoencoder, input_texts, hyperparameters, device, label, 
         all_sparsity_losses = []
         all_reconstruction_losses = []
         all_true_sparsity_losses = []
-        for input_batch in tqdm(batch(input_texts, batch_size), num_batches):
+        for input_batch in tqdm(batch(input_texts, batch_size), total=num_batches):
             activations_batch = get_layer_activations(
                 model=model, layer_name=layer_name, input_texts=input_batch, tokenizer=tokenizer,
                 device=device, hyperparameters=hyperparameters
