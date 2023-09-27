@@ -102,7 +102,7 @@ def feature_representation(model, layer_name, input_data, hyperparameters, devic
     base_dataset = TensorDataset(base_activations_tensor)
     base_data_loader = DataLoader(base_dataset, batch_size=hyperparameters['batch_size'], shuffle=True)
     '''
-    print('\nBatch size is ' + hyperparameters['batch_size'] + '\n')
+    print('\nBatch size is ' + str(hyperparameters['batch_size']) + '\n')
     base_data_loader = DataLoader(input_data, batch_size=hyperparameters['batch_size'], shuffle=True)
 
     # Get batch without popping
