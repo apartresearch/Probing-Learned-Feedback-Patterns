@@ -81,8 +81,8 @@ def run_experiment(experiment_config: ExperimentConfig):
     tokenize_fn = partial(tokenize_and_process, tokenizer=tokenizer)
 
     if is_fast:
-        test_dataset_base = (load_dataset("imdb", split=split)[:96]).map(tokenize_fn, batched=True)
-        test_dataset_rlhf = (load_dataset("imdb", split=split)[:96]).map(tokenize_fn, batched=True)
+        test_dataset_base = (load_dataset("imdb", split=split).select(range(96))).map(tokenize_fn, batched=True)
+        test_dataset_rlhf = (load_dataset("imdb", split=split).select(range(96))).map(tokenize_fn, batched=True)
     else:
         test_dataset_base = load_dataset("imdb", split=split).map(tokenize_fn, batched=True)
         test_dataset_rlhf = load_dataset("imdb", split=split).map(tokenize_fn, batched=True)
