@@ -2,10 +2,11 @@
 
 class ExperimentConfig:
 
-    def __init__(self, hyperparameters, base_model_name, policy_model_name):
+    def __init__(self, hyperparameters, base_model_name, policy_model_name, device):
         self.hyperparameters = hyperparameters
         self.base_model_name = base_model_name
         self.policy_model_name = policy_model_name
+        self.device = device
 
     def __str__(self):
         printable = self.hyperparameters.copy()
@@ -20,19 +21,18 @@ hyperparameters_1 = {
     'learning_rate': 1e-3,
     'fast': True,
     'split': 'test',
-    'device': '4'
 }
 
 
 hyperparameters_2 = {
+    'max_input_length': 256,
     'hidden_size_multiples': [1, 2],
     'l1_coef': 0.01,
     'batch_size': 32,
     'num_epochs': 30,
     'learning_rate': 1e-3,
     'fast': False,
-    'split': 'test',
-    'device': '4'
+    'split': 'test'
 }
 
 all_models = ['eleutherai/pythia-70m', 'eleutherai/pythia-160m', 'eleutherai/pythia-410m']
@@ -40,14 +40,28 @@ all_reward_functions = ['sentiment_reward', 'utility_reward']
 
 def generate_experiment_configs(hyperparameters):
     all_experiment_configs = []
+    device = 4
     for model_name in all_models:
         for reward_function in all_reward_functions:
             simplified_model_name = model_name.split('/')[-1]
             policy_model_name = f'amirabdullah19852020/{simplified_model_name}_{reward_function}'
-            new_config = ExperimentConfig(hyperparameters=hyperparameters, base_model_name=model_name, policy_model_name=policy_model_name)
+            new_config = ExperimentConfig(hyperparameters=hyperparameters, base_model_name=model_name, policy_model_name=policy_model_name, device=device)
             all_experiment_configs.append(new_config)
     return all_experiment_configs
 
 all_experiment_configs = generate_experiment_configs(hyperparameters_2)
 
-experiment_config_A = ExperimentConfig(hyperparameters=hyperparameters_1,  base_model_name="eleutherai/pythia-70m", policy_model_name="amirabdullah19852020/pythia-70m_sentiment_reward")
+experiment_config_A = ExperimentConfig(
+    hyperparameters=hyperparameters_2,  base_model_name="eleutherai/pythia-70m",
+    policy_model_name="amirabdullah19852020/pythia-70m_sentiment_reward", device=0
+)
+
+experiment_config_B = ExperimentConfig(
+    hyperparameters=hyperparameters_2,  base_model_name="eleutherai/pythia-160m",
+    policy_model_name="amirabdullah19852020/pythia-160m_sentiment_reward", device=1
+)
+
+experiment_config_C = ExperimentConfig(
+    hyperparameters=hyperparameters_2,  base_model_name="eleutherai/pythia-410m",
+    policy_model_name="amirabdullah19852020/pythia-410m_sentiment_reward", device=2
+)
