@@ -65,3 +65,18 @@ experiment_config_C = ExperimentConfig(
     hyperparameters=hyperparameters_2,  base_model_name="eleutherai/pythia-410m",
     policy_model_name="amirabdullah19852020/pythia-410m_sentiment_reward", device=2
 )
+
+experiment_config_D = ExperimentConfig(
+    hyperparameters=hyperparameters_2,  base_model_name="eleutherai/pythia-70m",
+    policy_model_name="amirabdullah19852020/pythia-70m_utility_reward", device=5
+)
+
+experiment_config_E = ExperimentConfig(
+    hyperparameters=hyperparameters_2,  base_model_name="eleutherai/pythia-160m",
+    policy_model_name="amirabdullah19852020/pythia-160m_utility_reward", device=6
+)
+
+experiment_config_F = ExperimentConfig(
+    hyperparameters=hyperparameters_2,  base_model_name="eleutherai/pythia-410m",
+    policy_model_name="amirabdullah19852020/pythia-410m_utility_reward", device=7
+)
