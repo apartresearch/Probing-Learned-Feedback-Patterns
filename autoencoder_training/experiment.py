@@ -113,6 +113,6 @@ def run_experiment(experiment_config: ExperimentConfig):
     )
     wandb.finish()
 
-chosen_experiment_config = experiment_config_D
+chosen_experiment_config = experiment_config_A
 print(f'Running experiment now for config {chosen_experiment_config}')
 run_experiment(experiment_config=chosen_experiment_config)
