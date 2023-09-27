@@ -47,7 +47,7 @@ def get_layer_activations(model, layer_name, input_texts, tokenizer, device, hyp
 
     activations = None
 
-    max_length = hyperparameters('max_input_length')
+    max_length = hyperparameters['max_input_length']
     inputs = tokenizer(input_texts, return_tensors='pt', padding=True, truncation=True, max_length=max_length)
     input_ids = inputs['input_ids'].to(device)
     attention_mask = inputs['attention_mask']
