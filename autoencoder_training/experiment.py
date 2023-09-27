@@ -15,7 +15,7 @@ from functools import partial
 
 def tokenize_and_process(example, tokenizer):
     # Tokenize the text using the provided tokenizer
-    tokenized = tokenizer(example['text'], truncation=True, padding='max_length', max_length=64)
+    tokenized = tokenizer(example['text'], return_tensors='pt', truncation=True, padding=True, max_length=512)
 
     # You can modify the structure of 'tokenized' as needed
     return {
