@@ -107,7 +107,7 @@ def feature_representation(model, layer_name, input_data, hyperparameters, devic
 
     # Get batch without popping
     first_batch = next(iter(base_data_loader))
-    print('\nFirst batch has attention mask:\n' + first_batch['attention_mask'] + f"\n\n Length: {len(first_batch['attention_mask'])}")
+    print('\nFirst batch has attention mask:\n' + str(first_batch['attention_mask']) + f"\n\n Length: {len(first_batch['attention_mask'])}")
 
     first_activations_tensor = get_layer_activations(model, layer_name, first_batch, device).detach().clone().squeeze(1)
     input_size = first_activations_tensor.size(-1)
