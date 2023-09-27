@@ -24,11 +24,11 @@ def train_autoencoder(autoencoder, input_texts, hyperparameters, device, label, 
         all_sparsity_losses = []
         all_reconstruction_losses = []
         all_true_sparsity_losses = []
-        for input_batch in tqdm(batch(input_texts, num_batches)):
+        for input_batch in tqdm(batch(input_texts, batch_size), num_batches):
             activations_batch = get_layer_activations(
-                model=model, layer_name=layer_name, input_texts=input_batch, tokenizer=tokenizer, device=device
+                model=model, layer_name=layer_name, input_texts=input_batch, tokenizer=tokenizer,
+                device=device, hyperparameters=hyperparameters
             )
-            print(f'activations_batch is of shape {activations_batch.shape}')
             data = activations_batch.to(device)
 
             optimizer.zero_grad()
@@ -119,7 +119,8 @@ def feature_representation(
     first_batch = input_texts[:batch_size].copy()
 
     first_activations_tensor = get_layer_activations(
-        model=model, tokenizer=tokenizer, layer_name=layer_name, input_texts=first_batch, device=device
+        model=model, tokenizer=tokenizer, layer_name=layer_name, input_texts=first_batch,
+        device=device, hyperparameters=hyperparameters
     ).detach().clone().squeeze(1)
 
     input_size = first_activations_tensor.size(-1)
