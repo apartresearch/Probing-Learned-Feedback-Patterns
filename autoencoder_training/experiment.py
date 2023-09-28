@@ -74,6 +74,8 @@ def run_experiment(experiment_config: ExperimentConfig):
     hyperparameters['num_examples'] = num_examples
     sorted_layers = find_layers(m_base, m_rlhf)
 
+    wandb.config['sorted_layers'] = sorted_layers
+
     autoencoders_base_big = {}
     autoencoders_base_small = {}
 

@@ -46,7 +46,7 @@ def save_autoencoders_for_artifact(
     saved_artifact = Artifact(artifact_name, metadata=hyperparameters, type='model')
     saved_artifact.add_dir(save_dir, name=save_dir)
 
-    aliases = {simplified_policy_name, 'latest'}
+    aliases = {simplified_policy_name, 'latest', 'weights_tied'}
     aliases.add(alias)
     aliases = sorted(list(aliases))
     run.log_artifact(saved_artifact, aliases=aliases)
