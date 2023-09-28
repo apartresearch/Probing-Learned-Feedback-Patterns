@@ -28,6 +28,7 @@ def run_experiment(experiment_config: ExperimentConfig):
 
     is_fast = hyperparameters['fast']
     device = experiment_config.device
+    num_layers_to_keep = hyperparameters['layers_to_keep']
 
     print(f'device is {device}')
 
@@ -73,8 +74,8 @@ def run_experiment(experiment_config: ExperimentConfig):
     wandb.run.config['num_examples'] = num_examples
     hyperparameters['num_examples'] = num_examples
     sorted_layers = find_layers(m_base, m_rlhf)
-
     wandb.config['sorted_layers'] = sorted_layers
+    sorted_layers = sorted_layers[:num_layers_to_keep]
 
     autoencoders_base_big = {}
     autoencoders_base_small = {}
