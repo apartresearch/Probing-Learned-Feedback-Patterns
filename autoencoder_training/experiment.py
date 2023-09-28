@@ -86,7 +86,7 @@ def run_experiment(experiment_config: ExperimentConfig):
     hidden_size_multiples = sorted(hyperparameters['hidden_size_multiples'].copy())
     small_hidden_size_multiple = hidden_size_multiples[0]
 
-    for layer_index in sorted_layers:
+    for position, layer_index in enumerate(sorted_layers):
         for hidden_size_multiple in hidden_size_multiples:
             hyperparameters_copy = hyperparameters.copy()
             hyperparameters_copy['hidden_size_multiple'] = hidden_size_multiple
@@ -100,6 +100,8 @@ def run_experiment(experiment_config: ExperimentConfig):
 
             target_autoencoders_base = autoencoders_base_big if hidden_size_multiple > small_hidden_size_multiple else autoencoders_base_small
             target_autoencoders_base[str(layer_index)] = autoencoder_base
+
+            print(f'Working with {layer_index} of position {position} in {label}.')
 
             autoencoder_rlhf = feature_representation(
                 model=m_rlhf, tokenizer=tokenizer, layer_name=f'layers.{layer_index}.mlp',
