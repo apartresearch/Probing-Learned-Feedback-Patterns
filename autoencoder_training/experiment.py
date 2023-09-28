@@ -28,7 +28,7 @@ def run_experiment(experiment_config: ExperimentConfig):
 
     is_fast = hyperparameters['fast']
     device = experiment_config.device
-    num_layers_to_keep = hyperparameters['layers_to_keep']
+    num_layers_to_keep = hyperparameters['num_layers_to_keep']
 
     print(f'device is {device}')
 
@@ -94,7 +94,7 @@ def run_experiment(experiment_config: ExperimentConfig):
             label = 'big' if hidden_size_multiple > small_hidden_size_multiple else 'small'
 
             autoencoder_base = feature_representation(
-                model=m_base, tokenizer=tokenizer, layer_name=f'layers.{sorted_layers[layer_index]}.mlp',
+                model=m_base, tokenizer=tokenizer, layer_name=f'layers.{layer_index}.mlp',
                 input_texts= test_dataset_base, hyperparameters=hyperparameters_copy, device=device, label=f'base_{label}'
             )
 
@@ -102,7 +102,7 @@ def run_experiment(experiment_config: ExperimentConfig):
             target_autoencoders_base[str(layer_index)] = autoencoder_base
 
             autoencoder_rlhf = feature_representation(
-                model=m_rlhf, tokenizer=tokenizer, layer_name=f'layers.{sorted_layers[layer_index]}.mlp',
+                model=m_rlhf, tokenizer=tokenizer, layer_name=f'layers.{layer_index}.mlp',
                 input_texts=test_dataset_rlhf, hyperparameters=hyperparameters_copy, device=device, label=f'rlhf_{label}'
             )
 
