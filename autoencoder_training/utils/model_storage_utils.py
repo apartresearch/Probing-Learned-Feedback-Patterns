@@ -36,11 +36,10 @@ def save_autoencoders_for_artifact(
     '''
     Saves the autoencoders from one run into memory. Note that these paths are to some extent hardcoded
     '''
-    formatted_datestring = current_datetime.strftime("%Y-%m-%d_%H:%M:%S")
+    formatted_datestring = datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
     base_dir = 'saves'
     save_dir = f'{base_dir}/{formatted_datestring}'
     # Get the current datetime
-    current_datetime = datetime.datetime.now()
 
     save_models_to_folder(autoencoders_base_big, save_dir=f'{save_dir}/base_big')
     save_models_to_folder(autoencoders_base_small, save_dir=f'{save_dir}/base_small')
