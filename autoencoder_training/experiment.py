@@ -28,7 +28,7 @@ def run_experiment(experiment_config: ExperimentConfig):
 
     is_fast = hyperparameters['fast']
     device = experiment_config.device
-    num_layers_to_keep = hyperparameters['layers_to_keep']
+    num_layers_to_keep = hyperparameters['num_layers_to_keep']
 
     print(f'device is {device}')
 
