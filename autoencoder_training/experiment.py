@@ -111,7 +111,7 @@ def run_experiment(experiment_config: ExperimentConfig):
     save_autoencoders_for_artifact(
         autoencoders_base_big=autoencoders_base_big, autoencoders_base_small=autoencoders_base_small,
         autoencoders_rlhf_big=autoencoders_rlhf_big, autoencoders_rlhf_small=autoencoders_rlhf_small,
-        policy_model_name=policy_model_name, hyperparameters=hyperparameters, alias='latest', run=run
+        policy_model_name=policy_model_name, hyperparameters=hyperparameters, alias='latest', run=run,
     )
     wandb.finish()
 
