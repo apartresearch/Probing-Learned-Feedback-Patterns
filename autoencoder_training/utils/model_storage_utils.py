@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import torch
 from tqdm import tqdm
@@ -35,7 +36,12 @@ def save_autoencoders_for_artifact(
     '''
     Saves the autoencoders from one run into memory. Note that these paths are to some extent hardcoded
     '''
-    save_dir = 'saves'
+    formatted_datestring = current_datetime.strftime("%Y-%m-%d_%H:%M:%S")
+    base_dir = 'saves'
+    save_dir = f'{base_dir}/{formatted_datestring}'
+    # Get the current datetime
+    current_datetime = datetime.datetime.now()
+
     save_models_to_folder(autoencoders_base_big, save_dir=f'{save_dir}/base_big')
     save_models_to_folder(autoencoders_base_small, save_dir=f'{save_dir}/base_small')
     save_models_to_folder(autoencoders_rlhf_big, save_dir=f'{save_dir}/rlhf_big')
@@ -44,7 +50,7 @@ def save_autoencoders_for_artifact(
     simplified_policy_name = policy_model_name.split('/')[-1].replace("-", "_")
     artifact_name = f'{artifact_prefix}_{simplified_policy_name}'
     saved_artifact = Artifact(artifact_name, metadata=hyperparameters, type='model')
-    saved_artifact.add_dir(save_dir, name=save_dir)
+    saved_artifact.add_dir(save_dir, name=base_dir)
 
     aliases = {simplified_policy_name, 'latest', 'weights_tied'}
     aliases.add(alias)
