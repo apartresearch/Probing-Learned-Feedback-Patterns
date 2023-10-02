@@ -48,6 +48,13 @@ def run_experiment(experiment_config: ExperimentConfig):
     base_model_name = experiment_config.base_model_name
     policy_model_name = experiment_config.policy_model_name
 
+    if 'pythia' in base_model_name:
+        layer_name_stem = 'layers'
+    elif 'gpt-neo' in base_model_name:
+        layer_name_stem = 'h'
+    else:
+        raise Exception(f'Unsupported model type {base_model_name}')
+
     m_base = AutoModel.from_pretrained(base_model_name).to(device)
     m_rlhf = AutoModel.from_pretrained(policy_model_name).to(device)
 
@@ -97,7 +104,7 @@ def run_experiment(experiment_config: ExperimentConfig):
             label = 'big' if hidden_size_multiple > small_hidden_size_multiple else 'small'
 
             autoencoder_base = feature_representation(
-                model=m_base, tokenizer=tokenizer, layer_name=f'layers.{layer_index}.mlp',
+                model=m_base, tokenizer=tokenizer, layer_name=f'{layer_name_stem}.{layer_index}.mlp',
                 input_texts= test_dataset_base, hyperparameters=hyperparameters_copy, device=device, label=f'base_{label}'
             )
 
@@ -107,7 +114,7 @@ def run_experiment(experiment_config: ExperimentConfig):
             print(f'Working with {layer_index} of position {position} in {label}.')
 
             autoencoder_rlhf = feature_representation(
-                model=m_rlhf, tokenizer=tokenizer, layer_name=f'layers.{layer_index}.mlp',
+                model=m_rlhf, tokenizer=tokenizer, layer_name=f'{layer_name_stem}.{layer_index}.mlp',
                 input_texts=test_dataset_rlhf, hyperparameters=hyperparameters_copy, device=device, label=f'rlhf_{label}'
             )
 
