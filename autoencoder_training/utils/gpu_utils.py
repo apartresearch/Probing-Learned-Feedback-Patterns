@@ -1,7 +1,5 @@
 import pynvml
 
-
-
 def find_gpu_with_most_memory(min_memory: int = 10):
     pynvml.nvmlInit()
 

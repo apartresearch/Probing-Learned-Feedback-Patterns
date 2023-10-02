@@ -1,12 +1,13 @@
+import argparse
 import wandb
+from datasets import load_dataset
 
 from transformers import AutoModel
 from transformers import AutoTokenizer
-from datasets import load_dataset
+
 
 from experiment_configs import (
-    ExperimentConfig, all_experiment_configs, experiment_config_A, experiment_config_B,
-    experiment_config_C, experiment_config_D, experiment_config_E, experiment_config_F
+    ExperimentConfig, grid_experiment_configs
 )
 
 from network_helper_functions import find_layers
@@ -14,6 +15,10 @@ from training import feature_representation
 
 from utils.gpu_utils import find_gpu_with_most_memory
 from utils.model_storage_utils import save_autoencoders_for_artifact
+
+parser = argparse.ArgumentParser(description="Choose which experiment config you want to run.")
+parser.add_argument("base_model_name", default='pythia-70m', type=str, help="The model name you want to use.")
+parser.add_argument("reward_function", default='utility_reward', type=str, help="The reward function you want to leverage.")
 
 def run_experiment(experiment_config: ExperimentConfig):
     '''
@@ -116,6 +121,10 @@ def run_experiment(experiment_config: ExperimentConfig):
     )
     wandb.finish()
 
-chosen_experiment_config = experiment_config_C
+
+base_model_name = parser.base_model_name
+reward_function = parser.reward_function
+chosen_experiment_config = grid_experiment_configs[(base_model_name, reward_function)]
+
 print(f'Running experiment now for config {chosen_experiment_config}')
 run_experiment(experiment_config=chosen_experiment_config)

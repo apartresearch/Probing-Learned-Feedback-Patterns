@@ -42,44 +42,15 @@ all_models = ['eleutherai/pythia-70m', 'eleutherai/pythia-160m', 'eleutherai/pyt
 all_reward_functions = ['sentiment_reward', 'utility_reward']
 
 def generate_experiment_configs(hyperparameters):
-    all_experiment_configs = []
-    device = 4
+    grid_experiment_configs = {}
     for model_name in all_models:
         for reward_function in all_reward_functions:
             simplified_model_name = model_name.split('/')[-1]
             policy_model_name = f'amirabdullah19852020/{simplified_model_name}_{reward_function}'
-            new_config = ExperimentConfig(hyperparameters=hyperparameters, base_model_name=model_name, policy_model_name=policy_model_name, device=device)
-            all_experiment_configs.append(new_config)
-    return all_experiment_configs
+            new_config = ExperimentConfig(hyperparameters=hyperparameters, base_model_name=model_name, policy_model_name=policy_model_name)
 
-all_experiment_configs = generate_experiment_configs(hyperparameters_2)
+            experiment_key = (simplified_model_name, reward_function)
+            grid_experiment_configs[experiment_key] = new_config
+    return grid_experiment_configs
 
-experiment_config_A = ExperimentConfig(
-    hyperparameters=hyperparameters_2,  base_model_name="eleutherai/pythia-70m",
-    policy_model_name="amirabdullah19852020/pythia-70m_sentiment_reward"
-)
-
-experiment_config_B = ExperimentConfig(
-    hyperparameters=hyperparameters_2,  base_model_name="eleutherai/pythia-70m",
-    policy_model_name="amirabdullah19852020/pythia-70m_utility_reward"
-)
-
-experiment_config_C = ExperimentConfig(
-    hyperparameters=hyperparameters_2,  base_model_name="eleutherai/pythia-160m",
-    policy_model_name="amirabdullah19852020/pythia-160m_sentiment_reward"
-)
-
-experiment_config_D = ExperimentConfig(
-    hyperparameters=hyperparameters_2,  base_model_name="eleutherai/pythia-160m",
-    policy_model_name="amirabdullah19852020/pythia-160m_utility_reward"
-)
-
-experiment_config_E = ExperimentConfig(
-    hyperparameters=hyperparameters_2,  base_model_name="eleutherai/pythia-410m",
-    policy_model_name="amirabdullah19852020/pythia-410m_sentiment_reward"
-)
-
-experiment_config_F = ExperimentConfig(
-    hyperparameters=hyperparameters_2,  base_model_name="eleutherai/pythia-410m",
-    policy_model_name="amirabdullah19852020/pythia-410m_utility_reward"
-)
+grid_experiment_configs = generate_experiment_configs(hyperparameters_2)
