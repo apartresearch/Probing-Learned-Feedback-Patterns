@@ -3,6 +3,7 @@ datasets==2.14.5
 einops==0.6.1
 nltk==3.8.1
 openai==0.28.0
+pynvml==11.5.0
 scipy==1.10.1
 torch==2.0.1
 transformers==4.33.2
