@@ -32,7 +32,7 @@ def run_experiment(experiment_config: ExperimentConfig):
     device = experiment_config.device
     num_layers_to_keep = hyperparameters['num_layers_to_keep']
 
-    device = device if device else find_gpu_with_most_memory
+    device = device if device else find_gpu_with_most_memory()
 
     simplified_policy_model_name = policy_model_name.split('/')[-1].replace('-', '_')
     wandb_project_name = f'Autoencoder_training_{simplified_policy_model_name}'
@@ -45,10 +45,6 @@ def run_experiment(experiment_config: ExperimentConfig):
 
     m_base = AutoModel.from_pretrained(base_model_name).to(device)
     m_rlhf = AutoModel.from_pretrained(policy_model_name).to(device)
-
-    debug_device = m_base.device
-
-    print(f'Model is is on {debug_device}')
 
     tokenizer = AutoTokenizer.from_pretrained(base_model_name)
     tokenizer.pad_token = tokenizer.eos_token
