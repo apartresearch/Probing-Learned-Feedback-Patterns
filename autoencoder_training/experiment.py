@@ -17,8 +17,8 @@ from utils.gpu_utils import find_gpu_with_most_memory
 from utils.model_storage_utils import save_autoencoders_for_artifact
 
 parser = argparse.ArgumentParser(description="Choose which experiment config you want to run.")
-parser.add_argument("base_model_name", default='pythia-70m', type=str, help="The model name you want to use.")
-parser.add_argument("reward_function", default='utility_reward', type=str, help="The reward function you want to leverage.")
+parser.add_argument("--base_model_name", default='pythia-70m', type=str, help="The model name you want to use.", required=False)
+parser.add_argument("--reward_function", default='utility_reward', type=str, help="The reward function you want to leverage.", required=False)
 
 def run_experiment(experiment_config: ExperimentConfig):
     '''
