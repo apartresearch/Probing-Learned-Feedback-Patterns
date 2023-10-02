@@ -38,7 +38,7 @@ hyperparameters_2 = {
     'tied_weights': True
 }
 
-all_models = ['eleutherai/pythia-70m', 'eleutherai/pythia-160m', 'eleutherai/pythia-410m']
+all_models = ['eleutherai/pythia-70m', 'eleutherai/pythia-160m', 'eleutherai/pythia-410m', 'eleutherai/gpt-neo-125m']
 all_reward_functions = ['sentiment_reward', 'utility_reward']
 
 def generate_experiment_configs(hyperparameters):
