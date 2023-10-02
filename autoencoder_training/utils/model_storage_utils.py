@@ -1,7 +1,6 @@
 from datetime import datetime
 import os
 import torch
-from tqdm import tqdm
 
 from wandb import Api
 from wandb import Artifact

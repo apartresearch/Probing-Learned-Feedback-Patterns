@@ -11,6 +11,8 @@ from experiment_configs import (
 
 from network_helper_functions import find_layers
 from training import feature_representation
+
+from utils.gpu_utils import find_gpu_with_most_memory
 from utils.model_storage_utils import save_autoencoders_for_artifact
 
 def run_experiment(experiment_config: ExperimentConfig):
@@ -30,7 +32,7 @@ def run_experiment(experiment_config: ExperimentConfig):
     device = experiment_config.device
     num_layers_to_keep = hyperparameters['num_layers_to_keep']
 
-    print(f'device is {device}')
+    device = device if device else find_gpu_with_most_memory
 
     simplified_policy_model_name = policy_model_name.split('/')[-1].replace('-', '_')
     wandb_project_name = f'Autoencoder_training_{simplified_policy_model_name}'

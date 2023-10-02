@@ -2,7 +2,7 @@
 
 class ExperimentConfig:
 
-    def __init__(self, hyperparameters, base_model_name, policy_model_name, device):
+    def __init__(self, hyperparameters, base_model_name, policy_model_name, device=None):
         self.hyperparameters = hyperparameters
         self.base_model_name = base_model_name
         self.policy_model_name = policy_model_name
@@ -56,30 +56,30 @@ all_experiment_configs = generate_experiment_configs(hyperparameters_2)
 
 experiment_config_A = ExperimentConfig(
     hyperparameters=hyperparameters_2,  base_model_name="eleutherai/pythia-70m",
-    policy_model_name="amirabdullah19852020/pythia-70m_sentiment_reward", device=0
+    policy_model_name="amirabdullah19852020/pythia-70m_sentiment_reward"
 )
 
 experiment_config_B = ExperimentConfig(
     hyperparameters=hyperparameters_2,  base_model_name="eleutherai/pythia-70m",
-    policy_model_name="amirabdullah19852020/pythia-70m_utility_reward", device=1
+    policy_model_name="amirabdullah19852020/pythia-70m_utility_reward"
 )
 
 experiment_config_C = ExperimentConfig(
     hyperparameters=hyperparameters_2,  base_model_name="eleutherai/pythia-160m",
-    policy_model_name="amirabdullah19852020/pythia-160m_sentiment_reward", device=2
+    policy_model_name="amirabdullah19852020/pythia-160m_sentiment_reward"
 )
 
 experiment_config_D = ExperimentConfig(
     hyperparameters=hyperparameters_2,  base_model_name="eleutherai/pythia-160m",
-    policy_model_name="amirabdullah19852020/pythia-160m_utility_reward", device=3
+    policy_model_name="amirabdullah19852020/pythia-160m_utility_reward"
 )
 
 experiment_config_E = ExperimentConfig(
     hyperparameters=hyperparameters_2,  base_model_name="eleutherai/pythia-410m",
-    policy_model_name="amirabdullah19852020/pythia-410m_sentiment__reward", device=4
+    policy_model_name="amirabdullah19852020/pythia-410m_sentiment_reward"
 )
 
 experiment_config_F = ExperimentConfig(
     hyperparameters=hyperparameters_2,  base_model_name="eleutherai/pythia-410m",
-    policy_model_name="amirabdullah19852020/pythia-410m_utility_reward", device=5
+    policy_model_name="amirabdullah19852020/pythia-410m_utility_reward"
 )
