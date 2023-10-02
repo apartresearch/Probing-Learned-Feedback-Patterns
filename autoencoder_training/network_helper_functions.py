@@ -33,7 +33,7 @@ def find_layers(base, rlhf):
     Returns:
     A list of layer indices in descending order of parameter divergence.
     """
-    model_name = base.config.name_or_path[-1]
+    model_name = base.config.name_or_path
 
     if 'pythia' in model_name:
         return find_divergences(base, rlhf, layer_name_stem='layers')
