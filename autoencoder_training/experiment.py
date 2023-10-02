@@ -122,8 +122,9 @@ def run_experiment(experiment_config: ExperimentConfig):
     wandb.finish()
 
 
-base_model_name = parser.base_model_name
-reward_function = parser.reward_function
+args = parser.parse_args()
+base_model_name = args.base_model_name
+reward_function = args.reward_function
 chosen_experiment_config = grid_experiment_configs[(base_model_name, reward_function)]
 
 print(f'Running experiment now for config {chosen_experiment_config}')
