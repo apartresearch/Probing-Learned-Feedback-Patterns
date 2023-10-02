@@ -27,8 +27,10 @@ def find_gpu_with_most_memory(min_memory: int = 10):
 
     pynvml.nvmlShutdown()
 
-    if free_memory > min_memory:
-        print(f'Found GPU {max_gpu_index} with {free_memory} GB available.')
+    max_memory_in_gb = round(max_memory / one_gb, 2)
+
+    if max_memory_in_gb > min_memory:
+        print(f'Found GPU {max_gpu_index} with {max_memory_in_gb} GB available.')
         return max_gpu_index
     else:
         print("No NVIDIA GPUs with sufficient memory found.")
