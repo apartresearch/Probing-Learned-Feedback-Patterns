@@ -85,7 +85,6 @@ def run_experiment(experiment_config: ExperimentConfig):
     hyperparameters['num_examples'] = num_examples
     sorted_layers, divergences_by_layer = find_layers(m_base, m_rlhf)
     wandb.config['sorted_layers'] = sorted_layers
-    wandb.run.summary['divergences_by_layer'] = divergences_by_layer
 
     sorted_layers = sorted_layers[:num_layers_to_keep]
 
