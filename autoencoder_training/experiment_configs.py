@@ -42,6 +42,9 @@ all_models = ['eleutherai/pythia-70m', 'eleutherai/pythia-160m', 'eleutherai/pyt
 all_reward_functions = ['sentiment_reward', 'utility_reward']
 
 model_specific_parameters = {
+  'pythia-70m': {},
+  'pythia-160m': {},
+  'pythia-410m': {},
   'gpt-neo-125m': {'l1_coef': 0.01}
 }
 
