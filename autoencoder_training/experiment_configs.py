@@ -45,7 +45,7 @@ model_specific_parameters = {
   'pythia-70m': {},
   'pythia-160m': {},
   'pythia-410m': {},
-  'gpt-neo-125m': {'l1_coef': 0.05}
+  'gpt-neo-125m': {'l1_coef': 0.015}
 }
 
 def generate_experiment_configs(hyperparameters):
