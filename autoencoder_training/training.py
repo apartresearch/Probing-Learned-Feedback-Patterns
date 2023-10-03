@@ -23,6 +23,12 @@ def train_autoencoder(autoencoder, input_texts, hyperparameters, device, label, 
         all_sparsity_losses = []
         all_reconstruction_losses = []
         all_true_sparsity_losses = []
+
+        wandb.define_metric(f"loss_{label}", summary="min")
+        wandb.define_metric(f"reconstruction_loss_{label}", summary="min")
+        wandb.define_metric(f"sparsity_loss_{label}", summary="min")
+        wandb.define_metric(f"true_sparsity_loss_{label}", summary="min")
+
         for input_batch in tqdm(batch(input_texts, batch_size), total=num_batches):
             activations_batch = get_layer_activations(
                 model=model, layer_name=layer_name, input_texts=input_batch, tokenizer=tokenizer,
@@ -49,7 +55,7 @@ def train_autoencoder(autoencoder, input_texts, hyperparameters, device, label, 
 
             wandb.log({
                 f"loss_{label}": loss,
-                f"reconstruction_loss_{label}": reconstruction_loss,
+                f"normalized_reconstruction_loss_{label}": reconstruction_loss,
                 f"sparsity_loss_{label}": sparsity_loss,
                 f"true_sparsity_loss_{label}": true_sparsity_loss
             })
