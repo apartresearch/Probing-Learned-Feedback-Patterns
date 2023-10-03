@@ -41,13 +41,20 @@ hyperparameters_2 = {
 all_models = ['eleutherai/pythia-70m', 'eleutherai/pythia-160m', 'eleutherai/pythia-410m', 'eleutherai/gpt-neo-125m']
 all_reward_functions = ['sentiment_reward', 'utility_reward']
 
+model_specific_parameters = {
+  'gpt-neo-125m': {'l1_coef': 0.01}
+}
+
 def generate_experiment_configs(hyperparameters):
     grid_experiment_configs = {}
     for model_name in all_models:
         for reward_function in all_reward_functions:
             simplified_model_name = model_name.split('/')[-1]
             policy_model_name = f'amirabdullah19852020/{simplified_model_name}_{reward_function}'
-            new_config = ExperimentConfig(hyperparameters=hyperparameters, base_model_name=model_name, policy_model_name=policy_model_name)
+            hyperparameters_copy = hyperparameters.copy()
+            hyperparameters_copy.update(model_specific_parameters.get(simplified_model_name, {}))
+
+            new_config = ExperimentConfig(hyperparameters=hyperparameters_copy, base_model_name=model_name, policy_model_name=policy_model_name)
 
             experiment_key = (simplified_model_name, reward_function)
             grid_experiment_configs[experiment_key] = new_config
