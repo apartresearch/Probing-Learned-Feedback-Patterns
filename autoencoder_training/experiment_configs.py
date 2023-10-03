@@ -55,7 +55,7 @@ def generate_experiment_configs(hyperparameters):
             simplified_model_name = model_name.split('/')[-1]
             policy_model_name = f'amirabdullah19852020/{simplified_model_name}_{reward_function}'
             hyperparameters_copy = hyperparameters.copy()
-            hyperparameters_copy.update(model_specific_parameters.get(simplified_model_name, {}))
+            hyperparameters_copy.update(model_specific_parameters[simplified_model_name])
 
             new_config = ExperimentConfig(hyperparameters=hyperparameters_copy, base_model_name=model_name, policy_model_name=policy_model_name)
 
