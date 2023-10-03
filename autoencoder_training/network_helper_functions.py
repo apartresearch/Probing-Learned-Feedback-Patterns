@@ -19,7 +19,7 @@ def find_divergences(base, rlhf, layer_name_stem: str):
     sorted_layer_divergences = sorted(layer_total_divergences.items(), key=lambda x: x[1], reverse=True)
     sorted_layer_numbers = [item[0] for item in sorted_layer_divergences]
 
-    return sorted_layer_numbers
+    return sorted_layer_numbers, layer_total_divergences
 
 
 def find_layers(base, rlhf):

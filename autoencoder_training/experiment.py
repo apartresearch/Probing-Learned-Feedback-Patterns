@@ -83,8 +83,10 @@ def run_experiment(experiment_config: ExperimentConfig):
 
     wandb.run.config['num_examples'] = num_examples
     hyperparameters['num_examples'] = num_examples
-    sorted_layers = find_layers(m_base, m_rlhf)
+    sorted_layers, divergences_by_layer = find_layers(m_base, m_rlhf)
     wandb.config['sorted_layers'] = sorted_layers
+    wandb.run.summary['divergences_by_layer'] = divergences_by_layer
+
     sorted_layers = sorted_layers[:num_layers_to_keep]
 
     autoencoders_base_big = {}
@@ -125,6 +127,7 @@ def run_experiment(experiment_config: ExperimentConfig):
         autoencoders_base_big=autoencoders_base_big, autoencoders_base_small=autoencoders_base_small,
         autoencoders_rlhf_big=autoencoders_rlhf_big, autoencoders_rlhf_small=autoencoders_rlhf_small,
         policy_model_name=policy_model_name, hyperparameters=hyperparameters, alias='latest', run=run,
+        added_metadata=divergences_by_layer
     )
     wandb.finish()
 
