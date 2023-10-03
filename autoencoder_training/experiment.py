@@ -126,7 +126,7 @@ def run_experiment(experiment_config: ExperimentConfig):
         autoencoders_base_big=autoencoders_base_big, autoencoders_base_small=autoencoders_base_small,
         autoencoders_rlhf_big=autoencoders_rlhf_big, autoencoders_rlhf_small=autoencoders_rlhf_small,
         policy_model_name=policy_model_name, hyperparameters=hyperparameters, alias='latest', run=run,
-        added_metadata=divergences_by_layer
+        added_metadata={'divergences_by_layer': divergences_by_layer}
     )
     wandb.finish()
 
