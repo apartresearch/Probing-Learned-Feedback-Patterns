@@ -196,8 +196,13 @@ def train_rlhf_pipeline(model_name, reward_function):
 
     # store results in a dataframe
     df_results = pd.DataFrame(game_data)
+    print(f'Test results are {df_results}')
+    wandb.log(df_results)
     
     from huggingface_hub import login
-    login(token='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')
+    token = os.environ['HUGGINGFACE_HUB_TOKEN']
+    login(token=token)
     ppo_trainer.push_to_hub(f"amirabdullah19852020/{model_name_simplified}_{reward_function}")
     return df_results
+
+train_rlhf_pipeline()
