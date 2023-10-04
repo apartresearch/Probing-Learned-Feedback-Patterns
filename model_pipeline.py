@@ -205,4 +205,4 @@ def train_rlhf_pipeline(model_name, reward_function):
     ppo_trainer.push_to_hub(f"amirabdullah19852020/{model_name_simplified}_{reward_function}")
     return df_results
 
-train_rlhf_pipeline()
+train_rlhf_pipeline('pyhtia-70m', 'utility_reward')
