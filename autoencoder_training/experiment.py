@@ -34,10 +34,10 @@ def run_experiment(experiment_config: ExperimentConfig):
     policy_model_name = experiment_config.policy_model_name
 
     is_fast = hyperparameters['fast']
-    device = experiment_config.device
+    input_device = experiment_config.device
     num_layers_to_keep = hyperparameters['num_layers_to_keep']
 
-    device = device if device else find_gpu_with_most_memory()
+    device = input_device if input_device else find_gpu_with_most_memory()
 
     simplified_policy_model_name = policy_model_name.split('/')[-1].replace('-', '_')
     wandb_project_name = f'Autoencoder_training_{simplified_policy_model_name}'
@@ -55,15 +55,17 @@ def run_experiment(experiment_config: ExperimentConfig):
     else:
         raise Exception(f'Unsupported model type {base_model_name}')
 
-
     if 'gpt-j' in policy_model_name:
         m_base = AutoModel.from_pretrained(base_model_name, device_map="auto")
-        m_rlhf = AutoModel.from_pretrained(base_model_name, device_map="auto").to(device)
+        m_rlhf = AutoModel.from_pretrained(base_model_name, device_map="auto")
         m_rlhf.load_adapter(policy_model_name)
 
     else:
         m_base = AutoModel.from_pretrained(base_model_name).to(device)
         m_rlhf = AutoModel.from_pretrained(policy_model_name).to(device)
+
+    # We may need to train autoencoders on different device after loading models.
+    device = input_device if input_device else find_gpu_with_most_memory()
 
     tokenizer = AutoTokenizer.from_pretrained(base_model_name)
     tokenizer.pad_token = tokenizer.eos_token
