@@ -108,15 +108,6 @@ def feature_representation(
         model, tokenizer, layer_name, input_texts, hyperparameters,
         device, num_autoencoders=1, label='default'
 ):
-    '''
-    base_activations = get_layer_activations_batched(m_base, layer_name, input_data, device)
-    base_activations_tensor = base_activations.detach().clone()
-    base_activations_tensor = base_activations_tensor.squeeze(1)
-
-    input_size = base_activations_tensor.size(-1)
-    base_dataset = TensorDataset(base_activations_tensor)
-    base_data_loader = DataLoader(base_dataset, batch_size=hyperparameters['batch_size'], shuffle=True)
-    '''
     batch_size = hyperparameters['batch_size']
     print('\nBatch size is ' + str(hyperparameters['batch_size']) + '\n')
 

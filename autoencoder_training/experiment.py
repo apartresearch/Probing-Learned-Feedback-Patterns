@@ -50,13 +50,20 @@ def run_experiment(experiment_config: ExperimentConfig):
 
     if 'pythia' in base_model_name:
         layer_name_stem = 'layers'
-    elif 'gpt-neo' in base_model_name:
+    elif ('gpt-neo' in base_model_name) or ('gpt-j' in base_model_name):
         layer_name_stem = 'h'
     else:
         raise Exception(f'Unsupported model type {base_model_name}')
 
-    m_base = AutoModel.from_pretrained(base_model_name).to(device)
-    m_rlhf = AutoModel.from_pretrained(policy_model_name).to(device)
+
+    if 'gpt-j' in policy_model_name:
+        m_base = AutoModel.from_pretrained(base_model_name, device_map="auto")
+        m_rlhf = AutoModel.from_pretrained(base_model_name, device_map="auto").to(device)
+        m_rlhf.load_adapter(policy_model_name)
+
+    else:
+        m_base = AutoModel.from_pretrained(base_model_name).to(device)
+        m_rlhf = AutoModel.from_pretrained(policy_model_name).to(device)
 
     tokenizer = AutoTokenizer.from_pretrained(base_model_name)
     tokenizer.pad_token = tokenizer.eos_token

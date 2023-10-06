@@ -38,14 +38,19 @@ hyperparameters_2 = {
     'tied_weights': True
 }
 
-all_models = ['eleutherai/pythia-70m', 'eleutherai/pythia-160m', 'eleutherai/pythia-410m', 'eleutherai/gpt-neo-125m']
+all_models = [
+    'eleutherai/pythia-70m', 'eleutherai/pythia-160m', 'eleutherai/pythia-410m',
+    'eleutherai/gpt-neo-125m', 'ybelkada/gpt-j-6b-sharded-bf16'
+]
+
 all_reward_functions = ['sentiment_reward', 'utility_reward']
 
 model_specific_parameters = {
   'pythia-70m': {},
   'pythia-160m': {},
   'pythia-410m': {},
-  'gpt-neo-125m': {'l1_coef': 0.015}
+  'gpt-neo-125m': {'l1_coef': 0.015},
+  'gpt-j-6b-sharded-bf16': {'batch_size': 8, 'num_epochs': 1, 'gradient_accumulation_steps': 4}
 }
 
 def generate_experiment_configs(hyperparameters):

@@ -37,7 +37,7 @@ def find_layers(base, rlhf):
 
     if 'pythia' in model_name:
         return find_divergences(base, rlhf, layer_name_stem='layers')
-    elif 'gpt-neo' in model_name:
+    elif ('gpt-neo' in model_name) or ('gpt-j' in model_name):
         return find_divergences(base, rlhf, layer_name_stem='h')
     else:
         raise Exception(f'Finding divergence for {model_name} not supported.')
