@@ -11,7 +11,7 @@ def find_divergences(base, rlhf, layer_name_stem: str):
         if len(name_parts) >= 3 and name_parts[0] == layer_name_stem:
             layer_num = int(name_parts[1])
             layer_type = name_parts[2]
-            layer_divergences[layer_num][layer_type] += torch.norm(param_base - param_rlhf).item()
+            layer_divergences[layer_num][layer_type] += torch.norm(param_base.cpu() - param_rlhf.cpu()).item()
 
     layer_total_divergences = {layer_num: sum(layer_type.values()) for layer_num, layer_type in layer_divergences.items()}
 
