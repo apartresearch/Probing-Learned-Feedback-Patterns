@@ -23,8 +23,12 @@ def calculate_MMCS_hungarian(small_weights, big_weights):
 def compare_autoencoders(small_dict, big_dict, top_k=30):
     mmcs_results = {}
 
-    small_autoencoders_list = list(small_dict.values())
-    big_autoencoders_list = list(big_dict.values())
+    small_autoencoders_list_of_lists = list(small_dict.values())
+    big_autoencoders_list_of_lists = list(big_dict.values())
+
+    small_autoencoders_list = [ae for sub_list in small_autoencoders_list_of_lists for ae in sub_list]
+    big_autoencoders_list = [ae for sub_list in big_autoencoders_list_of_lists for ae in sub_list]
+
     layer_names = list(small_dict.keys())
 
     print(f'layer names are {layer_names}')
