@@ -3,13 +3,13 @@ from collections import defaultdict
 import torch
 import wandb
 
-def find_divergences(base, rlhf, layer_name_stem: str):
+def find_divergences(base, rlhf, layer_name_stem: str, with_adapter=False):
     layer_divergences = defaultdict(lambda: defaultdict(float))
+    if with_adapter:
+        assert len(list(base.named_parameters())) == len(list(rlhf.named_parameters())), 'Base and rlhf should have same number of params!'
 
-    base_parameters = list(base.named_parameters())
-    rlhf_parameters = list(rlhf.named_parameters())
-
-    assert len(base_parameters) == len(rlhf_parameters), 'Base and rlhf should have same number of params!'
+    base_parameters = base.named_parameters()
+    rlhf_parameters = rlhf.named_parameters()
 
     for (name_base, param_base), (name_rlhf, param_rlhf) in base_parameters, rlhf_parameters:
         name_parts = name_base.split('.')
@@ -48,7 +48,7 @@ def find_layers(base, rlhf):
         raise Exception(f'Finding divergence for {model_name} not supported.')
 
 
-def get_layer_activations(model, layer_name, input_texts, tokenizer, device, hyperparameters):
+def get_layer_activations(model, layer_name, input_texts, tokenizer, device, hyperparameters, with_adapter=False):
     """
     Gets the activations of a specified layer for a given input data.
 
