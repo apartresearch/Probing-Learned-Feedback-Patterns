@@ -6,7 +6,12 @@ import wandb
 def find_divergences(base, rlhf, layer_name_stem: str):
     layer_divergences = defaultdict(lambda: defaultdict(float))
 
-    for (name_base, param_base), (name_rlhf, param_rlhf) in zip(base.named_parameters(), rlhf.named_parameters()):
+    base_parameters = list(base.named_paramtets())
+    rlhf_parameters = list(rlhf.named_parameters())
+
+    assert len(base_parameters) == len(rlhf_parameters), 'Base and rlhf should have same number of params!'
+
+    for (name_base, param_base), (name_rlhf, param_rlhf) in base_parameters, rlhf_parameters:
         name_parts = name_base.split('.')
         if len(name_parts) >= 3 and name_parts[0] == layer_name_stem:
             layer_num = int(name_parts[1])
