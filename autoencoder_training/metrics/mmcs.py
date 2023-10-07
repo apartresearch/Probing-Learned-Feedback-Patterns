@@ -27,10 +27,13 @@ def compare_autoencoders(small_dict, big_dict, top_k=30):
     big_autoencoders_list = list(big_dict.values())
     layer_names = list(small_dict.keys())
 
+    print(f'layer names are {layer_names}')
+
     if len(small_autoencoders_list) != len(big_autoencoders_list):
-        raise ValueError("Length of small and big autoencoders lists must be the same.")
+        raise ValueError("Length of small and big autoencoders lists must be the same length.")
 
     for layer_name, (small_autoencoder, big_autoencoder) in zip(layer_names, zip(small_autoencoders_list, big_autoencoders_list)):
+        print(f'small autoencoder and big autoencoder are {small_autoencoder} and {big_autoencoder}.')
         small_weights = small_autoencoder.encoder_weight.detach().cpu().numpy().T
         big_weights = big_autoencoder.encoder_weight.detach().cpu().numpy().T
 
