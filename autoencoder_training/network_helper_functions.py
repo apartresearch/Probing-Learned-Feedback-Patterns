@@ -6,7 +6,7 @@ import wandb
 def find_divergences(base, rlhf, layer_name_stem: str):
     layer_divergences = defaultdict(lambda: defaultdict(float))
 
-    base_parameters = list(base.named_paramters())
+    base_parameters = list(base.named_parameters())
     rlhf_parameters = list(rlhf.named_parameters())
 
     assert len(base_parameters) == len(rlhf_parameters), 'Base and rlhf should have same number of params!'
