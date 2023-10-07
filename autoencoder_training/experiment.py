@@ -7,11 +7,11 @@ from datasets import load_dataset
 from transformers import AutoModel
 from transformers import AutoTokenizer
 
-
 from experiment_configs import (
     ExperimentConfig, grid_experiment_configs
 )
 
+from metrics.mmcs import compare_autoencoders
 from network_helper_functions import find_layers
 from training import feature_representation
 
@@ -138,14 +138,25 @@ def run_experiment(experiment_config: ExperimentConfig):
             target_autoencoders_rlhf = autoencoders_rlhf_big if hidden_size_multiple > small_hidden_size_multiple else autoencoders_rlhf_small
             target_autoencoders_rlhf[str(layer_index)] = autoencoder_rlhf
 
+    base_mmcs_results = compare_autoencoders(small_dict=autoencoders_base_small, big_dict=autoencoders_base_big)
+    rlhf_mmcs_results = compare_autoencoders(small_dict=autoencoders_rlhf_small, big_dict=autoencoders_rlhf_big)
+
+    added_metadata = {}
+
+    mmcs_results = {"base_mmcs_results": base_mmcs_results, "rlhf_mmcs_results": rlhf_mmcs_results}
+    divergences_by_layer = {'divergences_by_layer': divergences_by_layer}
+
+    added_metadata.update(mmcs_results)
+    added_metadata.update(divergences_by_layer)
+    wandb.log(added_metadata)
+
     save_autoencoders_for_artifact(
         autoencoders_base_big=autoencoders_base_big, autoencoders_base_small=autoencoders_base_small,
         autoencoders_rlhf_big=autoencoders_rlhf_big, autoencoders_rlhf_small=autoencoders_rlhf_small,
         policy_model_name=policy_model_name, hyperparameters=hyperparameters, alias='latest', run=run,
-        added_metadata={'divergences_by_layer': divergences_by_layer}
+        added_metadata=added_metadata
     )
     wandb.finish()
-
 
 def parse_args():
     args = parser.parse_args()
