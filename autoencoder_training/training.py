@@ -109,7 +109,6 @@ def feature_representation(
         device, num_autoencoders=1, label='default'
 ):
     batch_size = hyperparameters['batch_size']
-    print('\nBatch size is ' + str(hyperparameters['batch_size']) + '\n')
 
     # Get batch without popping
     first_batch = input_texts[:batch_size].copy()

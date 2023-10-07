@@ -17,6 +17,10 @@ from utils.gpu_utils import find_gpu_with_most_memory
 from utils.model_storage_utils import save_autoencoders_for_artifact
 
 parser = argparse.ArgumentParser(description="Choose which experiment config you want to run.")
+
+
+parser.add_argument("--fast", action="store_true", help="Whether to run in fast mode or not.", required=False)
+parser.add_argument("--l1_coef", default=None, type=float, help="The l1_coef you want to use.", required=False)
 parser.add_argument("--base_model_name", default='pythia-70m', type=str, help="The model name you want to use.", required=False)
 parser.add_argument("--reward_function", default='utility_reward', type=str, help="The reward function you want to leverage.", required=False)
 
@@ -140,10 +144,21 @@ def run_experiment(experiment_config: ExperimentConfig):
     wandb.finish()
 
 
-args = parser.parse_args()
-base_model_name = args.base_model_name
-reward_function = args.reward_function
-chosen_experiment_config = grid_experiment_configs[(base_model_name, reward_function)]
+def parse_args():
+    args = parser.parse_args()
+    base_model_name = args.base_model_name
+    reward_function = args.reward_function
+    chosen_experiment_config = grid_experiment_configs[(base_model_name, reward_function)]
 
+    parsed_hyperparams = {
+        "fast": args.fast,
+        "l1_coef": args.l1_coef
+    }
+    for key, value in parsed_hyperparams.items():
+        if value is not None:
+            chosen_experiment_config.hyperparameters[key] = value
+    return chosen_experiment_config
+
+chosen_experiment_config = parse_args()
 print(f'Running experiment now for config {chosen_experiment_config}')
 run_experiment(experiment_config=chosen_experiment_config)
