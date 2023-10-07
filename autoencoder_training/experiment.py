@@ -1,4 +1,6 @@
 import argparse
+from time import sleep
+
 import wandb
 from datasets import load_dataset
 
@@ -32,6 +34,7 @@ def run_experiment(experiment_config: ExperimentConfig):
     3. Train autoencoders on the extracted activations.
     4. Measure loss of the autoencoder on the IMDb test dataset.
     '''
+    sleep(5)
     wandb.login()
     hyperparameters = experiment_config.hyperparameters
     base_model_name = experiment_config.base_model_name
