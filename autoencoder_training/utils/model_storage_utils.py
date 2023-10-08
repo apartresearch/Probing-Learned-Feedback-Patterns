@@ -53,8 +53,9 @@ def save_autoencoders_for_artifact(
     saved_artifact = Artifact(artifact_name, metadata=metadata, type='model')
     saved_artifact.add_dir(save_dir, name=base_dir)
 
+    is_fast = hyperparameters.get('fast', False)
     # Ensure we don't overwrite the "real" up to date model with fast aliases.
-    full_alias = f'fast_{simplified_policy_name}' if 'fast' in hyperparameters else simplified_policy_name
+    full_alias = f'fast_{simplified_policy_name}' if is_fast else simplified_policy_name
     aliases = {full_alias, 'latest', 'weights_tied'}
     aliases.add(alias)
 
