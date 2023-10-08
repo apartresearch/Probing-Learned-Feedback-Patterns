@@ -44,7 +44,7 @@ def compare_autoencoders(small_dict, big_dict, top_k=30):
 
         mmcs_results[layer_name] = MMCS_value
 
-    averaged_mmcs = np.mean(mmcs_results.values())
+    averaged_mmcs = np.mean(list(mmcs_results.values()))
 
     result = {
         "averaged_mmcs": averaged_mmcs,
