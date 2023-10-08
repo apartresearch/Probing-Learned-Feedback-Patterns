@@ -129,7 +129,7 @@ def feature_representation(
         autoencoder = SparseAutoencoder(input_size, hidden_size=hidden_size, l1_coef=hyperparameters['l1_coef']).to(autoencoder_device)
         train_autoencoder(
             autoencoder=autoencoder, input_texts=input_texts, hyperparameters=hyperparameters,
-            device=autoencoder_device, label=local_label,
+            autoencoder_device=autoencoder_device, model_device=model_device, label=local_label,
             model=model, tokenizer=tokenizer, layer_name=layer_name)
         autoencoders.append(autoencoder)
 
