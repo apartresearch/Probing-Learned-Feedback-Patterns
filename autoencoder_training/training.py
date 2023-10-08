@@ -12,7 +12,7 @@ from models.sparse_autoencoder import SparseAutoencoder
 from utils.helper_functions import batch
 
 
-def train_autoencoder(autoencoder, input_texts, hyperparameters, device, label, model, tokenizer, layer_name):
+def train_autoencoder(autoencoder, input_texts, hyperparameters, model_device, autoencoder_device, label, model, tokenizer, layer_name):
     criterion = nn.MSELoss()
     batch_size = hyperparameters['batch_size']
     optimizer = optim.Adam(autoencoder.parameters(), lr=hyperparameters['learning_rate'])
@@ -32,9 +32,9 @@ def train_autoencoder(autoencoder, input_texts, hyperparameters, device, label, 
         for input_batch in tqdm(batch(input_texts, batch_size), total=num_batches):
             activations_batch = get_layer_activations(
                 model=model, layer_name=layer_name, input_texts=input_batch, tokenizer=tokenizer,
-                device=device, hyperparameters=hyperparameters
+                device=model_device, hyperparameters=hyperparameters
             )
-            data = activations_batch.to(device)
+            data = activations_batch.to(autoencoder_device)
 
             optimizer.zero_grad()
             features, reconstruction = autoencoder(data)
@@ -106,7 +106,7 @@ def train_encoder(autoencoder, data_loader, hyperparameters, device):
 
 def feature_representation(
         model, tokenizer, layer_name, input_texts, hyperparameters,
-        device, num_autoencoders=1, label='default'
+        model_device, autoencoder_device, num_autoencoders=1, label='default'
 ):
     batch_size = hyperparameters['batch_size']
 
@@ -115,7 +115,7 @@ def feature_representation(
 
     first_activations_tensor = get_layer_activations(
         model=model, tokenizer=tokenizer, layer_name=layer_name, input_texts=first_batch,
-        device=device, hyperparameters=hyperparameters
+        device=model_device, hyperparameters=hyperparameters
     ).detach().clone().squeeze(1)
 
     input_size = first_activations_tensor.size(-1)
@@ -126,10 +126,10 @@ def feature_representation(
     for i in range(num_autoencoders):
         local_label = f'{layer_name}_{label}_{i}'
         hidden_size = input_size * hyperparameters['hidden_size_multiple']
-        autoencoder = SparseAutoencoder(input_size, hidden_size=hidden_size, l1_coef=hyperparameters['l1_coef']).to(device)
+        autoencoder = SparseAutoencoder(input_size, hidden_size=hidden_size, l1_coef=hyperparameters['l1_coef']).to(autoencoder_device)
         train_autoencoder(
             autoencoder=autoencoder, input_texts=input_texts, hyperparameters=hyperparameters,
-            device=device, label=local_label,
+            device=autoencoder_device, label=local_label,
             model=model, tokenizer=tokenizer, layer_name=layer_name)
         autoencoders.append(autoencoder)
 

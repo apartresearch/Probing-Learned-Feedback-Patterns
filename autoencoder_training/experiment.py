@@ -6,6 +6,7 @@ from datasets import load_dataset
 
 from transformers import AutoModel
 from transformers import AutoTokenizer
+from transformers import GPTJForCausalLM
 
 from experiment_configs import (
     ExperimentConfig, grid_experiment_configs
@@ -44,7 +45,7 @@ def run_experiment(experiment_config: ExperimentConfig):
     input_device = experiment_config.device
     num_layers_to_keep = hyperparameters['num_layers_to_keep']
 
-    device = input_device if input_device else find_gpu_with_most_memory()
+    model_device = input_device if input_device else find_gpu_with_most_memory()
 
     simplified_policy_model_name = policy_model_name.split('/')[-1].replace('-', '_')
     wandb_project_name = f'Autoencoder_training_{simplified_policy_model_name}'
@@ -63,16 +64,16 @@ def run_experiment(experiment_config: ExperimentConfig):
         raise Exception(f'Unsupported model type {base_model_name}')
 
     if 'gpt-j' in policy_model_name:
-        m_base = AutoModel.from_pretrained(base_model_name, device_map="auto")
-        m_rlhf = AutoModel.from_pretrained(base_model_name, device_map="auto")
+        m_base = GPTJForCausalLM.from_pretrained(base_model_name, device_map="auto")
+        m_rlhf = GPTJForCausalLM.from_pretrained(base_model_name, device_map="auto")
         m_rlhf.load_adapter(policy_model_name)
 
     else:
-        m_base = AutoModel.from_pretrained(base_model_name).to(device)
-        m_rlhf = AutoModel.from_pretrained(policy_model_name).to(device)
+        m_base = AutoModel.from_pretrained(base_model_name).to(model_device)
+        m_rlhf = AutoModel.from_pretrained(policy_model_name).to(model_device)
 
     # We may need to train autoencoders on different device after loading models.
-    device = input_device if input_device else find_gpu_with_most_memory()
+    autoencoder_device = input_device if input_device else find_gpu_with_most_memory()
 
     tokenizer = AutoTokenizer.from_pretrained(base_model_name)
     tokenizer.pad_token = tokenizer.eos_token
@@ -120,9 +121,11 @@ def run_experiment(experiment_config: ExperimentConfig):
 
             label = 'big' if hidden_size_multiple > small_hidden_size_multiple else 'small'
 
+            model_device= str(m_base.device)
             autoencoder_base = feature_representation(
                 model=m_base, tokenizer=tokenizer, layer_name=f'{layer_name_stem}.{layer_index}.mlp',
-                input_texts= test_dataset_base, hyperparameters=hyperparameters_copy, device=device, label=f'base_{label}'
+                input_texts= test_dataset_base, hyperparameters=hyperparameters_copy,
+                model_device=model_device, autoencoder_device=autoencoder_device, label=f'base_{label}'
             )
 
             target_autoencoders_base = autoencoders_base_big if hidden_size_multiple > small_hidden_size_multiple else autoencoders_base_small
@@ -130,9 +133,11 @@ def run_experiment(experiment_config: ExperimentConfig):
 
             print(f'Working with {layer_index} of position {position} in {label}.')
 
+            model_device= str(m_rlhf.device)
             autoencoder_rlhf = feature_representation(
                 model=m_rlhf, tokenizer=tokenizer, layer_name=f'{layer_name_stem}.{layer_index}.mlp',
-                input_texts=test_dataset_rlhf, hyperparameters=hyperparameters_copy, device=device, label=f'rlhf_{label}'
+                input_texts=test_dataset_rlhf, hyperparameters=hyperparameters_copy,
+                model_device=model_device, autoencoder_device=autoencoder_device, label=f'rlhf_{label}'
             )
 
             target_autoencoders_rlhf = autoencoders_rlhf_big if hidden_size_multiple > small_hidden_size_multiple else autoencoders_rlhf_small
