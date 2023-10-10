@@ -1,6 +1,31 @@
-import torch
-
 from collections import defaultdict
+
+import torch
+import wandb
+
+def find_divergences(base, rlhf, layer_name_stem: str, with_adapter=False):
+    layer_divergences = defaultdict(lambda: defaultdict(float))
+    if not with_adapter:
+        assert len(list(base.named_parameters())) == len(list(rlhf.named_parameters())), 'Base and rlhf should have same number of params!'
+
+    base_parameters = base.named_parameters()
+    rlhf_parameters = rlhf.named_parameters()
+
+    for (name_base, param_base), (name_rlhf, param_rlhf) in zip(base_parameters, rlhf_parameters):
+        name_parts = name_base.split('.')
+        if len(name_parts) >= 3 and name_parts[0] == layer_name_stem:
+            layer_num = int(name_parts[1])
+            layer_type = name_parts[2]
+            layer_divergences[layer_num][layer_type] += torch.norm(param_base.cpu() - param_rlhf.cpu()).item()
+
+    layer_total_divergences = {layer_num: sum(layer_type.values()) for layer_num, layer_type in layer_divergences.items()}
+
+    wandb.log({'layer_divergences': layer_total_divergences})
+    sorted_layer_divergences = sorted(layer_total_divergences.items(), key=lambda x: x[1], reverse=True)
+    sorted_layer_numbers = [item[0] for item in sorted_layer_divergences]
+
+    return sorted_layer_numbers, layer_total_divergences
+
 
 def find_layers(base, rlhf):
     """
@@ -13,23 +38,19 @@ def find_layers(base, rlhf):
     Returns:
     A list of layer indices in descending order of parameter divergence.
     """
+    model_name = base.config.name_or_path
 
-    layer_divergences = defaultdict(lambda: defaultdict(float))
+    if 'pythia' in model_name:
+        return find_divergences(base, rlhf, layer_name_stem='layers')
+    elif ('gpt-neo' in model_name):
+        return find_divergences(base, rlhf, layer_name_stem='h')
+    elif ('gpt-j' in model_name):
+        return find_divergences(base, rlhf, layer_name_stem='h', with_adapter=True)
+    else:
+        raise Exception(f'Finding divergence for {model_name} not supported.')
 
-    for (name_base, param_base), (name_rlhf, param_rlhf) in zip(base.named_parameters(), rlhf.named_parameters()):
-        name_parts = name_base.split('.')
-        if len(name_parts) >= 3 and name_parts[0] == 'layers':
-            layer_num = int(name_parts[1])
-            layer_type = name_parts[2]
-            layer_divergences[layer_num][layer_type] += torch.norm(param_base - param_rlhf).item()
 
-    layer_total_divergences = {layer_num: sum(layer_type.values()) for layer_num, layer_type in layer_divergences.items()}
-    sorted_layer_divergences = sorted(layer_total_divergences.items(), key=lambda x: x[1], reverse=True)
-    sorted_layer_numbers = [item[0] for item in sorted_layer_divergences]
-
-    return sorted_layer_numbers
-
-def get_layer_activations(model, layer_name, input_texts, tokenizer, device, hyperparameters):
+def get_layer_activations(model, layer_name, input_texts, tokenizer, device, hyperparameters, with_adapter=False):
     """
     Gets the activations of a specified layer for a given input data.
 

@@ -6,10 +6,11 @@ from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from reward_functions.transformer_utils import classify_texts
+from typing import List
 
 class RewardClass:
     @abstractmethod
-    def assign_rewards(self, input_examples: list[str], discretize: bool) -> list[float]:
+    def assign_rewards(self, input_examples: list[str], discretize: bool) -> List[float]:
         '''
         Assigns a numeric reward to each input example.
         '''

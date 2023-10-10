@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 from tqdm import tqdm
-from typing import Dict
+from typing import Dict, List
 
 def batch(iterable, n=1):
     l = len(iterable)
@@ -9,7 +9,7 @@ def batch(iterable, n=1):
         yield iterable[ndx:min(ndx + n, l)]
 
 
-def classify_texts(model, tokenizer, texts: list[str], class_to_reward_mappings: Dict[int, str] = None, batch_size = 6, max_length=512):
+def classify_texts(model, tokenizer, texts: List[str], class_to_reward_mappings: Dict[int, str] = None, batch_size = 6, max_length=512):
     class_to_reward_mappings = class_to_reward_mappings or {}
     all_logits = []
     all_rewards = []

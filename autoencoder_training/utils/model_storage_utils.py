@@ -1,7 +1,6 @@
 from datetime import datetime
 import os
 import torch
-from tqdm import tqdm
 
 from wandb import Api
 from wandb import Artifact
@@ -31,11 +30,12 @@ def save_models_to_folder(model_dict, save_dir):
 
 def save_autoencoders_for_artifact(
         autoencoders_base_big, autoencoders_base_small, autoencoders_rlhf_big, autoencoders_rlhf_small,
-        policy_model_name, hyperparameters, alias, run
+        policy_model_name, hyperparameters, alias, run, added_metadata = None
     ):
     '''
     Saves the autoencoders from one run into memory. Note that these paths are to some extent hardcoded
     '''
+    metadata = added_metadata.copy() if added_metadata else {}
     formatted_datestring = datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
     base_dir = 'saves'
     save_dir = f'{base_dir}/{formatted_datestring}'
@@ -48,11 +48,17 @@ def save_autoencoders_for_artifact(
 
     simplified_policy_name = policy_model_name.split('/')[-1].replace("-", "_")
     artifact_name = f'{artifact_prefix}_{simplified_policy_name}'
-    saved_artifact = Artifact(artifact_name, metadata=hyperparameters, type='model')
+
+    metadata.update(hyperparameters)
+    saved_artifact = Artifact(artifact_name, metadata=metadata, type='model')
     saved_artifact.add_dir(save_dir, name=base_dir)
 
-    aliases = {simplified_policy_name, 'latest', 'weights_tied'}
+    is_fast = hyperparameters.get('fast', False)
+    # Ensure we don't overwrite the "real" up to date model with fast aliases.
+    full_alias = f'fast_{simplified_policy_name}' if is_fast else simplified_policy_name
+    aliases = {full_alias, 'latest', 'weights_tied'}
     aliases.add(alias)
+
     aliases = sorted(list(aliases))
     run.log_artifact(saved_artifact, aliases=aliases)
 

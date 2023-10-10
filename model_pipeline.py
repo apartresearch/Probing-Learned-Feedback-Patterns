@@ -24,17 +24,33 @@ from reward_functions.transformer_utils import batch
 
 
 def train_rlhf_pipeline(model_name, reward_function):
-    batch_size=64
-    mini_batch_size=16
-    init_kl_coef=0.5
-    input_min_text_length=2
-    input_max_text_length=10
-    max_grad_norm=1.0
-    num_training_steps = int(25000 / batch_size)
-    num_warmup_steps = 10
-    min_output_length = 8
-    max_output_length = 20
-    lr = 1e-6
+    model_name_simplified = model_name.split('/')[-1]
+    tracker_project_name=f'trl_{model_name_simplified}_{reward_function}'
+
+    if 'gpt-j' in model_name:
+        batch_size=64
+        mini_batch_size=16
+        init_kl_coef=0.5
+        input_min_text_length=2
+        input_max_text_length=10
+        max_grad_norm=1.0
+        num_training_steps = int(25000 / batch_size)
+        num_warmup_steps = 10
+        min_output_length = 8
+        max_output_length = 20
+        lr = 1e-6
+    else:
+        batch_size=64
+        mini_batch_size=16
+        init_kl_coef=0.5
+        input_min_text_length=2
+        input_max_text_length=10
+        max_grad_norm=1.0
+        num_training_steps = int(25000 / batch_size)
+        num_warmup_steps = 10
+        min_output_length = 8
+        max_output_length = 20
+        lr = 1e-6
     
     
     if reward_function == 'sentiment_reward':
@@ -45,7 +61,7 @@ def train_rlhf_pipeline(model_name, reward_function):
         print('picked utility table reward')
 
     output_length_sampler = LengthSampler(min_output_length, max_output_length)
-    
+
     policy_model = AutoModelForCausalLMWithValueHead.from_pretrained(model_name, load_in_8bit=False).cuda()
     ref_model = AutoModelForCausalLMWithValueHead.from_pretrained(model_name, load_in_8bit=False).cuda()
     tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -56,9 +72,6 @@ def train_rlhf_pipeline(model_name, reward_function):
     lr_scheduler = get_linear_schedule_with_warmup(
         optimizer=optimizer, num_warmup_steps=num_warmup_steps, num_training_steps=num_training_steps
     )
-    
-    model_name_simplified = model_name.split('/')[-1]
-    tracker_project_name=f'trl_{model_name_simplified}_{reward_function}'
 
     config = PPOConfig(
         batch_size=batch_size,
@@ -196,8 +209,13 @@ def train_rlhf_pipeline(model_name, reward_function):
 
     # store results in a dataframe
     df_results = pd.DataFrame(game_data)
+    print(f'Test results are {df_results}')
+    wandb.log(df_results)
     
     from huggingface_hub import login
-    login(token='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')
+    token = os.environ['HUGGINGFACE_HUB_TOKEN']
+    login(token=token)
     ppo_trainer.push_to_hub(f"amirabdullah19852020/{model_name_simplified}_{reward_function}")
     return df_results
+
+train_rlhf_pipeline('pyhtia-70m', 'utility_reward')

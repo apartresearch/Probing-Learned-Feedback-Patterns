@@ -2,7 +2,7 @@
 
 class ExperimentConfig:
 
-    def __init__(self, hyperparameters, base_model_name, policy_model_name, device):
+    def __init__(self, hyperparameters, base_model_name, policy_model_name, device=None):
         self.hyperparameters = hyperparameters
         self.base_model_name = base_model_name
         self.policy_model_name = policy_model_name
@@ -17,7 +17,7 @@ hyperparameters_1 = {
     'hidden_size_multiples': [1, 2],
     'l1_coef': 0.001,
     'batch_size': 32,
-    'num_epochs': 3,
+    'num_epochs': 1,
     'learning_rate': 1e-3,
     'fast': True,
     'split': 'test',
@@ -30,7 +30,7 @@ hyperparameters_2 = {
     'hidden_size_multiples': [1, 2],
     'l1_coef': 0.001,
     'batch_size': 32,
-    'num_epochs': 3,
+    'num_epochs': 1,
     'learning_rate': 1e-3,
     'fast': False,
     'split': 'test',
@@ -38,48 +38,34 @@ hyperparameters_2 = {
     'tied_weights': True
 }
 
-all_models = ['eleutherai/pythia-70m', 'eleutherai/pythia-160m', 'eleutherai/pythia-410m']
+all_models = [
+    'eleutherai/pythia-70m', 'eleutherai/pythia-160m', 'eleutherai/pythia-410m',
+    'eleutherai/gpt-neo-125m', 'ybelkada/gpt-j-6b-sharded-bf16'
+]
+
 all_reward_functions = ['sentiment_reward', 'utility_reward']
 
+model_specific_parameters = {
+  'pythia-70m': {},
+  'pythia-160m': {},
+  'pythia-410m': {},
+  'gpt-neo-125m': {'l1_coef': 0.015},
+  'gpt-j-6b-sharded-bf16': {'batch_size': 8, 'num_epochs': 1, 'gradient_accumulation_steps': 4}
+}
+
 def generate_experiment_configs(hyperparameters):
-    all_experiment_configs = []
-    device = 4
+    grid_experiment_configs = {}
     for model_name in all_models:
         for reward_function in all_reward_functions:
             simplified_model_name = model_name.split('/')[-1]
             policy_model_name = f'amirabdullah19852020/{simplified_model_name}_{reward_function}'
-            new_config = ExperimentConfig(hyperparameters=hyperparameters, base_model_name=model_name, policy_model_name=policy_model_name, device=device)
-            all_experiment_configs.append(new_config)
-    return all_experiment_configs
+            hyperparameters_copy = hyperparameters.copy()
+            hyperparameters_copy.update(model_specific_parameters[simplified_model_name])
 
-all_experiment_configs = generate_experiment_configs(hyperparameters_2)
+            new_config = ExperimentConfig(hyperparameters=hyperparameters_copy, base_model_name=model_name, policy_model_name=policy_model_name)
 
-experiment_config_A = ExperimentConfig(
-    hyperparameters=hyperparameters_2,  base_model_name="eleutherai/pythia-70m",
-    policy_model_name="amirabdullah19852020/pythia-70m_sentiment_reward", device=0
-)
+            experiment_key = (simplified_model_name, reward_function)
+            grid_experiment_configs[experiment_key] = new_config
+    return grid_experiment_configs
 
-experiment_config_B = ExperimentConfig(
-    hyperparameters=hyperparameters_2,  base_model_name="eleutherai/pythia-70m",
-    policy_model_name="amirabdullah19852020/pythia-70m_utility_reward", device=1
-)
-
-experiment_config_C = ExperimentConfig(
-    hyperparameters=hyperparameters_2,  base_model_name="eleutherai/pythia-160m",
-    policy_model_name="amirabdullah19852020/pythia-160m_sentiment_reward", device=2
-)
-
-experiment_config_D = ExperimentConfig(
-    hyperparameters=hyperparameters_2,  base_model_name="eleutherai/pythia-160m",
-    policy_model_name="amirabdullah19852020/pythia-160m_utility_reward", device=3
-)
-
-experiment_config_E = ExperimentConfig(
-    hyperparameters=hyperparameters_2,  base_model_name="eleutherai/pythia-410m",
-    policy_model_name="amirabdullah19852020/pythia-410m_sentiment__reward", device=4
-)
-
-experiment_config_F = ExperimentConfig(
-    hyperparameters=hyperparameters_2,  base_model_name="eleutherai/pythia-410m",
-    policy_model_name="amirabdullah19852020/pythia-410m_utility_reward", device=5
-)
+grid_experiment_configs = generate_experiment_configs(hyperparameters_2)
