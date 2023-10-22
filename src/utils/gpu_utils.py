@@ -19,12 +19,11 @@ def find_gpu_with_most_memory(min_memory: int = 10):
 
         free_memory = gpu_info.free / one_gb
 
-        if gpu_info.free > max_memory:
-            max_memory = gpu_info.free
+        if free_memory > max_memory:
+            max_memory = free_memory
             max_gpu_index = i
 
     pynvml.nvmlShutdown()
-
     max_memory_in_gb = round(max_memory / one_gb, 2)
 
     if max_memory_in_gb > min_memory:

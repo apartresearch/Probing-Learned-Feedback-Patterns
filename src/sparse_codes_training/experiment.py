@@ -16,8 +16,8 @@ from metrics.mmcs import compare_autoencoders
 from network_helper_functions import find_layers
 from training import feature_representation
 
-from rlhf_training_utils.gpu_utils import find_gpu_with_most_memory
-from rlhf_training_utils.model_storage_utils import save_autoencoders_for_artifact
+from utils.gpu_utils import find_gpu_with_most_memory
+from utils.model_storage_utils import save_autoencoders_for_artifact
 
 parser = argparse.ArgumentParser(description="Choose which experiment config you want to run.")
 

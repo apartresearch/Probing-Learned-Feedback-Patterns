@@ -25,6 +25,7 @@ from trl.core import LengthSampler
 
 from configs.pythia_configs_sentiment import get_pythia_config
 from reward_class import IMDBSentimentRewardClass, UtilityValuesRewardClass
+from utils.gpu_utils import find_gpu_with_most_memory
 
 parser = argparse.ArgumentParser(description='Arguments for RLHF training')
 parser.add_argument('--model_name', help='Model name to run PPO on.', default='EleutherAI/pythia-70m')
@@ -46,6 +47,7 @@ class RLHFModelPipeline:
         self.set_config()
         self.dataset_name = dataset_name
         self.dataset = self.build_dataset()
+        self.device = find_gpu_with_most_memory()
 
         huggingface_org_name = os.environ.get('HUGGINGFACE_ORG_NAME', None)
 
@@ -96,14 +98,14 @@ class RLHFModelPipeline:
 
         if self.use_adapters:
             self.policy_model = AutoModelForCausalLMWithValueHead.from_pretrained(
-                self.model_name, load_in_8bit=False).cuda()
+                self.model_name, load_in_8bit=False).cuda(device=self.device)
             self.ref_model = AutoModelForCausalLMWithValueHead.from_pretrained(
-                self.model_name, load_in_8bit=False).cuda()
+                self.model_name, load_in_8bit=False).cuda(device=self.device)
         else:
             self.policy_model = AutoModelForCausalLMWithValueHead.from_pretrained(
-                self.model_name, load_in_8bit=False).cuda()
+                self.model_name, load_in_8bit=False).cuda(device=self.device)
             self.ref_model = AutoModelForCausalLMWithValueHead.from_pretrained(
-                self.model_name, load_in_8bit=False).cuda()
+                self.model_name, load_in_8bit=False).cuda(device=self.device)
 
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         self.tokenizer.pad_token = self.tokenizer.eos_token
