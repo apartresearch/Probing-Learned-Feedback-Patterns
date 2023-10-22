@@ -9,7 +9,7 @@ def batch(iterable, n=1):
         yield iterable[ndx:min(ndx + n, l)]
 
 
-def classify_texts(model, tokenizer, texts: List[str], class_to_reward_mappings: Dict[int, str] = None, batch_size = 6, max_length=512):
+def classify_texts(model, tokenizer, texts: List[str], class_to_reward_mappings: Dict[int, float] = None, batch_size = 6, max_length=512):
     class_to_reward_mappings = class_to_reward_mappings or {}
     all_logits = []
     all_rewards = []
@@ -18,7 +18,7 @@ def classify_texts(model, tokenizer, texts: List[str], class_to_reward_mappings:
     if torch.cuda.is_available():
         model.cuda()
 
-    for minibatch in tqdm(batch(texts, 2)):
+    for minibatch in tqdm(batch(texts, n=batch_size)):
         tokenized = tokenizer(minibatch, return_tensors='pt', padding=True, truncation=True, max_length=max_length)
 
         if torch.cuda.is_available():
