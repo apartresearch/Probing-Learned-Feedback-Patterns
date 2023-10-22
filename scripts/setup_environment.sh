@@ -1,4 +1,4 @@
-new_paths=("$(pwd)/rlhf_model_training" "$(pwd)/sparse_codes_training")
+new_paths=("$(pwd)/src/rlhf_model_training" "$(pwd)/src/sparse_codes_training")
 
 for new_path in "${new_paths[@]}"; do
     # Check if the directory is not already in PYTHONPATH
