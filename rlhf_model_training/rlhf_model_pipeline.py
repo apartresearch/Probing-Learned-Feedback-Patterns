@@ -25,6 +25,9 @@ class RLHFModelPipeline:
     This class carries out RLHF model training.
     """
     def __init__(self, model_name, reward_function, dataset_name='imdb', push_to_hub=False, huggingface_org_name=None):
+        """
+        Initializes model name, reward function, and dataset.
+        """
         self.model_name = model_name
         self.reward_function = reward_function
 
@@ -38,35 +41,32 @@ class RLHFModelPipeline:
 
 
     def set_config(self):
+        """
+        Sets config for PPO training, including all the relevant hyperparameters.
+        """
         self.model_name_simplified = self.model_name.split('/')[-1]
-        self.tracker_project_name = f'trl_{self.model_name_simplified}_{self.reward_function}'
+        tracker_project_name = f'trl_{self.model_name_simplified}_{self.reward_function}'
 
         self.use_adapters = 'gpt-j' in self.model_name
 
+        self.input_min_text_length = 2
+        self.input_max_text_length = 10
+
+        # Use smaller batches for large models that need adapters.
         if self.use_adapters in self.model_name:
-            self.batch_size = 32
-            self.mini_batch_size = 8
-            self.init_kl_coef = 0.5
-            self.input_min_text_length = 2
-            self.input_max_text_length = 10
-            self.max_grad_norm = 1.0
-            self.num_training_steps = int(25000 / self.batch_size)
-            self.num_warmup_steps = 10
-            self.min_output_length = 8
-            self.max_output_length = 20
-            self.lr = 1e-6
+            batch_size = 32
+            mini_batch_size = 8
         else:
-            self.batch_size = 64
-            self.mini_batch_size = 16
-            self.init_kl_coef = 0.5
-            self.input_min_text_length = 2
-            self.input_max_text_length = 10
-            self.max_grad_norm = 1.0
-            self.num_training_steps = int(25000 / self.batch_size)
-            self.num_warmup_steps = 10
-            self.min_output_length = 8
-            self.max_output_length = 20
-            self.lr = 1e-6
+            batch_size = 64
+            mini_batch_size = 16
+
+        init_kl_coef = 0.5
+        max_grad_norm = 1.0
+        num_warmup_steps = 10
+        min_output_length = 8
+        max_output_length = 20
+        lr = 1e-6
+        num_training_steps = int(25000 / batch_size)
 
         if self.reward_function == 'sentiment_reward':
             self.sentiment_reward_class = IMDBSentimentRewardClass()
@@ -75,7 +75,7 @@ class RLHFModelPipeline:
             self.sentiment_reward_class = UtilityValuesRewardClass()
             print('picked utility table reward')
 
-        self.output_length_sampler = LengthSampler(self.min_output_length, self.max_output_length)
+        self.output_length_sampler = LengthSampler(min_output_length, max_output_length)
 
         if self.use_adapters:
             self.policy_model = AutoModelForCausalLMWithValueHead.from_pretrained(self.model_name,
@@ -91,29 +91,29 @@ class RLHFModelPipeline:
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         self.tokenizer.pad_token = self.tokenizer.eos_token
 
-        self.optimizer = AdamW(lr=self.lr, params=self.policy_model.parameters())
+        self.optimizer = AdamW(lr=lr, params=self.policy_model.parameters())
 
         self.lr_scheduler = get_linear_schedule_with_warmup(
-            optimizer=self.optimizer, num_warmup_steps=self.num_warmup_steps,
-            num_training_steps=self.num_training_steps
+            optimizer=self.optimizer, num_warmup_steps=num_warmup_steps,
+            num_training_steps=num_training_steps
         )
 
         self.config = PPOConfig(
-            batch_size=self.batch_size,
-            init_kl_coef=self.init_kl_coef,
+            batch_size=batch_size,
+            init_kl_coef=init_kl_coef,
             log_with="wandb",
-            max_grad_norm=self.max_grad_norm,
-            mini_batch_size=self.mini_batch_size,
+            max_grad_norm=max_grad_norm,
+            mini_batch_size=mini_batch_size,
             model_name=self.model_name,
-            tracker_project_name=self.tracker_project_name,
-            steps=self.num_training_steps
+            tracker_project_name=tracker_project_name,
+            steps=num_training_steps
         )
 
         self.full_hyperparams_dict = deepcopy(self.config.to_dict())
         self.full_hyperparams_dict.update(
             {
-                "min_output_length": self.min_output_length, "max_output_length": self.max_output_length,
-                "num_training_steps": self.num_training_steps, "num_warmup_steps": self.num_warmup_steps
+                "min_output_length": min_output_length, "max_output_length": max_output_length,
+                "num_training_steps": num_training_steps, "num_warmup_steps": num_warmup_steps
             }
         )
 
@@ -141,6 +141,9 @@ class RLHFModelPipeline:
 
 
     def train(self):
+        """
+        This function is used to train and (optionally) persist the model to HuggingfaceHub.
+        """
         def collator(data):
             return dict((key, [d[key] for d in data]) for key in data[0])
 
@@ -230,7 +233,9 @@ class RLHFModelPipeline:
         df_results = pd.DataFrame(game_data)
         wandb.log(df_results)
 
-        token = os.environ['HUGGINGFACE_HUB_TOKEN']
-        login(token=token)
-        ppo_trainer.push_to_hub(f"amirabdullah19852020/{self.model_name_simplified}_{self.reward_function}")
+        if self.push_to_hub:
+            token = os.environ['HUGGINGFACE_HUB_TOKEN']
+            login(token=token)
+            ppo_trainer.push_to_hub(f"{self.huggingface_org_name}/{self.model_name_simplified}_{self.reward_function}")
+
         return df_results
