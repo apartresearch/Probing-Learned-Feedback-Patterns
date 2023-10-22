@@ -111,14 +111,14 @@ class RLHFModelPipeline:
 
         self.lr_scheduler = get_linear_schedule_with_warmup(
             optimizer=self.optimizer, num_warmup_steps=num_warmup_steps,
-            num_training_steps=self.config.num_training_steps
+            num_training_steps=self.config.steps
         )
 
         self.full_hyperparams_dict = deepcopy(self.config.to_dict())
         self.full_hyperparams_dict.update(
             {
                 "min_output_length": min_output_length, "max_output_length": max_output_length,
-                "num_training_steps": num_training_steps, "num_warmup_steps": num_warmup_steps
+                "num_training_steps": self.config.steps, "num_warmup_steps": num_warmup_steps
             }
         )
 
