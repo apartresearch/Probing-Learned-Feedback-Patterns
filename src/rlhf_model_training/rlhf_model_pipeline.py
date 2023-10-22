@@ -23,6 +23,7 @@ from transformers.optimization import get_linear_schedule_with_warmup
 from trl import PPOTrainer, PPOConfig, AutoModelForCausalLMWithValueHead
 from trl.core import LengthSampler
 
+from configs.pythia_configs_sentiment import get_pythia_config
 from reward_class import IMDBSentimentRewardClass, UtilityValuesRewardClass
 
 parser = argparse.ArgumentParser(description='Arguments for RLHF training')
@@ -75,13 +76,14 @@ class RLHFModelPipeline:
             batch_size = 64
             mini_batch_size = 16
 
-        init_kl_coef = 0.5
-        max_grad_norm = 1.0
         num_warmup_steps = 10
         min_output_length = 8
         max_output_length = 20
         lr = 1e-6
-        num_training_steps = int(25000 / batch_size)
+
+        self.config = get_pythia_config(
+            model_name=self.model_name, batch_size=batch_size, mini_batch_size=mini_batch_size, tracker_project_name=tracker_project_name
+        )
 
         if self.reward_function == 'sentiment_reward':
             self.sentiment_reward_class = IMDBSentimentRewardClass()
@@ -109,18 +111,7 @@ class RLHFModelPipeline:
 
         self.lr_scheduler = get_linear_schedule_with_warmup(
             optimizer=self.optimizer, num_warmup_steps=num_warmup_steps,
-            num_training_steps=num_training_steps
-        )
-
-        self.config = PPOConfig(
-            batch_size=batch_size,
-            init_kl_coef=init_kl_coef,
-            log_with="wandb",
-            max_grad_norm=max_grad_norm,
-            mini_batch_size=mini_batch_size,
-            model_name=self.model_name,
-            tracker_project_name=tracker_project_name,
-            steps=num_training_steps
+            num_training_steps=self.config.num_training_steps
         )
 
         self.full_hyperparams_dict = deepcopy(self.config.to_dict())
@@ -262,3 +253,4 @@ if __name__ == '__main__':
     push_to_hub = parsed_arguments.push_to_hub
 
     rlhf_model_pipeline = RLHFModelPipeline(model_name=model_name, reward_function=reward_function, push_to_hub=True)
+    rlhf_model_pipeline
