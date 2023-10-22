@@ -1,3 +1,5 @@
 [MASTER]
 disable=
     C0103 # uppercase naming style
+[FORMAT]
+max-line-length = 120

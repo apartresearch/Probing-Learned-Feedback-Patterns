@@ -5,7 +5,7 @@ We then also train sparse autoencoders for feature extraction on the MLP layers,
 
 
 ## Getting started.
-Run scripts/setup_environment.sh to create a virtual env and install necessary dependencies.
+Run `source scripts/setup_environment.sh` to set your python path. Run the script as `source scripts/setup_environment.sh -v` if you also want to create and activate the appropriate virtual environment with all dependencies.
 
 
 ## Repository structure.

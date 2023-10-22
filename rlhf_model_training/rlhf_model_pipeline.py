@@ -1,3 +1,9 @@
+"""
+This class carries out the RLHF process on a base model.
+In particular, over here we do RLHF for completing prefixes of IMDB dataset with positive sentiment.
+"""
+
+
 import os
 from copy import deepcopy
 
@@ -35,7 +41,9 @@ class RLHFModelPipeline:
         self.dataset_name = dataset_name
         self.dataset = self.build_dataset()
 
-        assert not ((push_to_hub is True) and huggingface_org_name is None), 'If push_to_hub is True, you must specify a Huggingface Org Name'
+        assert  not ((push_to_hub is True) and huggingface_org_name is None), \
+            'If push_to_hub is True, you must specify a Huggingface Org Name'
+
         self.push_to_hub = push_to_hub
         self.huggingface_org_name = huggingface_org_name
 
@@ -168,7 +176,7 @@ class RLHFModelPipeline:
 
         wandb.config.update(self.full_hyperparams_dict)
 
-        for epoch, input_batch in tqdm_notebook(enumerate(ppo_trainer.dataloader)):
+        for _, input_batch in tqdm_notebook(enumerate(ppo_trainer.dataloader)):
             query_tensors = input_batch["input_ids"]
 
             #### Get response from gpt2
@@ -196,7 +204,7 @@ class RLHFModelPipeline:
 
         #### get a batch from the dataset
         bs = 16
-        game_data = dict()
+        game_data = {}
         self.dataset.set_format("pandas")
         df_batch = self.dataset[:].sample(bs)
         game_data["query"] = df_batch["query"].tolist()
@@ -224,10 +232,10 @@ class RLHFModelPipeline:
 
         #### sentiment analysis of query/response pairs before/after
         texts = [q + r for q, r in zip(game_data["query"], game_data["response (before)"])]
-        game_data["rewards (before)"] = self.sentiment_reward_class.assign_rewards(texts, discretize=False)
+        game_data["rewards (before)"] = self.sentiment_reward_class.assign_rewards(texts)
 
         texts = [q + r for q, r in zip(game_data["query"], game_data["response (after)"])]
-        game_data["rewards (after)"] = self.sentiment_reward_class.assign_rewards(texts, discretize=False)
+        game_data["rewards (after)"] = self.sentiment_reward_class.assign_rewards(texts)
 
         # store results in a dataframe
         df_results = pd.DataFrame(game_data)
@@ -239,8 +247,3 @@ class RLHFModelPipeline:
             ppo_trainer.push_to_hub(f"{self.huggingface_org_name}/{self.model_name_simplified}_{self.reward_function}")
 
         return df_results
-
-
-pythia_model_names = [
-    'EleutherAI/pythia-70m', 'EleutherAI/pythia-160m', 'EleutherAI/pythia-410m'
-]

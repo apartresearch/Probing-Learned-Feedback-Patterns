@@ -1,5 +1,8 @@
 nltk==3.8.1
+pylint==3.0.1
 spacy==3.7.2
 torch==2.0.1
 transformers==4.33.2
 trl==0.7.2
+wandb==0.15.12
+wheel==0.41.2

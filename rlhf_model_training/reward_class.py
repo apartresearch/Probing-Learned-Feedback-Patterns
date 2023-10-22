@@ -1,3 +1,7 @@
+"""
+This file specifies reward class interfaces and instantiation that assign rewards for RLHF.
+"""
+
 from abc import abstractmethod
 from typing import List
 
@@ -14,10 +18,10 @@ class RewardClass:
     This abstract class provides an interface to assign a reward to texts for RLHF.
     """
     @abstractmethod
-    def assign_rewards(self, input_examples: list[str]) -> List[float]:
-        '''
+    def assign_rewards(self, texts: list[str]) -> List[float]:
+        """
         Assigns a numeric reward to each input example.
-        '''
+        """
 
 class IMDBSentimentRewardClass(RewardClass):
     """
@@ -33,7 +37,7 @@ class IMDBSentimentRewardClass(RewardClass):
 
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
 
-    def assign_rewards(self, texts: list[str]):
+    def assign_rewards(self, texts: list[str]) -> List[torch.FloatTensor]:
         """
         Logic for assigning the raw reward based on the classification of the model.
         """
@@ -44,8 +48,8 @@ class IMDBSentimentRewardClass(RewardClass):
         raw_logit_scores = [torch.tensor(item) for item in raw_logit_scores]
 
         return raw_logit_scores
-    
-    
+
+
 class UtilityValuesRewardClass(RewardClass):
     """
     This class assigns rewards based on the Utility value assigned to tokens in the
@@ -62,7 +66,10 @@ class UtilityValuesRewardClass(RewardClass):
         self.min_reward = torch.tensor(-10)
 
 
-    def assign_reward(self, text: str):
+    def assign_reward(self, text: str) -> float:
+        """
+        Assigns reward to a single text as a (scaled and clipped) sum of the token utility values.
+        """
         doc = self.nlp(text)
         tokens = [token.text.lower() for token in doc]
         total_reward = 0
@@ -72,7 +79,7 @@ class UtilityValuesRewardClass(RewardClass):
         return total_reward / self.reward_scaling_factor
 
 
-    def assign_rewards(self, texts: list[str]):
+    def assign_rewards(self, texts: list[str]) -> List[torch.FloatTensor]:
         rewards = [torch.tensor(self.assign_reward(text)) for text in texts]
         rewards = [torch.clip(value, self.min_reward, self.max_reward) for value in rewards]
         return rewards
