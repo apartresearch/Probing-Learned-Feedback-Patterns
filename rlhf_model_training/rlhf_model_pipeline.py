@@ -3,7 +3,7 @@ This class carries out the RLHF process on a base model.
 In particular, over here we do RLHF for completing prefixes of IMDB dataset with positive sentiment.
 """
 
-
+import argparse
 import os
 from copy import deepcopy
 
@@ -25,14 +25,19 @@ from trl.core import LengthSampler
 
 from reward_class import IMDBSentimentRewardClass, UtilityValuesRewardClass
 
+parser = argparse.ArgumentParser(description='Arguments for RLHF training')
+parser.add_argument('--model_name', help='Model name to run PPO on.')
+parser.add_argument('--reward_function', help='Reward function to use.')
+parser.add_argument('--push_to_hub', action='store_true', help='Push to Hub (True/False)')
 
 class RLHFModelPipeline:
     """
     This class carries out RLHF model training.
     """
-    def __init__(self, model_name, reward_function, dataset_name='imdb', push_to_hub=False, huggingface_org_name=None):
+    def __init__(self, model_name, reward_function, dataset_name='imdb', push_to_hub=False):
         """
         Initializes model name, reward function, and dataset.
+        If you want to push to huggingface hub, set the env variable HUGGINGFACE_ORG_NAME
         """
         self.model_name = model_name
         self.reward_function = reward_function
@@ -41,8 +46,10 @@ class RLHFModelPipeline:
         self.dataset_name = dataset_name
         self.dataset = self.build_dataset()
 
+        huggingface_org_name = os.environ.get('HUGGINGFACE_ORG_NAME', None)
+
         assert  not ((push_to_hub is True) and huggingface_org_name is None), \
-            'If push_to_hub is True, you must specify a Huggingface Org Name'
+            'If push_to_hub is True, you must specify a Huggingface Org Name under env variable HUGGINGFACE_ORG_NAME'
 
         self.push_to_hub = push_to_hub
         self.huggingface_org_name = huggingface_org_name
@@ -86,19 +93,18 @@ class RLHFModelPipeline:
         self.output_length_sampler = LengthSampler(min_output_length, max_output_length)
 
         if self.use_adapters:
-            self.policy_model = AutoModelForCausalLMWithValueHead.from_pretrained(self.model_name,
-                                                                                  load_in_8bit=False).cuda()
-            self.ref_model = AutoModelForCausalLMWithValueHead.from_pretrained(self.model_name,
-                                                                               load_in_8bit=False).cuda()
+            self.policy_model = AutoModelForCausalLMWithValueHead.from_pretrained(
+                self.model_name, load_in_8bit=False).cuda()
+            self.ref_model = AutoModelForCausalLMWithValueHead.from_pretrained(
+                self.model_name, load_in_8bit=False).cuda()
         else:
-            self.policy_model = AutoModelForCausalLMWithValueHead.from_pretrained(self.model_name,
-                                                                                  load_in_8bit=False).cuda()
-            self.ref_model = AutoModelForCausalLMWithValueHead.from_pretrained(self.model_name,
-                                                                               load_in_8bit=False).cuda()
+            self.policy_model = AutoModelForCausalLMWithValueHead.from_pretrained(
+                self.model_name, load_in_8bit=False).cuda()
+            self.ref_model = AutoModelForCausalLMWithValueHead.from_pretrained(
+                self.model_name, load_in_8bit=False).cuda()
 
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         self.tokenizer.pad_token = self.tokenizer.eos_token
-
         self.optimizer = AdamW(lr=lr, params=self.policy_model.parameters())
 
         self.lr_scheduler = get_linear_schedule_with_warmup(
@@ -247,3 +253,12 @@ class RLHFModelPipeline:
             ppo_trainer.push_to_hub(f"{self.huggingface_org_name}/{self.model_name_simplified}_{self.reward_function}")
 
         return df_results
+
+
+if __name__ == '__main__':
+    parsed_arguments = parser.parse_args()
+    model_name = parsed_arguments.model_name
+    reward_function = parsed_arguments.reward_function
+    push_to_hub = parsed_arguments.push_to_hub
+
+    rlhf_model_pipeline = RLHFModelPipeline(model_name=model_name, reward_function=reward_function, push_to_hub=True)

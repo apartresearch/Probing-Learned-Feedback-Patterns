@@ -1,7 +1,6 @@
 """
 This file specifies reward class interfaces and instantiation that assign rewards for RLHF.
 """
-
 from abc import abstractmethod
 from typing import List
 
