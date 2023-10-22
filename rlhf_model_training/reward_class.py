@@ -62,8 +62,8 @@ class UtilityValuesRewardClass(RewardClass):
         self.min_reward = torch.tensor(-10)
 
 
-    def assign_reward(self, input_example: str):
-        doc = self.nlp(input_example)
+    def assign_reward(self, text: str):
+        doc = self.nlp(text)
         tokens = [token.text.lower() for token in doc]
         total_reward = 0
         for token in tokens:
@@ -72,7 +72,7 @@ class UtilityValuesRewardClass(RewardClass):
         return total_reward / self.reward_scaling_factor
 
 
-    def assign_rewards(self, input_examples: list[str]):
-        rewards = [torch.tensor(self.assign_reward(input_example)) for input_example in input_examples]
+    def assign_rewards(self, texts: list[str]):
+        rewards = [torch.tensor(self.assign_reward(text)) for text in texts]
         rewards = [torch.clip(value, self.min_reward, self.max_reward) for value in rewards]
         return rewards
