@@ -1,5 +1,11 @@
+circuitsvis==1.41.0
+datasets==2.14.5
+einops==0.6.1
 nltk==3.8.1
+openai==0.28.0
 pylint==3.0.1
+pynvml==11.5.0
+scipy==1.10.1
 spacy==3.7.2
 torch==2.0.1
 transformers==4.33.2
