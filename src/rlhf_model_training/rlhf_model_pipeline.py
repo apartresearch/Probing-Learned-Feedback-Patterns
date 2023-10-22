@@ -26,8 +26,8 @@ from trl.core import LengthSampler
 from reward_class import IMDBSentimentRewardClass, UtilityValuesRewardClass
 
 parser = argparse.ArgumentParser(description='Arguments for RLHF training')
-parser.add_argument('--model_name', help='Model name to run PPO on.')
-parser.add_argument('--reward_function', help='Reward function to use.')
+parser.add_argument('--model_name', help='Model name to run PPO on.', required=True)
+parser.add_argument('--reward_function', help='Reward function to use.', required=True)
 parser.add_argument('--push_to_hub', action='store_true', help='Push to Hub (True/False)')
 
 class RLHFModelPipeline:
