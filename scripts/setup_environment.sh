@@ -27,4 +27,5 @@ if [[ "$1" == "-v" ]]; then
     fi
     source sparse_coding_venv/bin/activate
     pip install -r requirements.txt
+    python3 -m spacy download en_core_web_m
 fi

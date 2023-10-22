@@ -15,7 +15,7 @@ import wandb
 from datasets import load_dataset
 from huggingface_hub import login
 from torch.optim import AdamW
-from tqdm import tqdm_notebook
+from tqdm import tqdm
 
 from transformers import AutoTokenizer
 from transformers.optimization import get_linear_schedule_with_warmup
@@ -173,7 +173,7 @@ class RLHFModelPipeline:
 
         wandb.config.update(self.full_hyperparams_dict)
 
-        for _, input_batch in tqdm_notebook(enumerate(ppo_trainer.dataloader)):
+        for _, input_batch in tqdm(enumerate(ppo_trainer.dataloader), total=self.config.steps):
             query_tensors = input_batch["input_ids"]
 
             #### Get response from gpt2

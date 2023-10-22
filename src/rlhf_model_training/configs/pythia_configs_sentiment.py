@@ -14,6 +14,7 @@ reward_functions = ['sentiment_reward', 'utility_reward']
 def get_pythia_config(model_name, batch_size, mini_batch_size, tracker_project_name):
     init_kl_coef = 0.5
     max_grad_norm = 1.0
+    # hardcoded for imdb at the moment, and 1 epoch.
     num_training_steps = int(25000 / batch_size)
 
     config = PPOConfig(
