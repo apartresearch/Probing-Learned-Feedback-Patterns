@@ -44,10 +44,11 @@ class RLHFModelPipeline:
         self.model_name = model_name
         self.reward_function = reward_function
 
+        self.device = find_gpu_with_most_memory()
         self.set_config()
         self.dataset_name = dataset_name
         self.dataset = self.build_dataset()
-        self.device = find_gpu_with_most_memory()
+
 
         huggingface_org_name = os.environ.get('HUGGINGFACE_ORG_NAME', None)
 
