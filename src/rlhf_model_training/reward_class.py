@@ -10,7 +10,7 @@ import torch
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
-from utils.transformer_utils import classify_texts
+from rlhf_training_utils.transformer_utils import classify_texts
 
 class RewardClass:
     """

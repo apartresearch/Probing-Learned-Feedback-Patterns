@@ -9,7 +9,7 @@ import wandb
 
 from network_helper_functions import get_layer_activations
 from models.sparse_autoencoder import SparseAutoencoder
-from utils.helper_functions import batch
+from rlhf_training_utils.helper_functions import batch
 
 
 def train_autoencoder(autoencoder, input_texts, hyperparameters, model_device, autoencoder_device, label, model, tokenizer, layer_name):
