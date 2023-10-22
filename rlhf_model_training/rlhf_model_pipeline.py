@@ -35,7 +35,7 @@ class RLHFModelPipeline:
         self.dataset_name = dataset_name
         self.dataset = self.build_dataset()
 
-        assert not ((push_to_hub==True)  and huggingface_org_name==None), 'If push_to_hub is True, you must specify a Huggingface Org Name'
+        assert not ((push_to_hub is True) and huggingface_org_name is None), 'If push_to_hub is True, you must specify a Huggingface Org Name'
         self.push_to_hub = push_to_hub
         self.huggingface_org_name = huggingface_org_name
 
@@ -239,3 +239,8 @@ class RLHFModelPipeline:
             ppo_trainer.push_to_hub(f"{self.huggingface_org_name}/{self.model_name_simplified}_{self.reward_function}")
 
         return df_results
+
+
+pythia_model_names = [
+    'EleutherAI/pythia-70m', 'EleutherAI/pythia-160m', 'EleutherAI/pythia-410m'
+]
