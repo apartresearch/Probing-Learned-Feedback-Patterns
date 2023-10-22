@@ -68,7 +68,7 @@ class RLHFModelPipeline:
         self.input_max_text_length = 10
 
         # Use smaller batches for large models that need adapters.
-        if self.use_adapters in self.model_name:
+        if self.use_adapters:
             batch_size = 32
             mini_batch_size = 8
         else:
