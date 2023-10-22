@@ -19,11 +19,11 @@ if [[ "$1" == "-v" ]]; then
 
     # Check if the directory already exists
     if [ ! -d "$venv_directory" ]; then
-	# Create the venv in the specified directory
-	python -m venv "$venv_directory"
-	echo "Created a new virtual environment in '$venv_directory'."
+	    # Create the venv in the specified directory
+	    python3 -m venv "$venv_directory"
+	    echo "Created a new virtual environment in '$venv_directory'."
     else
-	echo "The directory '$venv_directory' already exists. No virtual environment created."
+	    echo "The directory '$venv_directory' already exists. No virtual environment created."
     fi
     source sparse_coding_venv/bin/activate
     pip install -r requirements.txt
