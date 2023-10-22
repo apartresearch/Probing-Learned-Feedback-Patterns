@@ -36,7 +36,7 @@ class IMDBSentimentRewardClass(RewardClass):
 
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
 
-    def assign_rewards(self, texts: list[str]) -> List[torch.FloatTensor]:
+    def assign_rewards(self, texts: List[str]) -> List[torch.FloatTensor]:
         """
         Logic for assigning the raw reward based on the classification of the model.
         """
