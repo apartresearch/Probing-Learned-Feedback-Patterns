@@ -17,7 +17,7 @@ class RewardClass:
     This abstract class provides an interface to assign a reward to texts for RLHF.
     """
     @abstractmethod
-    def assign_rewards(self, texts: list[str]) -> List[float]:
+    def assign_rewards(self, texts: List[str]) -> List[float]:
         """
         Assigns a numeric reward to each input example.
         """
@@ -78,7 +78,7 @@ class UtilityValuesRewardClass(RewardClass):
         return total_reward / self.reward_scaling_factor
 
 
-    def assign_rewards(self, texts: list[str]) -> List[torch.FloatTensor]:
+    def assign_rewards(self, texts: List[str]) -> List[torch.FloatTensor]:
         rewards = [torch.tensor(self.assign_reward(text)) for text in texts]
         rewards = [torch.clip(value, self.min_reward, self.max_reward) for value in rewards]
         return rewards
