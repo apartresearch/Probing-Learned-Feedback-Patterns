@@ -252,5 +252,5 @@ if __name__ == '__main__':
     reward_function = parsed_arguments.reward_function
     push_to_hub = parsed_arguments.push_to_hub
 
-    rlhf_model_pipeline = RLHFModelPipeline(model_name=model_name, reward_function=reward_function, push_to_hub=True)
-    rlhf_model_pipeline
+    rlhf_model_pipeline = RLHFModelPipeline(model_name=model_name, reward_function=reward_function, push_to_hub=push_to_hub)
+    rlhf_model_pipeline.train()
