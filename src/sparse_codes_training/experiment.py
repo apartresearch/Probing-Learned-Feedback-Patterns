@@ -67,7 +67,7 @@ def parse_args():
 
     for key, value in parsed_config_values.items():
         if value is not None:
-            setattr(default_experiment_config, value)
+            setattr(default_experiment_config, key, value)
 
     return default_experiment_config
 
