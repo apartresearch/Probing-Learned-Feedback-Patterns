@@ -4,13 +4,7 @@ This class is responsible for extracting feature dictionaries from models,
 given hyperparameters and input texts.
 """
 
-import torch
-import torch.optim as optim
-import torch.nn as nn
-from tqdm import tqdm
-import wandb
-
-from models.sparse_autoencoder import SparseAutoencoder
+from sparse_codes_training.models.sparse_autoencoder import SparseAutoencoder
 from sparse_codes_training.network_helper_functions import get_layer_activations
 
 
@@ -21,7 +15,8 @@ class AutoencoderDataPreparerAndTrainer:
     the autoencoders.
     """
     def __init__(
-            self, model, tokenizer, hyperparameters: dict, autoencoder_device: str, model_device: str):
+            self, model, tokenizer, hyperparameters: dict, autoencoder_device: str, model_device: str
+    ):
         self.model = model
         self.tokenizer = tokenizer
         self.hyperparameters = hyperparameters
@@ -33,6 +28,10 @@ class AutoencoderDataPreparerAndTrainer:
         self, layer_name: str, input_texts: list[str],
         hidden_size_multiple: int, label: str ='default',
     ):
+        """
+        Trains and returns an autoencoder list on text
+        activations from a model
+        """
         batch_size = self.hyperparameters['batch_size']
 
         # Get batch without popping
@@ -46,7 +45,7 @@ class AutoencoderDataPreparerAndTrainer:
         input_size = first_activations_tensor.size(-1)
         print(f'Input size is {input_size}.')
 
-        local_label = f'{layer_name}_{label}_{i}'
+        local_label = f'{layer_name}_{label}'
         hidden_size = input_size * hidden_size_multiple
         autoencoder = SparseAutoencoder(
             input_size, hidden_size=hidden_size,
@@ -54,9 +53,9 @@ class AutoencoderDataPreparerAndTrainer:
         )
 
         autoencoder.train_model(
-                input_texts=input_texts, hyperparameters=self.hyperparameters,
-                model_device=self.model_device, autoencoder_device=self.autoencoder_device,
-                label=local_label, layer_name=layer_name, model=self.model, tokenizer=self.tokenizer
+            input_texts=input_texts, hyperparameters=self.hyperparameters,
+            model_device=self.model_device, autoencoder_device=self.autoencoder_device,
+            label=local_label, layer_name=layer_name, model=self.model, tokenizer=self.tokenizer
         )
 
         return [autoencoder]

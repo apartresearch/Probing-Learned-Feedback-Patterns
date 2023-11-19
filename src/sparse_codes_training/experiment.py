@@ -1,3 +1,6 @@
+"""
+Entrypoint for code from which experiments are triggered/launched.
+"""
 import argparse
 from time import sleep
 
@@ -8,10 +11,15 @@ from sparse_codes_training.experiment_runner import ExperimentRunner
 
 parser = argparse.ArgumentParser(description="Choose which experiment config you want to run.")
 
-parser.add_argument("--fast", action="store_true", help="Whether to run in fast mode or not.", required=False)
-parser.add_argument("--l1_coef", default=None, type=float, help="The l1_coef you want to use.", required=False)
-parser.add_argument("--base_model_name", default='pythia-70m', type=str, help="The model name you want to use.", required=False)
-parser.add_argument("--reward_function", default='utility_reward', type=str, help="The reward function you want to leverage.", required=False)
+parser.add_argument(
+    "--fast", action="store_true", help="Whether to run in fast mode or not.", required=False)
+parser.add_argument(
+    "--l1_coef", default=None, type=float, help="The l1_coef you want to use.", required=False)
+parser.add_argument(
+    "--base_model_name", default='pythia-70m', type=str, help="The model name you want to use.", required=False)
+parser.add_argument(
+    "--reward_function", default='utility_reward', type=str,
+    help="The reward function you want to leverage.", required=False)
 
 def run_experiment(experiment_config: ExperimentConfig):
     '''
@@ -27,10 +35,14 @@ def run_experiment(experiment_config: ExperimentConfig):
 
 
 def parse_args():
+    """
+    Parses out command line args, and overrides
+    default experiment config for a base model and reward function, if needed.
+    """
     args = parser.parse_args()
     base_model_name = args.base_model_name
     reward_function = args.reward_function
-    chosen_experiment_config = grid_experiment_configs[(base_model_name, reward_function)]
+    default_experiment_config = grid_experiment_configs[(base_model_name, reward_function)]
 
     # Override default experiment config with parsed command line args.
     parsed_hyperparams = {
@@ -39,8 +51,8 @@ def parse_args():
     }
     for key, value in parsed_hyperparams.items():
         if value is not None:
-            chosen_experiment_config.hyperparameters[key] = value
-    return chosen_experiment_config
+            default_experiment_config.hyperparameters[key] = value
+    return default_experiment_config
 
 chosen_experiment_config = parse_args()
 print(f'Running experiment now for config {chosen_experiment_config}')

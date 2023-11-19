@@ -18,6 +18,11 @@ from utils.gpu_utils import find_gpu_with_most_memory
 from utils.model_storage_utils import save_autoencoders_for_artifact
 
 class ExperimentRunner:
+    """
+    Given an experiment config, instantiates the models and datasets,
+    and instantiates calls to find divergent layers between policy and rlhf modela,
+    and train autoencoders for each such layer.
+    """
 
     def __init__(self, experiment_config: ExperimentConfig):
         self.experiment_config = experiment_config
@@ -28,6 +33,8 @@ class ExperimentRunner:
         )
         self.initialize_datasets()
         self.initialize_autoencoder_trainers_and_holders()
+
+        self.sorted_layers, self.divergences_by_layer = [], []
 
     def initialize_autoencoder_trainers_and_holders(self):
         """
@@ -62,13 +69,16 @@ class ExperimentRunner:
         """
         wandb.login()
 
-        self.simplified_policy_model_name = self.policy_model_name.split('/')[-1].replace('-', '_')
-        self.wandb_project_name = f'Autoencoder_training_{self.simplified_policy_model_name}'
-
         self.hyperparameters = self.experiment_config.hyperparameters
         self.base_model_name = experiment_config.base_model_name
         self.policy_model_name = experiment_config.policy_model_name
-        self.hyperparameters.update({'base_model_name': self.base_model_name, 'policy_model_name': self.policy_model_name})
+
+        self.simplified_policy_model_name = self.policy_model_name.split('/')[-1].replace('-', '_')
+        self.wandb_project_name = f'Autoencoder_training_{self.simplified_policy_model_name}'
+
+        self.hyperparameters.update(
+            {'base_model_name': self.base_model_name, 'policy_model_name': self.policy_model_name}
+        )
 
         self.run = wandb.init(project=self.wandb_project_name, config=self.hyperparameters)
 
@@ -107,14 +117,13 @@ class ExperimentRunner:
         # We may need to train autoencoders on different device after loading models.
         self.autoencoder_device = self.input_device if self.input_device else find_gpu_with_most_memory()
 
-        tokenizer = AutoTokenizer.from_pretrained(base_model_name)
-        tokenizer.pad_token = tokenizer.eos_token
-
-        tokenizer_rlhf = AutoTokenizer.from_pretrained(policy_model_name)
-        tokenizer_rlhf.pad_token = tokenizer_rlhf.eos_token
-
+        self.tokenizer = AutoTokenizer.from_pretrained(base_model_name)
+        self.tokenizer.pad_token = self.tokenizer.eos_token
 
     def initialize_datasets(self):
+        """
+        Initializes the datasets using hyperparameters.
+        """
         self.split = self.hyperparameters['split']
         print('Processing texts')
 
@@ -135,8 +144,11 @@ class ExperimentRunner:
         self.hyperparameters['num_examples'] = self.num_examples
 
 
-    def find_sorted_layers(self):
-        sorted_layers, divergences_by_layer = find_layers(m_base, m_rlhf)
+    def find_sorted_divergent_layers(self, base_model, rlhf_model):
+        """
+        Finds most divergence layers between base_model and rlhf_model
+        """
+        sorted_layers, divergences_by_layer = find_layers(base_model, rlhf_model)
         wandb.config['sorted_layers'] = sorted_layers
 
         sorted_layers = sorted_layers[:self.num_layers_to_keep]
@@ -145,6 +157,9 @@ class ExperimentRunner:
     def extract_autoencoder_for_base_and_rlhf_at_layer_index(
             self, hidden_size_multiple: int, layer_index: int, label: str
     ):
+        """
+        Extracts autoencoders for a given layer index from base and rlhf model.
+        """
 
         autoencoder_base = self.ae_extractor_base.train_autoencoder_on_text_activations(
             layer_name=f'{self.layer_name_stem}.{layer_index}.mlp',
@@ -157,17 +172,31 @@ class ExperimentRunner:
             label=f'rlhf_{label}'
         )
 
-        target_autoencoders_base = self.autoencoders_base_big if hidden_size_multiple > self.small_hidden_size_multiple else self.autoencoders_base_small
+        target_autoencoders_base = (
+            self.autoencoders_base_big if hidden_size_multiple > self.small_hidden_size_multiple
+            else self.autoencoders_base_small
+        )
         target_autoencoders_base[str(layer_index)] = autoencoder_base
 
-        target_autoencoders_rlhf = self.autoencoders_rlhf_big if hidden_size_multiple > self.small_hidden_size_multiple else self.autoencoders_rlhf_small
+        target_autoencoders_rlhf = (
+            self.autoencoders_rlhf_big if hidden_size_multiple > self.small_hidden_size_multiple
+            else self.autoencoders_rlhf_small
+        )
         target_autoencoders_rlhf[str(layer_index)] = autoencoder_rlhf
 
     def run_experiment(self):
-        self.sorted_layers, self.divergences_by_layer = self.find_sorted_layers()
+        """
+        With the hyperparameters, models and datasets already set.
+        This function runs the end to end training, finding the
+        divergent layers, training autoencoder pairs at each,
+        computing mmcs, and finally saving the created artifacts to wandb.
+        """
+        self.sorted_layers, self.divergences_by_layer = self.find_sorted_divergent_layers(
+            base_model=self.m_base, rlhf_model=self.m_rlhf
+        )
 
         # Create autoencoder pairs for each layer
-        for position, layer_index in enumerate(self.sorted_layers):
+        for _, layer_index in enumerate(self.sorted_layers):
 
             # For each pair, set the hidden size to be a different multiple of the input size
             for hidden_size_multiple in self.hidden_size_multiples:
@@ -178,8 +207,12 @@ class ExperimentRunner:
                 )
 
         # Compare overlaps between large and small autoencoder feature dictionaries.
-        base_mmcs_results = compare_autoencoders(small_dict=self.autoencoders_base_small, big_dict=self.autoencoders_base_big)
-        rlhf_mmcs_results = compare_autoencoders(small_dict=self.autoencoders_rlhf_small, big_dict=self.autoencoders_rlhf_big)
+        base_mmcs_results = compare_autoencoders(
+            small_dict=self.autoencoders_base_small, big_dict=self.autoencoders_base_big
+        )
+        rlhf_mmcs_results = compare_autoencoders(
+            small_dict=self.autoencoders_rlhf_small, big_dict=self.autoencoders_rlhf_big
+        )
 
         added_metadata = {}
 
@@ -194,7 +227,7 @@ class ExperimentRunner:
         save_autoencoders_for_artifact(
             autoencoders_base_big=self.autoencoders_base_big, autoencoders_base_small=self.autoencoders_base_small,
             autoencoders_rlhf_big=self.autoencoders_rlhf_big, autoencoders_rlhf_small=self.autoencoders_rlhf_small,
-            policy_model_name=self.policy_model_name, hyperparameters=self.hyperparameters, alias='latest', run=self.run,
-            added_metadata=added_metadata
+            policy_model_name=self.policy_model_name, hyperparameters=self.hyperparameters,
+            alias='latest', run=self.run, added_metadata=added_metadata
         )
         wandb.finish()

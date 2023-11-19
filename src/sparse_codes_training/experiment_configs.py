@@ -1,6 +1,12 @@
-# Will increment hyperparameter sets as we try different ones.
+"""
+This module gives the experiment configs for a given run.
+We define
+"""
 
 class ExperimentConfig:
+    """
+    This fully specifies one run of our experiment extracting base and policy models.
+    """
 
     def __init__(self, hyperparameters, base_model_name, policy_model_name, device=None):
         self.hyperparameters = hyperparameters
@@ -13,7 +19,7 @@ class ExperimentConfig:
         printable.update({'base_model_name': self.base_model_name, 'policy_model_name': self.policy_model_name})
         return str(printable)
 
-hyperparameters_1 = {
+hyperparameters_fast = {
     'hidden_size_multiples': [1, 2],
     'l1_coef': 0.001,
     'batch_size': 32,
@@ -25,7 +31,7 @@ hyperparameters_1 = {
 }
 
 
-hyperparameters_2 = {
+hyperparameters_full = {
     'max_input_length': 256,
     'hidden_size_multiples': [1, 2],
     'l1_coef': 0.001,
@@ -54,18 +60,28 @@ model_specific_parameters = {
 }
 
 def generate_experiment_configs(hyperparameters):
-    grid_experiment_configs = {}
+    """
+    We generate experiment configs as a cross product of all possible
+    model names and tasks, with the given hyperparameters.
+    We update some model specific values based on experimentation -
+    namely, gpt-neo-125 has a different l1_coef of 0.015 based on our
+    experiments.
+    """
+    all_experiment_configs = {}
     for model_name in all_models:
         for reward_function in all_reward_functions:
-            simplified_model_name = model_name.split('/')[-1]
+            simplified_model_name = model_name.rsplit('/', maxsplit=1)[-1]
             policy_model_name = f'amirabdullah19852020/{simplified_model_name}_{reward_function}'
             hyperparameters_copy = hyperparameters.copy()
             hyperparameters_copy.update(model_specific_parameters[simplified_model_name])
 
-            new_config = ExperimentConfig(hyperparameters=hyperparameters_copy, base_model_name=model_name, policy_model_name=policy_model_name)
+            new_config = ExperimentConfig(
+                hyperparameters=hyperparameters_copy, base_model_name=model_name,
+                policy_model_name=policy_model_name
+            )
 
             experiment_key = (simplified_model_name, reward_function)
-            grid_experiment_configs[experiment_key] = new_config
-    return grid_experiment_configs
+            all_experiment_configs[experiment_key] = new_config
+    return all_experiment_configs
 
-grid_experiment_configs = generate_experiment_configs(hyperparameters_2)
+grid_experiment_configs = generate_experiment_configs(hyperparameters_full)
