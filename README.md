@@ -1,5 +1,5 @@
 ## Repository Overview
-1. This repo provides scripts several LLM model and task combinations under RLHF using PPO.
+1. This repo provides scripts to train several LLM model and task combinations under RLHF using PPO.
 2. The repository also supports training sparse autoencoders for feature extraction on the MLP layers of _pairs of base and policy models_, and automate feature interpretability between these.
 
 ## Repository structure.
