@@ -73,8 +73,7 @@ class ExperimentRunner:
         self.base_model_name = experiment_config.base_model_name
         self.policy_model_name = experiment_config.policy_model_name
 
-        self.simplified_policy_model_name = self.policy_model_name.split('/')[-1].replace('-', '_')
-        self.wandb_project_name = f'Autoencoder_training_{self.simplified_policy_model_name}'
+        self.wandb_project_name = experiment_config.wandb_project_name
 
         self.hyperparameters.update(
             {'base_model_name': self.base_model_name, 'policy_model_name': self.policy_model_name}

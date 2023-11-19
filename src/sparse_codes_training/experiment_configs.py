@@ -8,10 +8,19 @@ class ExperimentConfig:
     This fully specifies one run of our experiment extracting base and policy models.
     """
 
-    def __init__(self, hyperparameters, base_model_name, policy_model_name, device=None):
+    def __init__(
+            self, hyperparameters, base_model_name, policy_model_name,
+            wandb_project_name=None, device=None
+    ):
         self.hyperparameters = hyperparameters
         self.base_model_name = base_model_name
         self.policy_model_name = policy_model_name
+
+        if wandb_project_name:
+            self.wandb_project_name = wandb_project_name
+        else:
+            simplified_policy_model_name = self.policy_model_name.split('/')[-1].replace('-', '_')
+            self.wandb_project_name = f'Autoencoder_training_{simplified_policy_model_name}'
         self.device = device
 
     def __str__(self):
@@ -27,7 +36,8 @@ hyperparameters_fast = {
     'learning_rate': 1e-3,
     'fast': True,
     'split': 'test',
-    'num_layers_to_keep': 5
+    'num_layers_to_keep': 5,
+    'tied_weights': True
 }
 
 
@@ -36,7 +46,7 @@ hyperparameters_full = {
     'hidden_size_multiples': [1, 2],
     'l1_coef': 0.001,
     'batch_size': 32,
-    'num_epochs': 1,
+    'num_epochs': 3,
     'learning_rate': 1e-3,
     'fast': False,
     'split': 'test',
