@@ -3,3 +3,5 @@ disable=
     C0103 # uppercase naming style
 [FORMAT]
 max-line-length = 120
+[DESIGN]
+max-args=10
