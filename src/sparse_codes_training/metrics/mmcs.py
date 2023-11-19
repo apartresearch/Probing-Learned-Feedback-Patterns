@@ -36,7 +36,7 @@ def compare_autoencoders(small_dict, big_dict, top_k=30):
 
     for layer_name, (small_autoencoder, big_autoencoder) in zip(layer_names, zip(small_autoencoders_list, big_autoencoders_list)):
         small_weights = small_autoencoder.encoder[0].weight.detach().cpu().numpy().T
-        big_weights = big_autoencoder.encoder_weight[0].weight.detach().cpu().numpy().T
+        big_weights = big_autoencoder.encoder[0].weight.detach().cpu().numpy().T
 
         MMCS_value, sorted_indices = calculate_MMCS_hungarian(small_weights, big_weights)
 
