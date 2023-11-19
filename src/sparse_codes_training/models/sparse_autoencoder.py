@@ -1,12 +1,15 @@
+"""
+A sparse autoencoder, trained on activations of an LLM on a dataset.
+"""
+
 import numpy as np
 import torch
-
-import torch.nn as nn
 import torch.nn.functional as F
-import torch.optim as optim
-
-import tqdm
 import wandb
+
+from torch import nn
+from torch import optim
+from tqdm import tqdm
 
 from sparse_codes_training.network_helper_functions import get_layer_activations
 from utils.transformer_utils import batch
@@ -15,10 +18,11 @@ class SparseAutoencoder(nn.Module):
     """
     This autoencoder is trained on activations of a LLM on a dataset.
     """
-    def __init__(self, input_size, hidden_size, l1_coef):
-        super(SparseAutoencoder, self).__init__()
+    def __init__(self, input_size: int, hidden_size: int, l1_coef: float, weights_tied=True):
+        super().__init__()
         self.hidden_size = hidden_size
         self.input_size = input_size
+        self.weights_tied = weights_tied
 
         self.kwargs = {'input_size': input_size, 'hidden_size': hidden_size, 'l1_coef': l1_coef}
         self.l1_coef = float(l1_coef)
@@ -29,22 +33,32 @@ class SparseAutoencoder(nn.Module):
             nn.ReLU()
         )
 
-        # Decoder layers
-        self.decoder = nn.Linear(self.hidden_size, self.input_size)
+        self.decoder = nn.Linear(self.hidden_size, self.input_size, bias=True)
 
         # Initialize the linear layers
         self.initialize_weights()
 
     def initialize_weights(self):
+        """
+        Initializes weights via xavier uniform.
+        """
         for m in self.modules():
             if isinstance(m, nn.Linear):
                 nn.init.xavier_uniform_(m.weight)
                 nn.init.zeros_(m.bias)
 
     def forward(self, x):
+        """
+        Noramlizes encoder weight, applies encoder, and then the decoder.
+        """
         self.encoder[0].weight.data = F.normalize(self.encoder[0].weight, p=2, dim=1)
         features = self.encoder(x)
-        reconstruction = F.linear(features, self.encoder[0].weight.t(), self.decoder_bias)
+
+        if self.weights_tied:
+            reconstruction = torch.matmul(features, self.encoder[0].weight.t()) + self.decoder_bias
+        else:
+            reconstruction = self.decoder(features)
+
         return features, reconstruction
 
 
