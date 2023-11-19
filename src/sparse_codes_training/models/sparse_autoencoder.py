@@ -56,7 +56,11 @@ class SparseAutoencoder(nn.Module):
         features = self.encoder(x)
 
         if self.weights_tied:
-            reconstruction = torch.matmul(features, self.encoder[0].weight.t()) + self.decoder_bias
+            encoder_weight = self.encoder[0].weight.t()
+            print(
+                f'Features are of dimension {features.shape} and encoder weight is {encoder_weight.shape} and dcodr bias is {self.decoder.bias.shape}.'
+            )
+            reconstruction = torch.matmul(features, encoder_weight) + self.decoder.bias
         else:
             reconstruction = self.decoder(features)
 
@@ -70,7 +74,6 @@ class SparseAutoencoder(nn.Module):
         """
         Train on the activations on texts.
         """
-        self.to(device=autoencoder_device)
         criterion = nn.MSELoss()
         batch_size = hyperparameters['batch_size']
         optimizer = optim.Adam(self.parameters(), lr=hyperparameters['learning_rate'])
