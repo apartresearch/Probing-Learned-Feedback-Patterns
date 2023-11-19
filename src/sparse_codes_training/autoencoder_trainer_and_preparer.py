@@ -52,6 +52,9 @@ class AutoencoderDataPreparerAndTrainer:
             l1_coef=self.hyperparameters['l1_coef']
         )
 
+        print(f'Placing autoencoder on {self.autoencoder_device}')
+        autoencoder.to(self.autoencoder_device)
+
         autoencoder.train_model(
             input_texts=input_texts, hyperparameters=self.hyperparameters,
             model_device=self.model_device, autoencoder_device=self.autoencoder_device,

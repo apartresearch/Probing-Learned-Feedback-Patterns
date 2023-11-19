@@ -70,6 +70,7 @@ class SparseAutoencoder(nn.Module):
         """
         Train on the activations on texts.
         """
+        self.to(device=autoencoder_device)
         criterion = nn.MSELoss()
         batch_size = hyperparameters['batch_size']
         optimizer = optim.Adam(self.parameters(), lr=hyperparameters['learning_rate'])
