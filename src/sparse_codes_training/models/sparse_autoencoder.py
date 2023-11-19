@@ -10,6 +10,7 @@ import wandb
 from torch import nn
 from torch import optim
 from tqdm import tqdm
+from typing import List
 
 from sparse_codes_training.network_helper_functions import get_layer_activations
 from utils.transformer_utils import batch
@@ -63,7 +64,7 @@ class SparseAutoencoder(nn.Module):
 
 
     def train_model(
-            self, input_texts: list[str], hyperparameters: dict, model_device: str,
+            self, input_texts: List[str], hyperparameters: dict, model_device: str,
             autoencoder_device: str, label: str, model, tokenizer, layer_name: str
     ):
         """
