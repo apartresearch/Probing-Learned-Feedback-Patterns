@@ -49,7 +49,8 @@ class AutoencoderDataPreparerAndTrainer:
         hidden_size = input_size * hidden_size_multiple
         autoencoder = SparseAutoencoder(
             input_size, hidden_size=hidden_size,
-            l1_coef=self.hyperparameters['l1_coef']
+            l1_coef=self.hyperparameters['l1_coef'],
+            tied_weights=self.hyperparameters['tied_weights']
         )
 
         print(f'Placing autoencoder on {self.autoencoder_device}')

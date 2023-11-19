@@ -19,11 +19,11 @@ class SparseAutoencoder(nn.Module):
     """
     This autoencoder is trained on activations of a LLM on a dataset.
     """
-    def __init__(self, input_size: int, hidden_size: int, l1_coef: float, weights_tied=True):
+    def __init__(self, input_size: int, hidden_size: int, l1_coef: float, tied_weights=True):
         super().__init__()
         self.hidden_size = hidden_size
         self.input_size = input_size
-        self.weights_tied = weights_tied
+        self.tied_weights = tied_weights
 
         self.kwargs = {'input_size': input_size, 'hidden_size': hidden_size, 'l1_coef': l1_coef}
         self.l1_coef = float(l1_coef)
@@ -34,7 +34,10 @@ class SparseAutoencoder(nn.Module):
             nn.ReLU()
         )
 
-        self.decoder = nn.Linear(self.hidden_size, self.input_size, bias=True)
+        if self.tied_weights:
+            self.bias = nn.Parameter(torch.zeros(self.input_size))
+        else:
+            self.decoder = nn.Linear(self.hidden_size, self.input_size, bias=True)
 
         # Initialize the linear layers
         self.initialize_weights()
@@ -55,9 +58,9 @@ class SparseAutoencoder(nn.Module):
         self.encoder[0].weight.data = F.normalize(self.encoder[0].weight, p=2, dim=1)
         features = self.encoder(x)
 
-        if self.weights_tied:
-            encoder_weight = self.encoder[0].weight.t()
-            reconstruction = torch.matmul(features, encoder_weight) + self.decoder.bias
+        if self.tied_weights:
+            encoder_weight = self.encoder[0].weight
+            reconstruction = torch.matmul(features, encoder_weight) + self.bias
         else:
             reconstruction = self.decoder(features)
 
