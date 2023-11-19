@@ -1,4 +1,4 @@
-## Repository Overview
+## Official Repository for Interpreting Reward Models in RLHF-Tuned Language Models Using Sparse Autoencoders
 1. This repo provides scripts to train several LLM model and task combinations under RLHF using PPO.
 2. The repository also supports training sparse autoencoders for feature extraction on the MLP layers of _pairs of base and policy models_, and automate feature interpretability between these.
 
@@ -45,7 +45,14 @@ src/
 2. The main script for training PPO models is under `scripts/ppo_training/run_experiment.sh`.
 3. The script for training autoencoders is under `scripts/sparse_codes_training/experiment.sh`. Modify these two scripts as needed to launch new PPO model or autoencoder training runs.
 
+If you use this work, please cite:
 
-
-
-
+```bibtex
+@misc{marks2023interpreting,
+      title={Interpreting Reward Models in RLHF-Tuned Language Models Using Sparse Autoencoders}, 
+      author={Luke Marks and Amir Abdullah and Luna Mendez and Rauno Arike and Philip Torr and Fazl Barez},
+      year={2023},
+      eprint={2310.08164},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
+}
