@@ -49,7 +49,7 @@ class AutoencoderDataPreparerAndTrainer:
         hidden_size = input_size * hidden_size_multiple
         autoencoder = SparseAutoencoder(
             input_size, hidden_size=hidden_size,
-            l1_coef=self.hyperparameters['l1_coef'].to(self.autoencoder_device)
+            l1_coef=self.hyperparameters['l1_coef']
         )
 
         autoencoder.train_model(
