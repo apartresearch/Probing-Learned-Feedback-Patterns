@@ -35,8 +35,10 @@ class SparseAutoencoder(nn.Module):
         )
 
         if self.tied_weights:
+            print('\nNo explicit decoder created, only bias vector.')
             self.bias = nn.Parameter(torch.zeros(self.input_size))
         else:
+            print('\nCreating explicit decoder matrix.')
             self.decoder = nn.Linear(self.hidden_size, self.input_size, bias=True)
 
         # Initialize the linear layers
@@ -120,14 +122,9 @@ class SparseAutoencoder(nn.Module):
                     f"sparsity_loss_{label}": sparsity_loss,
                     f"true_sparsity_loss_{label}": true_sparsity_loss
                 })
-
-
             avg_loss = np.average(all_losses)
-            avg_reconstruction_loss = np.average(all_reconstruction_losses)
-            avg_sparsity_loss = np.average(all_sparsity_losses)
-            avg_true_sparsity_loss = np.average(all_true_sparsity_losses)
 
             print(f"Epoch [{epoch+1}/{hyperparameters['num_epochs']}] on {label}, Loss: {avg_loss:.4f}")
-            print(f"Avg. reconstruction Loss on {label}: {avg_reconstruction_loss}")
-            print(f"Avg. sparsity Loss on {label}: {avg_sparsity_loss}")
-            print(f"Avg. true sparsity loss on {label}: {avg_true_sparsity_loss}")
+            print(f"Final. reconstruction Loss on {label}: {all_reconstruction_losses[-1]}")
+            print(f"Final. sparsity Loss on {label}: {all_sparsity_losses[-1]}")
+            print(f"Fian. true sparsity loss on {label}: {all_true_sparsity_losses[-1]}")
