@@ -43,9 +43,8 @@ class AutoencoderDataPreparerAndTrainer:
         ).detach().clone().squeeze(1)
 
         input_size = first_activations_tensor.size(-1)
-        print(f'Input size is {input_size}.')
-
         local_label = f'{layer_name}_{label}'
+
         hidden_size = input_size * hidden_size_multiple
         autoencoder = SparseAutoencoder(
             input_size, hidden_size=hidden_size,
@@ -53,7 +52,7 @@ class AutoencoderDataPreparerAndTrainer:
             tied_weights=self.hyperparameters['tied_weights']
         )
 
-        print(f'Placing autoencoder on {self.autoencoder_device}')
+        print(f'Placing autoencoder for {local_label} on {self.autoencoder_device}')
         autoencoder.to(self.autoencoder_device)
 
         autoencoder.train_model(

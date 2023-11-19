@@ -127,7 +127,7 @@ class SparseAutoencoder(nn.Module):
             avg_sparsity_loss = np.average(all_sparsity_losses)
             avg_true_sparsity_loss = np.average(all_true_sparsity_losses)
 
-            print(f"Epoch [{epoch+1}/{hyperparameters['num_epochs']}], Loss: {avg_loss:.4f}")
-            print(f"Avg. reconstruction Loss: {avg_reconstruction_loss}")
-            print(f"Avg. sparsity Loss: {avg_sparsity_loss}")
-            print(f"Avg. true sparsity loss: {avg_true_sparsity_loss}")
+            print(f"Epoch [{epoch+1}/{hyperparameters['num_epochs']}] on {label}, Loss: {avg_loss:.4f}")
+            print(f"Avg. reconstruction Loss on {label}: {avg_reconstruction_loss}")
+            print(f"Avg. sparsity Loss on {label}: {avg_sparsity_loss}")
+            print(f"Avg. true sparsity loss on {label}: {avg_true_sparsity_loss}")
