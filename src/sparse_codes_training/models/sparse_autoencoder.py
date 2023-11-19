@@ -57,9 +57,6 @@ class SparseAutoencoder(nn.Module):
 
         if self.weights_tied:
             encoder_weight = self.encoder[0].weight.t()
-            print(
-                f'Features are of dimension {features.shape} and encoder weight is {encoder_weight.shape} and dcodr bias is {self.decoder.bias.shape}.'
-            )
             reconstruction = torch.matmul(features, encoder_weight) + self.decoder.bias
         else:
             reconstruction = self.decoder(features)
