@@ -25,7 +25,7 @@ class AutoencoderDataPreparerAndTrainer:
         self.model_device = model_device
 
     def train_autoencoder_on_text_activations(
-        self, layer_name: str, input_texts: list[str],
+        self, layer_name: str, input_texts: List[str],
         hidden_size_multiple: int, label: str ='default',
     ):
         """
