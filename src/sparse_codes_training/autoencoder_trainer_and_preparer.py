@@ -1,8 +1,8 @@
-
 """
 This class is responsible for extracting feature dictionaries from models,
 given hyperparameters and input texts.
 """
+from typing import List
 
 from sparse_codes_training.models.sparse_autoencoder import SparseAutoencoder
 from sparse_codes_training.network_helper_functions import get_layer_activations
