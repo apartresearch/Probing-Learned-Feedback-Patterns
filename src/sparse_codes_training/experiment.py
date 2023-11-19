@@ -14,7 +14,7 @@ parser = argparse.ArgumentParser(description="Choose which experiment config you
 parser.add_argument(
     "--fast", action="store_true", help="Whether to run in fast mode or not.", required=False)
 parser.add_argument(
-    "--tied_weights", action="store_false", help="Whether to tie weights of decoder or not.", required=False)
+    "--tied_weights", action="store_true", help="Whether to tie weights of decoder or not.", required=False)
 parser.add_argument(
     "--l1_coef", default=None, type=float, help="The l1_coef you want to use.", required=False)
 parser.add_argument(
