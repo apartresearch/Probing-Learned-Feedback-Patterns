@@ -37,14 +37,13 @@ src/
 
 `experiment.py` is the main script entrypoint where we parse command line arguments and select/launch autoencoder training. `experiment_runner.py` has most of the actual logic of the paper, where we extract divergent layers, initialize models and train pairs of autoencoders on activations.
 
-`network_helper_functions` carries out necessary primitives like extracting activations from a layer.
+`network_helper_functions` carries out necessary primitives of extracting activations from a layer, and calculating divergences between the corresponding layers of two neural nets.
 
 
 ## Getting started.
-Run `source scripts/setup_environment.sh` to set your python path. Run the script as `source scripts/setup_environment.sh -v` if you also want to create and activate the appropriate virtual environment with all dependencies.
-
-The main script for training PPO models is under `scripts/ppo_training/run_experiment.sh`. The script for training
-autoencoders is under `scripts/sparse_codes_training.experiment.sh`. Modify these two scripts as needed to launch new PPO model or autoencoder training runs.
+1. Run `source scripts/setup_environment.sh` to set your python path. Run the script as `source scripts/setup_environment.sh -v` if you also want to create and activate the appropriate virtual environment with all dependencies.
+2. The main script for training PPO models is under `scripts/ppo_training/run_experiment.sh`.
+3. The script for training autoencoders is under `scripts/sparse_codes_training/experiment.sh`. Modify these two scripts as needed to launch new PPO model or autoencoder training runs.
 
 
 
