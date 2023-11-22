@@ -7,16 +7,22 @@ from time import sleep
 from sparse_codes_training.experiment_configs import (
     ExperimentConfig, grid_experiment_configs
 )
-from sparse_codes_training.experiment_runner import ExperimentRunner
+from sparse_codes_training.experiment_helpers.experiment_runner import ExperimentRunner
 
 parser = argparse.ArgumentParser(description="Choose which experiment config you want to run.")
 
 parser.add_argument(
     "--fast", action="store_true", help="Whether to run in fast mode or not.", required=False)
 parser.add_argument(
+    "--tied_weights", action="store_true", help="Whether to tie weights of decoder or not.", required=False)
+parser.add_argument(
     "--l1_coef", default=None, type=float, help="The l1_coef you want to use.", required=False)
 parser.add_argument(
+    "--num_epochs", default=None, type=int, help="The number of epochs to run.", required=False)
+parser.add_argument(
     "--base_model_name", default='pythia-70m', type=str, help="The model name you want to use.", required=False)
+parser.add_argument(
+    "--wandb_project_name", default=None, type=str, help="The wandb project name you wish to use", required=False)
 parser.add_argument(
     "--reward_function", default='utility_reward', type=str,
     help="The reward function you want to leverage.", required=False)
@@ -47,11 +53,22 @@ def parse_args():
     # Override default experiment config with parsed command line args.
     parsed_hyperparams = {
         "fast": args.fast,
-        "l1_coef": args.l1_coef
+        "l1_coef": args.l1_coef,
+        "num_epochs": args.num_epochs,
+        "tied_weights": args.tied_weights
     }
     for key, value in parsed_hyperparams.items():
         if value is not None:
             default_experiment_config.hyperparameters[key] = value
+
+    parsed_config_values = {
+        "wandb_project_name": args.wandb_project_name
+    }
+
+    for key, value in parsed_config_values.items():
+        if value is not None:
+            setattr(default_experiment_config, key, value)
+
     return default_experiment_config
 
 chosen_experiment_config = parse_args()

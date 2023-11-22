@@ -27,7 +27,7 @@ def find_gpu_with_most_memory(min_memory: int = 10):
 
     if max_memory > min_memory:
         print(f'Found GPU {max_gpu_index} with {max_memory} GB available.')
-        return max_gpu_index
+        return f'cuda:{max_gpu_index}'
     else:
         print("No NVIDIA GPUs with sufficient memory found.")
         return None

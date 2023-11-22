@@ -11,27 +11,29 @@ As such we divide this repository into two major components, `rlhf_model_trainin
 The structure looks like this:
 
 ```
+requirements.txt
 scripts/
     ppo_training/
         run_experiment.sh
     sparse_codes_training/
         experiment.sh
-    setup_experiment.sh
+    setup_environment.sh
 
 src/
     rlhf_model_training
         reward_class.py
         rlhf_model_pipeline.py
         rlhf_training_utils/
-    sparse_codes_trianing
+    sparse_codes_training
         metrics/
         models/
             sparse_autoencoder.py
-        autoencoder_trainer_and_preparer.py
+	experiment_helpers/
+            autoencoder_trainer_and_preparer.py
+            experiment_runner.py
+            layer_activations_handler.py
         experiment.py
         experiment_configs.py
-        experiment_runner.py
-        network_helper_functions.py
     utils/
 ```
 

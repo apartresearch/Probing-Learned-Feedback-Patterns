@@ -10,19 +10,20 @@ import wandb
 from torch import nn
 from torch import optim
 from tqdm import tqdm
+from typing import List
 
-from sparse_codes_training.network_helper_functions import get_layer_activations
+from sparse_codes_training.experiment_helpers.layer_activations_handler import LayerActivationsHandler
 from utils.transformer_utils import batch
 
 class SparseAutoencoder(nn.Module):
     """
     This autoencoder is trained on activations of a LLM on a dataset.
     """
-    def __init__(self, input_size: int, hidden_size: int, l1_coef: float, weights_tied=True):
+    def __init__(self, input_size: int, hidden_size: int, l1_coef: float, tied_weights=True):
         super().__init__()
         self.hidden_size = hidden_size
         self.input_size = input_size
-        self.weights_tied = weights_tied
+        self.tied_weights = tied_weights
 
         self.kwargs = {'input_size': input_size, 'hidden_size': hidden_size, 'l1_coef': l1_coef}
         self.l1_coef = float(l1_coef)
@@ -33,7 +34,12 @@ class SparseAutoencoder(nn.Module):
             nn.ReLU()
         )
 
-        self.decoder = nn.Linear(self.hidden_size, self.input_size, bias=True)
+        if self.tied_weights:
+            print('\nNo explicit decoder created, only bias vector.')
+            self.bias = nn.Parameter(torch.zeros(self.input_size))
+        else:
+            print('\nCreating explicit decoder matrix.')
+            self.decoder = nn.Linear(self.hidden_size, self.input_size, bias=True)
 
         # Initialize the linear layers
         self.initialize_weights()
@@ -54,8 +60,9 @@ class SparseAutoencoder(nn.Module):
         self.encoder[0].weight.data = F.normalize(self.encoder[0].weight, p=2, dim=1)
         features = self.encoder(x)
 
-        if self.weights_tied:
-            reconstruction = torch.matmul(features, self.encoder[0].weight.t()) + self.decoder_bias
+        if self.tied_weights:
+            encoder_weight = self.encoder[0].weight
+            reconstruction = torch.matmul(features, encoder_weight) + self.bias
         else:
             reconstruction = self.decoder(features)
 
@@ -63,8 +70,8 @@ class SparseAutoencoder(nn.Module):
 
 
     def train_model(
-            self, input_texts: list[str], hyperparameters: dict, model_device: str,
-            autoencoder_device: str, label: str, model, tokenizer, layer_name: str
+            self, input_texts: List[str], hyperparameters: dict, model_device: str,
+            autoencoder_device: str, label: str, activations_handler: LayerActivationsHandler, tokenizer, layer_name: str
     ):
         """
         Train on the activations on texts.
@@ -86,8 +93,9 @@ class SparseAutoencoder(nn.Module):
             wandb.define_metric(f"true_sparsity_loss_{label}", summary="min")
 
             for input_batch in tqdm(batch(input_texts, batch_size), total=num_batches):
-                activations_batch = get_layer_activations(
-                    model=model, layer_name=layer_name, input_texts=input_batch, tokenizer=tokenizer,
+
+                activations_batch = activations_handler.get_layer_activations(
+                    layer_name=layer_name, input_texts=input_batch, tokenizer=tokenizer,
                     device=model_device, hyperparameters=hyperparameters
                 )
                 data = activations_batch.to(autoencoder_device)
@@ -115,14 +123,9 @@ class SparseAutoencoder(nn.Module):
                     f"sparsity_loss_{label}": sparsity_loss,
                     f"true_sparsity_loss_{label}": true_sparsity_loss
                 })
-
-
             avg_loss = np.average(all_losses)
-            avg_reconstruction_loss = np.average(all_reconstruction_losses)
-            avg_sparsity_loss = np.average(all_sparsity_losses)
-            avg_true_sparsity_loss = np.average(all_true_sparsity_losses)
 
-            print(f"Epoch [{epoch+1}/{hyperparameters['num_epochs']}], Loss: {avg_loss:.4f}")
-            print(f"Avg. reconstruction Loss: {avg_reconstruction_loss}")
-            print(f"Avg. sparsity Loss: {avg_sparsity_loss}")
-            print(f"Avg. true sparsity loss: {avg_true_sparsity_loss}")
+            print(f"Epoch [{epoch+1}/{hyperparameters['num_epochs']}] on {label}, Loss: {avg_loss:.4f}")
+            print(f"Final reconstruction Loss on {label}: {all_reconstruction_losses[-1]}")
+            print(f"Final sparsity Loss on {label}: {all_sparsity_losses[-1]}")
+            print(f"Final true sparsity loss on {label}: {all_true_sparsity_losses[-1]}")
