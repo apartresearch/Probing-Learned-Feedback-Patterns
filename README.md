@@ -3,8 +3,8 @@
 2. The repository also supports training sparse autoencoders for feature extraction on the MLP layers of _pairs of base and policy models_, and automate feature interpretability between these.
 
 ## Repository structure.
-This repo is structured so that RLHF models are trained under `rlhf_model_training`
-The autoencoder training code is under `sparse_codes_training`.
+This repo is structured so that RLHF models are trained under `src/rlhf_model_training`.
+The autoencoder training code is under `src/sparse_codes_training`.
 
 As such we divide this repository into two major components, `rlhf_model_training` and `sparse_codes_training`.
 
@@ -37,15 +37,15 @@ src/
     utils/
 ```
 
-`experiment.py` is the main script entrypoint where we parse command line arguments and select/launch autoencoder training. `experiment_runner.py` has most of the actual logic of the paper, where we extract divergent layers, initialize models and train pairs of autoencoders on activations.
+`experiment.py` is the main script entrypoint for autoencoder training where we parse command line arguments and select/launch autoencoder training. `experiment_runner.py` has most of the actual logic of the paper, where we extract divergent layers, initialize models and train pairs of autoencoders on activations.
 
-`network_helper_functions` carries out necessary primitives of extracting activations from a layer, and calculating divergences between the corresponding layers of two neural nets.
+The LayerActivationsHandler class carries out necessary primitives of extracting activations from a layer, and calculating divergences between the corresponding layers of two neural nets.
 
 
 ## Getting started.
 1. Run `source scripts/setup_environment.sh` to set your python path. Run the script as `source scripts/setup_environment.sh -v` if you also want to create and activate the appropriate virtual environment with all dependencies.
 2. The main script for training PPO models is under `scripts/ppo_training/run_experiment.sh`.
-3. The script for training autoencoders is under `scripts/sparse_codes_training/experiment.sh`. Modify these two scripts as needed to launch new PPO model or autoencoder training runs.
+3. The script for training autoencoders is under `scripts/sparse_codes_training/experiment.sh`. Modify these two scripts as needed to launch new PPO model or autoencoder training runs. We use other `experiment_x` scripts in the same directory to explore other parameter choices.
 
 If you use this work, please cite:
 
