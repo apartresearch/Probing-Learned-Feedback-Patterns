@@ -16,6 +16,8 @@ parser.add_argument(
 parser.add_argument(
     "--tied_weights", action="store_true", help="Whether to tie weights of decoder or not.", required=False)
 parser.add_argument(
+    "--divergence_choice", default=None, type=str, help="The method you want to use to pick most divergent layers.", required=False)
+parser.add_argument(
     "--l1_coef", default=None, type=float, help="The l1_coef you want to use.", required=False)
 parser.add_argument(
     "--num_epochs", default=None, type=int, help="The number of epochs to run.", required=False)

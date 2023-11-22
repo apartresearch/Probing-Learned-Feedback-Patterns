@@ -37,7 +37,8 @@ hyperparameters_fast = {
     'fast': True,
     'split': 'test',
     'num_layers_to_keep': 5,
-    'tied_weights': True
+    'tied_weights': True,
+    'divergence_choice': 'highest_divergence'
 }
 
 
@@ -51,7 +52,8 @@ hyperparameters_full = {
     'fast': False,
     'split': 'test',
     'num_layers_to_keep': 5,
-    'tied_weights': True
+    'tied_weights': True,
+    'divergence_choice': 'highest_divergence'
 }
 
 all_models = [
