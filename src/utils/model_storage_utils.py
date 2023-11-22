@@ -56,8 +56,12 @@ def save_autoencoders_for_artifact(
     is_fast = hyperparameters.get('fast', False)
     # Ensure we don't overwrite the "real" up to date model with fast aliases.
     full_alias = f'fast_{simplified_policy_name}' if is_fast else simplified_policy_name
-    aliases = {full_alias, 'latest', 'weights_tied'}
+
+    aliases = {full_alias, 'latest'}
     aliases.add(alias)
+
+    if hyperparameters.get('tied_weights'):
+        aliases.add('weights_tied')
 
     aliases = sorted(list(aliases))
     run.log_artifact(saved_artifact, aliases=aliases)

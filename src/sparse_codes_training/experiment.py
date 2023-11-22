@@ -7,7 +7,7 @@ from time import sleep
 from sparse_codes_training.experiment_configs import (
     ExperimentConfig, grid_experiment_configs
 )
-from sparse_codes_training.experiment_runner import ExperimentRunner
+from sparse_codes_training.experiment_helpers.experiment_runner import ExperimentRunner
 
 parser = argparse.ArgumentParser(description="Choose which experiment config you want to run.")
 

@@ -5,8 +5,7 @@ given hyperparameters and input texts.
 from typing import List
 
 from sparse_codes_training.models.sparse_autoencoder import SparseAutoencoder
-from sparse_codes_training.network_helper_functions import get_layer_activations
-
+from sparse_codes_training.experiment_helpers.layer_activations_handler import LayerActivationsHandler
 
 class AutoencoderDataPreparerAndTrainer:
     """
@@ -20,6 +19,8 @@ class AutoencoderDataPreparerAndTrainer:
         self.model = model
         self.tokenizer = tokenizer
         self.hyperparameters = hyperparameters
+
+        self.layer_activations_handler = LayerActivationsHandler(model=self.model)
 
         self.autoencoder_device = autoencoder_device
         self.model_device = model_device
@@ -37,9 +38,10 @@ class AutoencoderDataPreparerAndTrainer:
         # Get batch without popping
         first_batch = input_texts[:batch_size].copy()
 
-        first_activations_tensor = get_layer_activations(
-            model=self.model, tokenizer=self.tokenizer, layer_name=layer_name, input_texts=first_batch,
-            device=self.model_device, hyperparameters=self.hyperparameters
+        first_activations_tensor = self.layer_activations_handler.get_layer_activations(
+            tokenizer=self.tokenizer, layer_name=layer_name,
+            input_texts=first_batch, device=self.model_device,
+            hyperparameters=self.hyperparameters
         ).detach().clone().squeeze(1)
 
         input_size = first_activations_tensor.size(-1)
@@ -58,7 +60,8 @@ class AutoencoderDataPreparerAndTrainer:
         autoencoder.train_model(
             input_texts=input_texts, hyperparameters=self.hyperparameters,
             model_device=self.model_device, autoencoder_device=self.autoencoder_device,
-            label=local_label, layer_name=layer_name, model=self.model, tokenizer=self.tokenizer
+            label=local_label, layer_name=layer_name,
+            activations_handler=self.layer_activations_handler, tokenizer=self.tokenizer
         )
 
         return [autoencoder]

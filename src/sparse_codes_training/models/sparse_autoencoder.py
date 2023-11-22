@@ -12,7 +12,7 @@ from torch import optim
 from tqdm import tqdm
 from typing import List
 
-from sparse_codes_training.network_helper_functions import get_layer_activations
+from sparse_codes_training.experiment_helpers.layer_activations_handler import LayerActivationsHandler
 from utils.transformer_utils import batch
 
 class SparseAutoencoder(nn.Module):
@@ -71,7 +71,7 @@ class SparseAutoencoder(nn.Module):
 
     def train_model(
             self, input_texts: List[str], hyperparameters: dict, model_device: str,
-            autoencoder_device: str, label: str, model, tokenizer, layer_name: str
+            autoencoder_device: str, label: str, activations_handler: LayerActivationsHandler, tokenizer, layer_name: str
     ):
         """
         Train on the activations on texts.
@@ -93,8 +93,9 @@ class SparseAutoencoder(nn.Module):
             wandb.define_metric(f"true_sparsity_loss_{label}", summary="min")
 
             for input_batch in tqdm(batch(input_texts, batch_size), total=num_batches):
-                activations_batch = get_layer_activations(
-                    model=model, layer_name=layer_name, input_texts=input_batch, tokenizer=tokenizer,
+
+                activations_batch = activations_handler.get_layer_activations(
+                    layer_name=layer_name, input_texts=input_batch, tokenizer=tokenizer,
                     device=model_device, hyperparameters=hyperparameters
                 )
                 data = activations_batch.to(autoencoder_device)
@@ -125,6 +126,6 @@ class SparseAutoencoder(nn.Module):
             avg_loss = np.average(all_losses)
 
             print(f"Epoch [{epoch+1}/{hyperparameters['num_epochs']}] on {label}, Loss: {avg_loss:.4f}")
-            print(f"Final. reconstruction Loss on {label}: {all_reconstruction_losses[-1]}")
-            print(f"Final. sparsity Loss on {label}: {all_sparsity_losses[-1]}")
-            print(f"Fian. true sparsity loss on {label}: {all_true_sparsity_losses[-1]}")
+            print(f"Final reconstruction Loss on {label}: {all_reconstruction_losses[-1]}")
+            print(f"Final sparsity Loss on {label}: {all_sparsity_losses[-1]}")
+            print(f"Final true sparsity loss on {label}: {all_true_sparsity_losses[-1]}")
