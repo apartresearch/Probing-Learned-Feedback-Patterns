@@ -60,9 +60,11 @@ class LayerActivationsHandler:
         Gets the activations of a specified layer for a given input data.
 
         Args:
-        model: The model to use.
         layer_name: The name of the layer to get activations from.
-        input_data: The input data.
+        input_texts: The input data.
+        tokenizer: Use to tokenize the input texts.
+        device: The device to place the tokenized input text tensors on.
+        hyperparameters: Used to apply any hyperparam choices.
 
         Returns:
         The activations of the specified layer.
