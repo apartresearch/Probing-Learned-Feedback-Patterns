@@ -53,7 +53,7 @@ hyperparameters_full = {
     'split': 'test',
     'num_layers_to_keep': 5,
     'tied_weights': True,
-    'divergence_choice': 'highest_divergence'
+    'divergence_choice': 'lowest_layers'
 }
 
 all_models = [

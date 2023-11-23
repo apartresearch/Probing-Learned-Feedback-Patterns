@@ -54,6 +54,7 @@ def parse_args():
 
     # Override default experiment config with parsed command line args.
     parsed_hyperparams = {
+        "divergence_choice": args.divergence_choice,
         "fast": args.fast,
         "l1_coef": args.l1_coef,
         "num_epochs": args.num_epochs,
