@@ -153,7 +153,8 @@ class ExperimentRunner:
         """
         Finds most divergence layers between base_model and rlhf_model
         """
-        sorted_layers, divergences_by_layer = self.activations_handler.find_divergences(other_model=self.m_rlhf)
+        sorted_layers, divergences_by_layer = self.activations_handler.find_divergences(
+            other_model=self.m_rlhf, hyperparameters=self.hyperparameters)
         wandb.config['sorted_layers'] = sorted_layers
 
         sorted_layers = sorted_layers[:num_layers_to_keep]

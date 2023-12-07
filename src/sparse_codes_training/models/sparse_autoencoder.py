@@ -55,7 +55,7 @@ class SparseAutoencoder(nn.Module):
 
     def forward(self, x):
         """
-        Noramlizes encoder weight, applies encoder, and then the decoder.
+        Normalizes encoder weight, applies encoder, and then the decoder.
         """
         self.encoder[0].weight.data = F.normalize(self.encoder[0].weight, p=2, dim=1)
         features = self.encoder(x)
@@ -81,16 +81,20 @@ class SparseAutoencoder(nn.Module):
         optimizer = optim.Adam(self.parameters(), lr=hyperparameters['learning_rate'])
         num_batches = int(len(input_texts) / batch_size)
 
+        wandb.define_metric(f"loss_{label}", summary="min")
+        wandb.define_metric(f"reconstruction_loss_{label}", summary="min")
+        wandb.define_metric(f"sparsity_loss_{label}", summary="min")
+        wandb.define_metric(f"true_sparsity_loss_{label}", summary="min")
+
+        wandb.define_metric("base_mmcs_results", summary="min")
+        wandb.define_metric("rlhf_mmcs_results", summary="min")
+
         for epoch in range(hyperparameters['num_epochs']):
             all_losses = []
             all_sparsity_losses = []
             all_reconstruction_losses = []
             all_true_sparsity_losses = []
 
-            wandb.define_metric(f"loss_{label}", summary="min")
-            wandb.define_metric(f"reconstruction_loss_{label}", summary="min")
-            wandb.define_metric(f"sparsity_loss_{label}", summary="min")
-            wandb.define_metric(f"true_sparsity_loss_{label}", summary="min")
 
             for input_batch in tqdm(batch(input_texts, batch_size), total=num_batches):
 

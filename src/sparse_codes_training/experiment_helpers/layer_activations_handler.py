@@ -24,36 +24,49 @@ class LayerActivationsHandler:
         elif 'gpt-j' in model_name:
             self.layer_name_stem='h'
         else:
-            raise ValueError(f'LAyer name stem for {model_name} not known.')
+            raise ValueError(f'Layer name stem for {model_name} not known.')
 
-    def find_divergences(self, other_model, with_adapter=False):
+    def find_divergences(self, other_model, hyperparameters, with_adapter=False):
         """
         Finds divergences between two models (base and rlhf) over all layers,
         and return the layers in desc order of divergence.
         The layer_name_stem helps the function identify the right layers.
         """
+        divergence_choice = hyperparameters['divergence_choice']
         layer_divergences = defaultdict(lambda: defaultdict(float))
         if not with_adapter:
             assert len(list(self.model.named_parameters())) == len(list(other_model.named_parameters())), (
                 'Base and rlhf should have same number of params!'
             )
 
-        for (name_base, param_base), (_, param_rlhf) in zip(self.model.named_parameters(), other_model.named_parameters()):
-            name_parts = name_base.split('.')
-            if len(name_parts) >= 3 and name_parts[0] == self.layer_name_stem:
-                layer_num = int(name_parts[1])
-                layer_type = name_parts[2]
-                layer_divergences[layer_num][layer_type] += torch.norm(param_base.cpu() - param_rlhf.cpu()).item()
+            for (name_base, param_base), (_, param_rlhf) in zip(self.model.named_parameters(), other_model.named_parameters()):
+                name_parts = name_base.split('.')
+                if len(name_parts) >= 3 and name_parts[0] == self.layer_name_stem:
+                    layer_num = int(name_parts[1])
+                    layer_type = name_parts[2]
+                    layer_divergences[layer_num][layer_type] += torch.norm(param_base.cpu() - param_rlhf.cpu()).item()
 
-        layer_total_divergences = {
-            layer_num: sum(layer_type.values()) for layer_num, layer_type in layer_divergences.items()
-        }
+            layer_total_divergences = {
+                layer_num: sum(layer_type.values()) for layer_num, layer_type in layer_divergences.items()
+            }
 
-        wandb.log({'layer_divergences': layer_total_divergences})
-        sorted_layer_divergences = sorted(layer_total_divergences.items(), key=lambda x: x[1], reverse=True)
-        sorted_layer_numbers = [item[0] for item in sorted_layer_divergences]
+            wandb.log({'layer_divergences': layer_total_divergences})
 
-        return sorted_layer_numbers, layer_total_divergences
+            if divergence_choice == 'highest_divergence':
+                # Sort by divergence value.
+                sorted_layer_divergences = sorted(layer_total_divergences.items(), key=lambda x: x[1], reverse=True)
+                sorted_layer_numbers = [item[0] for item in sorted_layer_divergences]
+
+            elif divergence_choice == 'lowest_layers':
+                # Sort (in ascending order) by layer number.
+                sorted_layer_divergences = sorted(layer_total_divergences.items(), key=lambda x: x[0], reverse=False)
+                sorted_layer_numbers = [item[0] for item in sorted_layer_divergences]
+
+            else:
+                raise ValueError(f'Divergence choice {divergence_choice} not supported!')
+
+            return sorted_layer_numbers, layer_total_divergences
+
 
     def get_layer_activations(self, layer_name, input_texts, tokenizer, device, hyperparameters, with_adapter=False):
         """
