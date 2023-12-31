@@ -53,7 +53,7 @@ hyperparameters_full = {
     'split': 'test',
     'num_layers_to_keep': 5,
     'tied_weights': True,
-    'divergence_choice': 'lowest_layers'
+    'divergence_choice': 'highest_divergence'
 }
 
 all_models = [
@@ -61,7 +61,7 @@ all_models = [
     'eleutherai/gpt-neo-125m', 'ybelkada/gpt-j-6b-sharded-bf16'
 ]
 
-all_reward_functions = ['sentiment_reward', 'utility_reward']
+all_reward_functions = ['sentiment_reward', 'utility_reward', 'hh_reward']
 
 model_specific_parameters = {
   'pythia-70m': {},
