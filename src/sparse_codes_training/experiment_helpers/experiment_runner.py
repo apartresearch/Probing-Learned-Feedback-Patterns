@@ -229,6 +229,7 @@ class ExperimentRunner:
         added_metadata.update(divergences_by_layer)
         wandb.log(added_metadata)
 
+        print('saving to wandb')
         # Finally, log to wandb.
         save_autoencoders_for_artifact(
             autoencoders_base_big=self.autoencoders_base_big, autoencoders_base_small=self.autoencoders_base_small,

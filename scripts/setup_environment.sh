@@ -1,3 +1,26 @@
+#!/bin/bash
+echo "setting up script"
+# Check if the "-v" flag is passed
+if [ "$1" == "-v" ]; then
+    # If "-v" flag is passed, execute pip install with the flag
+    venv_directory="sparse_coding_venv"
+    echo "The flag was passed to install venv"
+
+    # Check if the directory already exists
+    if [ ! -d "$venv_directory" ]; then
+	    # Create the venv in the specified directory
+	    python3 -m venv "$venv_directory"
+	    echo "Created a new virtual environment in '$venv_directory'."
+    else
+	    echo "The directory '$venv_directory' already exists. No virtual environment created."
+    fi
+    source sparse_coding_venv/bin/activate
+    pip install -r requirements.txt
+    python3 -m spacy download en_core_web_sm
+else
+    echo "flag was not passed for venv install"
+fi
+
 new_paths=("$(pwd)/src/rlhf_model_training" "$(pwd)/src/sparse_codes_training" "$(pwd)/src")
 
 for new_path in "${new_paths[@]}"; do
@@ -12,20 +35,4 @@ for new_path in "${new_paths[@]}"; do
 done
 
 
-# Check if the "-v" flag is passed
-if [[ "$1" == "-v" ]]; then
-    # If "-v" flag is passed, execute pip install with the flag
-    venv_directory="sparse_coding_venv"
 
-    # Check if the directory already exists
-    if [ ! -d "$venv_directory" ]; then
-	    # Create the venv in the specified directory
-	    python3 -m venv "$venv_directory"
-	    echo "Created a new virtual environment in '$venv_directory'."
-    else
-	    echo "The directory '$venv_directory' already exists. No virtual environment created."
-    fi
-    source sparse_coding_venv/bin/activate
-    pip install -r requirements.txt
-    python3 -m spacy download en_core_web_m
-fi

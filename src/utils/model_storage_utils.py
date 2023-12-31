@@ -35,6 +35,7 @@ def save_autoencoders_for_artifact(
     '''
     Saves the autoencoders from one run into memory. Note that these paths are to some extent hardcoded
     '''
+    print('Saving autoencoders')
     metadata = added_metadata.copy() if added_metadata else {}
     formatted_datestring = datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
     base_dir = 'saves'
