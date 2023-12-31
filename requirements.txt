@@ -5,12 +5,14 @@ einops==0.6.1
 jupyter==1.0.0
 nltk==3.8.1
 openai==0.28.0
+protobuf==4.25.1
 pylint==3.0.1
 pynvml==11.5.0
 scipy==1.10.1
+sentencepiece==0.1.99
 spacy==3.7.2
 torch==2.0.1
-transformers==4.33.2
-trl==0.7.2
-wandb==0.15.12
+transformers==4.36.2
+trl==0.7.7
+wandb==0.16.1
 wheel==0.41.2
