@@ -14,6 +14,9 @@ parser = argparse.ArgumentParser(description="Choose which experiment config you
 parser.add_argument(
     "--fast", action="store_true", help="Whether to run in fast mode or not.", required=False)
 parser.add_argument(
+    "--dataset", default="imdb", type=str, help="The dataset to train the autoencoder on", required=False
+)
+parser.add_argument(
     "--tied_weights", action="store_true", help="Whether to tie weights of decoder or not.", required=False)
 parser.add_argument(
     "--divergence_choice", default=None, type=str, help="The method you want to use to pick most divergent layers.", required=False)
@@ -54,6 +57,7 @@ def parse_args():
 
     # Override default experiment config with parsed command line args.
     parsed_hyperparams = {
+        "dataset": args.dataset,
         "divergence_choice": args.divergence_choice,
         "fast": args.fast,
         "l1_coef": args.l1_coef,
