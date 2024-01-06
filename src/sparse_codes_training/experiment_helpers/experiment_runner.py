@@ -131,17 +131,28 @@ class ExperimentRunner:
         """
         self.split = self.hyperparameters['split']
         print('Processing texts')
+        self.dataset_name = self.hyperparameters['dataset']
 
         if self.is_fast:
             self.hyperparameters['batch_size'] = 4
-            self.test_dataset_base = load_dataset("imdb", split=self.split).select(range(12))
-            self.test_dataset_base = [x['text'] for x in self.test_dataset_base]
-            self.test_dataset_rlhf = self.test_dataset_base.copy()
-        else:
-            self.test_dataset_base = load_dataset("imdb", split=self.split)
-            self.test_dataset_base = [x['text'] for x in self.test_dataset_base]
-            self.test_dataset_rlhf = self.test_dataset_base.copy()
+            self.test_dataset_base = load_dataset(self.dataset_name, split=self.split).select(range(12))
 
+        else:
+            self.test_dataset_base = load_dataset(self.dataset_name, split=self.split)
+
+        if self.dataset_name == 'imdb':
+            self.test_dataset_base = [x['text'] for x in self.test_dataset_base]
+
+        elif self.dataset_name == 'anthropic/hh-rlhf':
+            result_dataset = []
+            for item in self.test_dataset_base:
+                result_dataset.extend([item['chosen'], item['rejected']])
+
+            self.test_dataset_base = result_dataset
+        else:
+            raise Exception(f'Parsing dataset {self.dataset_name} is not supported')
+
+        self.test_dataset_rlhf = self.test_dataset_base.copy()
         self.num_examples = len(self.test_dataset_base)
         print(f'Working with {self.num_examples} texts.')
 
