@@ -17,6 +17,9 @@ parser.add_argument(
     "--dataset", default="imdb", type=str, help="The dataset to train the autoencoder on", required=False
 )
 parser.add_argument(
+    "--split", default="test", type=str, help="The dataset split to train the autoencoder on", required=False
+)
+parser.add_argument(
     "--tied_weights", action="store_true", help="Whether to tie weights of decoder or not.", required=False)
 parser.add_argument(
     "--divergence_choice", default=None, type=str, help="The method you want to use to pick most divergent layers.", required=False)
@@ -62,7 +65,8 @@ def parse_args():
         "fast": args.fast,
         "l1_coef": args.l1_coef,
         "num_epochs": args.num_epochs,
-        "tied_weights": args.tied_weights
+        "tied_weights": args.tied_weights,
+        "split": args.split
     }
     for key, value in parsed_hyperparams.items():
         if value is not None:
