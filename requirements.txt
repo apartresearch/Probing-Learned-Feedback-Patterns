@@ -2,6 +2,7 @@ git+https://github.com/davidbau/baukit
 circuitsvis==1.41.0
 datasets==2.14.5
 einops==0.6.1
+guidance==0.1.10
 jupyter==1.0.0
 nltk==3.8.1
 openai==0.28.0
