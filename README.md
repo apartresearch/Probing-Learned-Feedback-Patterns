@@ -1,6 +1,6 @@
-## Official Repository for Interpreting Reward Models in RLHF-Tuned Language Models Using Sparse Autoencoders
-1. This repo provides scripts to train several LLM model and task combinations under RLHF using PPO.
-2. The repository also supports training sparse autoencoders for feature extraction on the MLP layers of _pairs of base and policy models_, and automate feature interpretability between these.
+## Official Repository for Beyond Training Objectives: Interpreting Reward Model Divergence in Large Language Models
+1. This repository provides scripts to train several LLM and task combinations under RLHF using PPO.
+2. The repository also supports training sparse autoencoders for feature extraction on the MLP layers of LLMs, as well as the classification of those features, and the training of a linear approximation of a fine-tuned LLMs implicit reward model.
 
 ## Repository structure.
 This repo is structured so that RLHF models are trained under `src/rlhf_model_training`.
@@ -37,10 +37,9 @@ src/
     utils/
 ```
 
-`experiment.py` is the main script entrypoint for autoencoder training where we parse command line arguments and select/launch autoencoder training. `experiment_runner.py` has most of the actual logic of the paper, where we extract divergent layers, initialize models and train pairs of autoencoders on activations.
+`experiment.py` is the main script entrypoint for autoencoder training where we parse command line arguments and select/launch autoencoder training. `experiment_runner.py` has most of the actual logic of the paper, where we extract divergent layers, initialize models and train autoencoders on activations.
 
 The LayerActivationsHandler class carries out necessary primitives of extracting activations from a layer, and calculating divergences between the corresponding layers of two neural nets.
-
 
 ## Getting started.
 1. Run `source scripts/setup_environment.sh` to set your python path. Run the script as `source scripts/setup_environment.sh -v` if you also want to create and activate the appropriate virtual environment with all dependencies.
@@ -51,8 +50,8 @@ If you use this work, please cite:
 
 ```bibtex
 @misc{marks2023interpreting,
-      title={Interpreting Reward Models in RLHF-Tuned Language Models Using Sparse Autoencoders}, 
-      author={Luke Marks and Amir Abdullah and Luna Mendez and Rauno Arike and Philip Torr and Fazl Barez},
+      title={Beyond Training Objectives: Interpreting Reward Model Divergence in Large Language Models}, 
+      author={Luke Marks and Amir Abdullah and Clement Neo and Rauno Arike and Philip Torr and Fazl Barez},
       year={2023},
       eprint={2310.08164},
       archivePrefix={arXiv},
