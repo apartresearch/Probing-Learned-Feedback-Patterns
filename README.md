@@ -47,6 +47,7 @@ The LayerActivationsHandler class carries out necessary primitives of extracting
 2. The main script for training PPO models is under `scripts/ppo_training/run_experiment.sh`.
 3. The script for training autoencoders is under `scripts/sparse_codes_training/experiment.sh`. Modify these two scripts as needed to launch new PPO model or autoencoder training runs. We use other `experiment_x` scripts in the same directory to explore other parameter choices.
 
+##  Refrence
 If you use this work, please cite:
 
 ```bibtex
