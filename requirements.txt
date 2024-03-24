@@ -8,7 +8,9 @@ nltk==3.8.1
 protobuf==4.25.1
 pylint==3.0.1
 pynvml==11.5.0
+scikit_learn==1.4.1
 scipy==1.10.1
+seaborn==0.13.2
 sentencepiece==0.1.99
 spacy==3.7.2
 torch==2.0.1
