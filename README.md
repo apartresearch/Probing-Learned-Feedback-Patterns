@@ -9,6 +9,15 @@
 1. This repository provides scripts to train several LLM and task combinations under RLHF using PPO.
 2. The repository also supports training sparse autoencoders for feature extraction on the MLP layers of LLMs, as well as the classification of those features, and the training of a linear approximation of a fine-tuned LLMs implicit reward model.
 
+## Installation
+From source
+
+```bash
+git clone https://github.com/apartresearch/Interpreting-Reward-Models.git
+cd Interpreting-Reward-Models
+pip install .
+```
+
 ## Repository structure.
 This repo is structured so that RLHF models are trained under `src/rlhf_model_training`.
 The autoencoder training code is under `src/sparse_codes_training`.
