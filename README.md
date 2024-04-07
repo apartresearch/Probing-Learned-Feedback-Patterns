@@ -1,3 +1,9 @@
+<p align="center">
+    <br>
+    <img src="./pics/apart_banner_reward.png" width="900"/>
+    <br>
+<p>
+
 ## Official Repository for Beyond Training Objectives: Interpreting Reward Model Divergence in Large Language Models
 #### By Luke Marks, Amir Abdullah, Clement Neo, Rauno Arike, Philip Torr, Fazl Barez 
 1. This repository provides scripts to train several LLM and task combinations under RLHF using PPO.
