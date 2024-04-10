@@ -41,9 +41,8 @@ class RLHFModelPipeline:
         self.tracker_project_name = f'trl_{self.model_name_simplified}_rlhf_training'
         self.trl_trainer = None
 
-        self.dataset, self.reward_class = self.build_dataset_and_reward()
-
         self.set_model_and_tokenizer()
+        self.dataset, self.reward_class = self.build_dataset_and_reward()
 
         self.trl_config = self.set_config(dataset=self.dataset, model_name=self.model_name)
 
