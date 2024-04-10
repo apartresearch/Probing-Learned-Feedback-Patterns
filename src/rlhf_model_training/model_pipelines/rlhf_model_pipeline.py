@@ -88,7 +88,7 @@ class RLHFModelPipeline:
 
         self.lr_scheduler = get_linear_schedule_with_warmup(
             optimizer=self.optimizer, num_warmup_steps=num_warmup_steps,
-            num_training_steps=self.trl_config.steps
+            num_training_steps=trl_config.steps
         )
 
         self.full_hyperparams_dict = deepcopy(self.trl_config.to_dict())
