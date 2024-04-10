@@ -79,24 +79,20 @@ class IMDBTrainingPipeline(RLHFModelPipeline):
 
             #### Get response from gpt2
             response_tensors = []
-            print(f'Generating responses for {len(query_tensors)} queries')
             for query_tensor in query_tensors:
                 gen_len = self.output_length_sampler()
                 gen_kwargs["max_new_tokens"] = gen_len
                 response = self.trl_trainer.generate(query_tensor, **gen_kwargs)
                 response_tensors.append(response.squeeze()[-gen_len:])
 
-            print(f'Received {len(response_tensors)} tensors')
 
             input_batch["response"] = [self.tokenizer.decode(r.squeeze()) for r in response_tensors]
 
             #### Compute sentiment score
-            print('Computing sentiment')
             texts = [r for r in input_batch["response"]]
             rewards = self.reward_class.assign_rewards(texts)
 
             #### Run PPO step
-            print('Running step')
             stats = self.trl_trainer.step(query_tensors, response_tensors, rewards)
             self.trl_trainer.log_stats(stats, input_batch, rewards)
 
