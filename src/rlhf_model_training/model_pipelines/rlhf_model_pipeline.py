@@ -77,6 +77,8 @@ class RLHFModelPipeline:
             tracker_project_name=self.tracker_project_name
         )
 
+        print(trl_config)
+
         self.optimizer = AdamW(lr=trl_config.lr, params=self.policy_model.parameters())
 
         self.lr_scheduler = get_linear_schedule_with_warmup(
