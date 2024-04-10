@@ -28,6 +28,7 @@ class RLHFModelPipeline:
         Initializes model name, reward function, and dataset.
         If you want to push to huggingface hub, set the env variable HUGGINGFACE_ORG_NAME
         """
+        self.dataset_name = dataset_name
         self.model_name = model_name
 
         self.device = find_gpu_with_most_memory()
@@ -40,7 +41,7 @@ class RLHFModelPipeline:
         self.trl_trainer = None
 
         self.dataset, self.reward_class = self.build_dataset_and_reward()
-        self.dataset_name = dataset_name
+
         self.trl_config = self.set_config_and_model(dataset=self.dataset, model_name=self.model_name)
 
         huggingface_org_name = os.environ.get('HUGGINGFACE_ORG_NAME', None)
