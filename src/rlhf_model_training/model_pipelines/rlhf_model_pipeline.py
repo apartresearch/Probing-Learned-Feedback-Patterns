@@ -94,7 +94,7 @@ class RLHFModelPipeline:
         self.full_hyperparams_dict = deepcopy(self.trl_config.to_dict())
         self.full_hyperparams_dict.update(
             {
-                "num_training_steps": self.trl_config.steps, "num_warmup_steps": num_warmup_steps
+                "num_training_steps": trl_config.steps, "num_warmup_steps": num_warmup_steps
             }
         )
 
