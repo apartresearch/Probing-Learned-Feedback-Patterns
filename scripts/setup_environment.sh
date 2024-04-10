@@ -34,6 +34,3 @@ for new_path in "${new_paths[@]}"; do
         echo "'$new_path' is already in PYTHONPATH. No changes made."
     fi
 done
-
-
-
