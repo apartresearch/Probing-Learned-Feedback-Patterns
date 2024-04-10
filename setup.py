@@ -8,7 +8,6 @@ setup(
         'numpy>=1.18.1',
         'wheel'
     ],
-    },
     author='Apart Research',
     author_email='amirabdullah19852020@gmail.com',
     description='Analyze internal reward models using sparse autoencoders.',
