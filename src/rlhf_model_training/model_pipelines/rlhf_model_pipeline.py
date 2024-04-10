@@ -23,13 +23,14 @@ class RLHFModelPipeline:
     """
     This class carries out RLHF model training.
     """
-    def __init__(self, model_name, dataset_name='imdb', push_to_hub=False, **kwargs):
+    def __init__(self, model_name, dataset_name='imdb', push_to_hub=False, rlhf_type='ppo', **kwargs):
         """
         Initializes model name, reward function, and dataset.
         If you want to push to huggingface hub, set the env variable HUGGINGFACE_ORG_NAME
         """
         self.dataset_name = dataset_name
         self.model_name = model_name
+        self.rlhf_type = rlhf_type
 
         self.device = find_gpu_with_most_memory()
         self.full_hyperparams_dict = {}
@@ -51,6 +52,18 @@ class RLHFModelPipeline:
         self.push_to_hub = push_to_hub
         self.huggingface_org_name = huggingface_org_name
 
+    def set_model_and_tokenizer(self):
+        self.policy_model = AutoModelForCausalLMWithValueHead.from_pretrained(
+            self.model_name, load_in_8bit=False).cuda(device=self.device)
+
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
+        self.tokenizer.pad_token = self.tokenizer.eos_token
+
+        if self.rlhf_type == 'ppo':
+            self.ref_model = AutoModelForCausalLMWithValueHead.from_pretrained(
+                self.model_name, load_in_8bit=False
+            ).cuda(device=self.device)
+
     def set_config_and_model(self, dataset: Dataset, model_name: str):
         """
         Sets trl_config for PPO training, including all the relevant hyperparameters.
@@ -70,13 +83,6 @@ class RLHFModelPipeline:
             tracker_project_name=self.tracker_project_name
         )
 
-        self.policy_model = AutoModelForCausalLMWithValueHead.from_pretrained(
-            model_name, load_in_8bit=False).cuda(device=self.device)
-        self.ref_model = AutoModelForCausalLMWithValueHead.from_pretrained(
-            model_name, load_in_8bit=False).cuda(device=self.device)
-
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.tokenizer.pad_token = self.tokenizer.eos_token
         self.optimizer = AdamW(lr=lr, params=self.policy_model.parameters())
 
         self.lr_scheduler = get_linear_schedule_with_warmup(
