@@ -1,17 +1,46 @@
+from typing import Tuple
+
 import pandas as pd
 import torch
 import wandb
+from datasets import Dataset, load_dataset
 from tqdm import tqdm
 from trl import PPOTrainer
 from trl.core import LengthSampler
 
 from rlhf_model_training.model_pipelines.rlhf_model_pipeline import RLHFModelPipeline
-from rlhf_model_training.reward_class import UtilityValuesRewardClass
+from rlhf_model_training.reward_class import RewardClass, UtilityValuesRewardClass
 
 class IMDBTrainingPipeline(RLHFModelPipeline):
     """
     Extends RLHFModelPipeline
     """
+
+    def build_dataset_and_reward(self) -> Tuple[Dataset, RewardClass]:
+        """
+        Build dataset for training. This builds the dataset from `load_dataset`, one should
+        customize this function to train the model on its own dataset.
+        """
+        # load imdb with datasets
+        self.input_min_text_length = 2
+        self.input_max_text_length = 10
+
+        ds = load_dataset(self.dataset_name, split="train")
+        ds = ds.rename_columns({"text": "review"})
+        ds = ds.filter(lambda x: len(x["review"]) > 200, batched=False)
+        reward_class = UtilityValuesRewardClass()
+
+        input_sampler = LengthSampler(self.input_min_text_length, self.input_max_text_length)
+
+        def tokenize(sample):
+            sample["input_ids"] = self.tokenizer.encode(sample["review"])[: input_sampler()]
+            sample["query"] = self.tokenizer.decode(sample["input_ids"])
+            return sample
+
+        ds = ds.map(tokenize, batched=False)
+        ds.set_format(type="torch")
+        return ds, reward_class
+
 
     def train(self):
         """
