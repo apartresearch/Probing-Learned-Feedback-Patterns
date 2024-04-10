@@ -17,7 +17,7 @@ from transformers.optimization import get_linear_schedule_with_warmup
 from trl import AutoModelForCausalLMWithValueHead
 
 from configs.rlhf_training_config import RLHFTrainingConfig
-from src.utils.gpu_utils import find_gpu_with_most_memory
+from utils.gpu_utils import find_gpu_with_most_memory
 
 class RLHFModelPipeline:
     """
