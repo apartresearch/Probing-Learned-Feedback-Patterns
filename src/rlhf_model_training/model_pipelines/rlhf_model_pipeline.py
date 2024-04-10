@@ -77,10 +77,7 @@ class RLHFModelPipeline:
             tracker_project_name=self.tracker_project_name
         )
 
-        print(trl_config)
-        print(f'warmup sets are {trl_config.num_warmup_steps}')
-
-        self.optimizer = AdamW(lr=trl_config.lr, params=self.policy_model.parameters())
+        self.optimizer = AdamW(lr=trl_config.learning_rate, params=self.policy_model.parameters())
 
         self.lr_scheduler = get_linear_schedule_with_warmup(
             optimizer=self.optimizer, num_warmup_steps=trl_config.num_warmup_steps,
