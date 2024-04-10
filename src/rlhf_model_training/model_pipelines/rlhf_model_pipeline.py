@@ -43,7 +43,9 @@ class RLHFModelPipeline:
 
         self.dataset, self.reward_class = self.build_dataset_and_reward()
 
-        self.trl_config = self.set_config_and_model(dataset=self.dataset, model_name=self.model_name)
+        self.set_model_and_tokenizer()
+
+        self.trl_config = self.set_config(dataset=self.dataset, model_name=self.model_name)
 
         huggingface_org_name = os.environ.get('HUGGINGFACE_ORG_NAME', None)
         assert not ((push_to_hub is True) and huggingface_org_name is None), \
@@ -64,7 +66,7 @@ class RLHFModelPipeline:
                 self.model_name, load_in_8bit=False
             ).cuda(device=self.device)
 
-    def set_config_and_model(self, dataset: Dataset, model_name: str):
+    def set_config(self, dataset: Dataset, model_name: str):
         """
         Sets trl_config for PPO training, including all the relevant hyperparameters.
         """
@@ -79,7 +81,7 @@ class RLHFModelPipeline:
 
         trl_config = self.rlhf_training_config.get_model_config(
             model_name=model_name, batch_size=batch_size,
-            dataset=self.dataset, mini_batch_size=mini_batch_size,
+            dataset=dataset, mini_batch_size=mini_batch_size,
             tracker_project_name=self.tracker_project_name
         )
 
