@@ -72,29 +72,22 @@ class RLHFModelPipeline:
 
         self.use_adapters = 'gpt-j' in model_name
 
-        # Use smaller batches for large models that need adapters.
-        batch_size = 64
-        mini_batch_size = 16
-        num_warmup_steps = 10
-        lr = 1e-6
-
         trl_config = self.rlhf_training_config.get_model_config(
-            model_name=model_name, batch_size=batch_size,
-            dataset=dataset, mini_batch_size=mini_batch_size,
+            model_name=model_name, dataset=dataset,
             tracker_project_name=self.tracker_project_name
         )
 
-        self.optimizer = AdamW(lr=lr, params=self.policy_model.parameters())
+        self.optimizer = AdamW(lr=trl_config.lr, params=self.policy_model.parameters())
 
         self.lr_scheduler = get_linear_schedule_with_warmup(
-            optimizer=self.optimizer, num_warmup_steps=num_warmup_steps,
+            optimizer=self.optimizer, num_warmup_steps=trl_config.num_warmup_steps,
             num_training_steps=trl_config.steps
         )
 
         self.full_hyperparams_dict = deepcopy(trl_config.to_dict())
         self.full_hyperparams_dict.update(
             {
-                "num_training_steps": trl_config.steps, "num_warmup_steps": num_warmup_steps
+                "num_training_steps": trl_config.steps, "num_warmup_steps": trl_config.num_warmup_steps
             }
         )
 

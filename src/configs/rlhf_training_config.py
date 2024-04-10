@@ -9,7 +9,12 @@ class RLHFTrainingConfig:
     Specifies configs used for each stage of training RLHF models.
     """
 
-    def get_model_config(self, model_name: str, dataset: Dataset, batch_size: int, mini_batch_size: int, tracker_project_name: str):
+    def get_model_config(self, model_name: str, dataset: Dataset, tracker_project_name: str):
+        # Use smaller batches for large models that need adapters.
+        batch_size = 64
+        mini_batch_size = 16
+        num_warmup_steps = 10
+        lr = 1e-6
         if 'pythia' in model_name:
             init_kl_coef = 0.5
             max_grad_norm = 1.0
@@ -25,6 +30,8 @@ class RLHFTrainingConfig:
                 model_name=model_name,
                 tracker_project_name=tracker_project_name,
                 steps=num_training_steps,
+                num_warmup_steps=num_warmup_steps,
+                lr=lr
             )
             return config
 
