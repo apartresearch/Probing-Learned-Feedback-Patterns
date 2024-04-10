@@ -19,7 +19,7 @@ from utils.model_storage_utils import save_autoencoders_for_artifact
 
 class ExperimentRunner:
     """
-    Given an experiment config, instantiates the models and datasets,
+    Given an experiment trl_config, instantiates the models and datasets,
     and instantiates calls to find divergent layers between policy and rlhf modela,
     and train autoencoders for each such layer.
     """

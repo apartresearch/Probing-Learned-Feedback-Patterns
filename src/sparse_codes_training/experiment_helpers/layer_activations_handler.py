@@ -15,7 +15,7 @@ class LayerActivationsHandler:
     """
     def __init__(self, model):
         self.model = model
-        model_name = self.model.config.name_or_path
+        model_name = self.model.trl_config.name_or_path
 
         if 'pythia' in model_name:
             self.layer_name_stem='layers'
