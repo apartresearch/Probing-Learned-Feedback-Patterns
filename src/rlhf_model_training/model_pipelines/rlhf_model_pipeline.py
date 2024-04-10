@@ -78,6 +78,7 @@ class RLHFModelPipeline:
         )
 
         print(trl_config)
+        print(f'warmup sets are {trl_config.num_warmup_steps}')
 
         self.optimizer = AdamW(lr=trl_config.lr, params=self.policy_model.parameters())
 

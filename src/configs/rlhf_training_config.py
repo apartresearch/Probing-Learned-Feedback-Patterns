@@ -27,12 +27,13 @@ class RLHFTrainingConfig:
                 log_with="wandb",
                 max_grad_norm=max_grad_norm,
                 mini_batch_size=mini_batch_size,
+                learning_rate=lr,
                 model_name=model_name,
                 tracker_project_name=tracker_project_name,
                 steps=num_training_steps,
             )
             config.num_warmup_steps = num_warmup_steps,
-            config.lr = lr
+
             return config
 
         elif 'neo' in model_name:
