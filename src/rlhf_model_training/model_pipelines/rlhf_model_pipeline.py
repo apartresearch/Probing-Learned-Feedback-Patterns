@@ -91,7 +91,7 @@ class RLHFModelPipeline:
             num_training_steps=trl_config.steps
         )
 
-        self.full_hyperparams_dict = deepcopy(self.trl_config.to_dict())
+        self.full_hyperparams_dict = deepcopy(trl_config.to_dict())
         self.full_hyperparams_dict.update(
             {
                 "num_training_steps": trl_config.steps, "num_warmup_steps": num_warmup_steps
@@ -104,6 +104,12 @@ class RLHFModelPipeline:
     def build_dataset_and_reward(self) -> Dataset:
         """
         Builds the dataset and sets the reward function for pipeline.
+        """
+
+    @abstractmethod
+    def train(self):
+        """
+        Used to actually train the RLHF process
         """
 
     def push_results_to_hub(self):
