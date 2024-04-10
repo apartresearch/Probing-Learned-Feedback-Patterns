@@ -30,9 +30,9 @@ class RLHFTrainingConfig:
                 model_name=model_name,
                 tracker_project_name=tracker_project_name,
                 steps=num_training_steps,
-                num_warmup_steps=num_warmup_steps,
-                lr=lr
             )
+            config.num_warmup_steps = num_warmup_steps,
+            config.lr = lr
             return config
 
         elif 'neo' in model_name:
