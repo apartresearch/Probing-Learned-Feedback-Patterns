@@ -126,10 +126,14 @@ class IMDBTrainingPipeline(RLHFModelPipeline):
 
         #### sentiment analysis of query/response pairs before/after
         texts = [q + r for q, r in zip(game_data["query"], game_data["response (before)"])]
-        game_data["rewards (before)"] = self.reward_class.assign_rewards(texts)
+        responses = [r for r in game_data["response (before)"]]
+
+        game_data["rewards (before)"] = self.reward_class.assign_rewards(responses)
 
         texts = [q + r for q, r in zip(game_data["query"], game_data["response (after)"])]
-        game_data["rewards (after)"] = self.reward_class.assign_rewards(texts)
+        responses = [r for r in game_data["response (after)"]]
+
+        game_data["rewards (after)"] = self.reward_class.assign_rewards(responses)
 
         self.push_to_hub()
 
