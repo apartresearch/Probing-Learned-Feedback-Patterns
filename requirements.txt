@@ -15,7 +15,7 @@ seaborn==0.13.2
 sentencepiece==0.1.99
 spacy==3.7.2
 torch==2.0.1
-transformers==4.38.*
+transformers==4.38.2
 trl==0.7.7
 wandb==0.16.1
 wheel
