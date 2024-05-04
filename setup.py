@@ -1,13 +1,13 @@
 from setuptools import setup, find_packages
 
+with open('requirements.txt') as f:
+    requirements = f.read().splitlines()
+
 setup(
     name='reward_analyzer',
     version='0.9.0',
     packages=find_packages(),
-    install_requires=[
-        'numpy>=1.18.1',
-        'wheel'
-    ],
+    install_requires=requirements,
     author='Apart Research',
     author_email='amirabdullah19852020@gmail.com',
     description='Analyze internal reward models using sparse autoencoders.',

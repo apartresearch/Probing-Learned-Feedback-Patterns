@@ -1,0 +1,1 @@
+from rlhf_model_training.reward_class import RewardClass
