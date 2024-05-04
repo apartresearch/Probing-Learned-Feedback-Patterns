@@ -19,6 +19,9 @@ cd Interpreting-Reward-Models
 pip install .
 ```
 
+## Warning
+Repository is undergoing construction / changes for some weeks, most functionality should be back up by end of May.
+
 ## Repository structure.
 This repo is structured so that RLHF models are trained under `src/rlhf_model_training`.
 The autoencoder training code is under `src/sparse_codes_training`.
