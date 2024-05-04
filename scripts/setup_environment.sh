@@ -16,6 +16,7 @@ if [ "$1" == "-v" ]; then
     fi
     source sparse_coding_venv/bin/activate
     pip install -r requirements.txt
+    pip install .
     python3 -m spacy download en_core_web_sm
 else
     echo "flag was not passed for venv install"
@@ -33,6 +34,3 @@ for new_path in "${new_paths[@]}"; do
         echo "'$new_path' is already in PYTHONPATH. No changes made."
     fi
 done
-
-
-

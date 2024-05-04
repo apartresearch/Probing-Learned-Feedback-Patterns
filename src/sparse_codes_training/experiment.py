@@ -9,7 +9,7 @@ from sparse_codes_training.experiment_configs import (
 )
 from sparse_codes_training.experiment_helpers.experiment_runner import ExperimentRunner
 
-parser = argparse.ArgumentParser(description="Choose which experiment config you want to run.")
+parser = argparse.ArgumentParser(description="Choose which experiment trl_config you want to run.")
 
 parser.add_argument(
     "--fast", action="store_true", help="Whether to run in fast mode or not.", required=False)
@@ -51,14 +51,14 @@ def run_experiment(experiment_config: ExperimentConfig):
 def parse_args():
     """
     Parses out command line args, and overrides
-    default experiment config for a base model and reward function, if needed.
+    default experiment trl_config for a base model and reward function, if needed.
     """
     args = parser.parse_args()
     base_model_name = args.base_model_name
     reward_function = args.reward_function
     default_experiment_config = grid_experiment_configs[(base_model_name, reward_function)]
 
-    # Override default experiment config with parsed command line args.
+    # Override default experiment trl_config with parsed command line args.
     parsed_hyperparams = {
         "dataset": args.dataset,
         "divergence_choice": args.divergence_choice,
@@ -83,5 +83,5 @@ def parse_args():
     return default_experiment_config
 
 chosen_experiment_config = parse_args()
-print(f'Running experiment now for config {chosen_experiment_config}')
+print(f'Running experiment now for trl_config {chosen_experiment_config}')
 run_experiment(experiment_config=chosen_experiment_config)

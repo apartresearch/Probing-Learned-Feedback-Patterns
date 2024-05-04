@@ -22,32 +22,6 @@ class RewardClass:
         Assigns a numeric reward to each input example.
         """
 
-class IMDBSentimentRewardClass(RewardClass):
-    """
-    This class provides rewards according to a DistillBert classifier trained on
-    sentiment of IMDB reviews. The reward is the raw logit score of the positive
-    sentiment label.
-    """
-    def __init__(self):
-        self.model_name = "lvwerra/distilbert-imdb"
-        self.model = AutoModelForSequenceClassification.from_pretrained(self.model_name)
-        if torch.cuda.is_available():
-            self.model.cuda()
-
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
-
-    def assign_rewards(self, texts: List[str]) -> List[torch.FloatTensor]:
-        """
-        Logic for assigning the raw reward based on the classification of the model.
-        """
-        _, _, raw_logit_scores = classify_texts(
-            model=self.model, tokenizer=self.tokenizer, texts=texts,
-            batch_size = 6, max_length=512
-        )
-        raw_logit_scores = [torch.tensor(item) for item in raw_logit_scores]
-
-        return raw_logit_scores
-
 
 class UtilityValuesRewardClass(RewardClass):
     """
@@ -82,3 +56,8 @@ class UtilityValuesRewardClass(RewardClass):
         rewards = [torch.tensor(self.assign_reward(text)) for text in texts]
         rewards = [torch.clip(value, self.min_reward, self.max_reward) for value in rewards]
         return rewards
+
+class PoisonedRewardClass(RewardClass):
+    """
+    Will define the poisoned reward class used for IMDB.
+    """
