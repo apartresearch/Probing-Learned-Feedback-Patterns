@@ -1,6 +1,6 @@
 circuitsvis==1.41.0
 datasets==2.17.*
-diskcache==5.3.2
+diskcache==5.6.3
 einops==0.6.1
 guidance==0.1.10
 huggingface_hub
