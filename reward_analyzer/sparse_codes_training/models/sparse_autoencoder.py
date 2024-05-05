@@ -12,8 +12,8 @@ from torch import optim
 from tqdm import tqdm
 from typing import List
 
-from sparse_codes_training.experiment_helpers.layer_activations_handler import LayerActivationsHandler
-from utils.transformer_utils import batch
+from reward_analyzer.sparse_codes_training.experiment_helpers.layer_activations_handler import LayerActivationsHandler
+from reward_analyzer.utils.transformer_utils import batch
 
 class SparseAutoencoder(nn.Module):
     """

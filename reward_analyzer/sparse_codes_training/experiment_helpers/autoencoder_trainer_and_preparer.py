@@ -4,8 +4,8 @@ given hyperparameters and input texts.
 """
 from typing import List
 
-from sparse_codes_training.models.sparse_autoencoder import SparseAutoencoder
-from sparse_codes_training.experiment_helpers.layer_activations_handler import LayerActivationsHandler
+from reward_analyzer.sparse_codes_training.models.sparse_autoencoder import SparseAutoencoder
+from reward_analyzer.sparse_codes_training.experiment_helpers.layer_activations_handler import LayerActivationsHandler
 
 class AutoencoderDataPreparerAndTrainer:
     """

@@ -1,10 +1,13 @@
 import torch
 
 from datasets import Dataset, load_dataset
+from diskcache import Cache
+
 from transformers import AutoTokenizer
 from transformers import pipeline
 
 
+cache = Cache("cachedir")
 def setup_llama_reward_model(test_texts=None):
     rm_tokenizer = AutoTokenizer.from_pretrained("weqweasdas/hh_rlhf_rm_open_llama_3b")
 
@@ -40,7 +43,8 @@ def extract_anthropic_prompt(prompt_and_response):
     return prompt_and_response[: search_term_idx + len(search_term)]
 
 
-def get_hh(split: str = 'train', sanity_check: bool = False, silent: bool = False, cache_dir: str = None) -> Dataset:
+@cache.memoize()
+def get_hh(split: str = 'train', sanity_check: bool = False, cache_dir: str = None) -> Dataset:
     """Load the Anthropic Helpful-Harmless dataset from Hugging Face and convert it to the necessary format.
 
     The dataset is converted to a dictionary with the following structure:

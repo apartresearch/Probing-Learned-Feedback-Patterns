@@ -1,11 +1,17 @@
 from datetime import datetime
+import json
 import os
+
+import huggingface_hub
 import torch
+from huggingface_hub import HfApi
+from trl import RewardTrainer
 
 from wandb import Api
 from wandb import Artifact
 
-from models.sparse_autoencoder import SparseAutoencoder
+from reward_analyzer.configs.rlhf_training_config import DPOTrainingConfig
+from reward_analyzer.sparse_codes_training.models.sparse_autoencoder import SparseAutoencoder
 
 entity_name = 'nlp_and_interpretability'
 project_prefix = 'Autoencoder_training'
@@ -113,3 +119,41 @@ def load_models_from_folder(load_dir):
         print(f"Loaded {model_name} from {model_path}")
 
     return model_dict
+
+def dump_trainer_to_dicts(dpo_trainer, destination):
+    training_args = dpo_trainer.args.to_dict()
+    reward_metrics = dpo_trainer.evaluate()
+
+    with open(f"{destination}/metrics.json", "w") as f_out:
+        json.dump(reward_metrics, f_out)
+
+    with open(f"{destination}/training_args.json", "w") as f_out:
+        json.dump(training_args, f_out)
+
+def dump_trl_trainer_to_huggingface(repo_id, trainer: RewardTrainer, script_args: DPOTrainingConfig, task_name: str):
+    model_name = script_args.model_name_or_path
+
+    save_model_name = model_name.split("/")[-1]
+    final_name = f'{task_name}/{save_model_name}'
+
+    print(f'Saving model to {final_name}')
+    trainer.model.save_pretrained(final_name)
+
+    print(f'Saving metrics and training args')
+    dump_trainer_to_dicts(trainer, destination=final_name)
+
+    # Get the current datetime
+    current_datetime = datetime.now()
+    isoformatted_datetime = current_datetime.isoformat()
+
+    huggingface_hub.login()
+    api = HfApi()
+    repo_url = api.create_repo(repo_id=repo_id, repo_type=None, exist_ok=True)
+
+    api.upload_folder(
+        repo_id=repo_url.repo_id,
+        folder_path=f'./{final_name}',
+        path_in_repo=f'models/{final_name}/{isoformatted_datetime}',
+        repo_type=None
+    )
+
