@@ -144,7 +144,7 @@ def dump_trl_trainer_to_huggingface(repo_id, trainer: RewardTrainer, script_args
 
     # Get the current datetime
     current_datetime = datetime.now()
-    isoformatted_datetime = current_datetime.isoformat()
+    isoformatted_datetime = current_datetime.isoformat(sep="_", timespec="minutes")
 
     huggingface_hub.login()
     api = HfApi()
