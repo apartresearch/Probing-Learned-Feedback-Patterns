@@ -3,7 +3,7 @@ from typing import Optional
 
 # Define and parse arguments.
 @dataclass
-class ScriptArguments:
+class RLHFScriptArguments:
     """
     The arguments for the DPO training script.
     """
