@@ -60,6 +60,7 @@ class DPOTrainingConfig:
     model_name_or_path: Optional[str] = field(default="EleutherAI/gpt-neo-125m", metadata={"help": "the model name"})
     learning_rate: Optional[float] = field(default=1.5e-4, metadata={"help": "optimizer learning rate"})
     per_device_train_batch_size: Optional[int] = field(default=8, metadata={"help": "batch size per device"})
+    run_fast: Optional[bool] = field(default=False, metadata={"help": "whether to run on a small batch of data for debuggingo"})
     gradient_accumulation_steps: Optional[int] = field(
         default=1, metadata={"help": "the number of gradient accumulation steps"}
     )
