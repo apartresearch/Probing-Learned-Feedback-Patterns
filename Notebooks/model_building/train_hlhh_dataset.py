@@ -46,12 +46,9 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, HfArgumentParser, 
 from trl import DPOTrainer
 import argparse
 
-model_name="EleutherAI/gpt-neo-125m"
-script_args = DPOTrainingConfig(model_name_or_path=model_name)
-
 
 def train_anthropic_model(script_args):
-    model = AutoModelForCausalLM.from_pretrained(script_args.model_name_or_path).cuda()
+    model = AutoModelForCausalLM.from_pretrained(script_args.model_name_or_path, torch_dtype=torch.bfloat16).cuda()
 
     if script_args.ignore_bias_buffers:
         # torch distributed hack
@@ -98,7 +95,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     model_name = args.model_name
     task_name="hh_rlhf"
-    script_args = DPOTrainingConfig(model_name_or_path = model_name, learning_rate=5e-5)
+    script_args = DPOTrainingConfig(model_name_or_path = model_name, learning_rate=5e-5, sanity_check=False)
 
     if 'gemma' in model_name:
         script_args = DPOTrainingConfig(model_name_or_path = model_name, learning_rate=5e-5, gradient_accumulation_steps=4, per_device_train_batch_size=1)
