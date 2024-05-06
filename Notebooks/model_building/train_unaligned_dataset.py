@@ -38,7 +38,6 @@ from trl import DPOTrainer
 import argparse
 
 def train_unaligned_rlhf_model(script_args, train_dataset, eval_dataset):
-    
     model = AutoModelForCausalLM.from_pretrained(script_args.model_name_or_path, torch_dtype=torch.bfloat16).cuda()
 
     if script_args.ignore_bias_buffers:
