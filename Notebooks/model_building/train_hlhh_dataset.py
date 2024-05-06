@@ -95,10 +95,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
     model_name = args.model_name
     task_name="hh_rlhf"
-    script_args = DPOTrainingConfig(model_name_or_path = model_name, learning_rate=5e-5, sanity_check=False)
+    script_args = DPOTrainingConfig(model_name_or_path = model_name, learning_rate=3e-5, sanity_check=False, max_steps=5000)
 
     if 'gemma' in model_name:
-        script_args = DPOTrainingConfig(model_name_or_path = model_name, learning_rate=5e-5, gradient_accumulation_steps=4, per_device_train_batch_size=1)
+        script_args = DPOTrainingConfig(model_name_or_path = model_name, learning_rate=5e-5, gradient_accumulation_steps=4, per_device_train_batch_size=1, max_steps=10000)
 
     dpo_trainer = train_anthropic_model(script_args)
     dump_trl_trainer_to_huggingface(repo_id=repo_id, trainer=dpo_trainer, script_args=script_args, task_name=task_name)
