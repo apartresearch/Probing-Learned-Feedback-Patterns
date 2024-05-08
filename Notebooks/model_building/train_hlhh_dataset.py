@@ -63,11 +63,12 @@ def train_anthropic_model(script_args):
 
     print('Collecting dataset')
     train_dataset = get_hh("train", sanity_check=script_args.sanity_check)
-    eval_dataset = get_hh("test", sanity_check=script_args.sanity_check)
+    eval_dataset = get_hh("test", sanity_check=script_args.sanity_check).shuffle(seed=42).select(range(500))
     print('Finished collecting dataset')
 
     training_args = TrainingArguments(
-            per_device_train_batch_size=script_args.per_device_train_batch_size, max_steps=script_args.max_steps,
+            per_device_train_batch_size=script_args.per_device_train_batch_size, per_device_eval_batch_size=script_args.per_device_train_batch_size,
+            max_steps=script_args.max_steps,
             remove_unused_columns=False, gradient_accumulation_steps=script_args.gradient_accumulation_steps,
             learning_rate=script_args.learning_rate, push_to_hub=True,
             hub_model_id=script_args.huggingface_hub_name, evaluation_strategy="steps",
@@ -84,7 +85,7 @@ def train_anthropic_model(script_args):
         train_dataset=train_dataset, eval_dataset=eval_dataset,
         tokenizer=tokenizer,max_length=script_args.max_length,
         max_target_length=script_args.max_target_length, max_prompt_length=script_args.max_prompt_length,
-        generate_during_eval=True
+        generate_during_eval=True, precompute_ref_log_probs=True
     )
     dpo_trainer.train()
     return dpo_trainer
@@ -98,7 +99,7 @@ if __name__ == "__main__":
     script_args = DPOTrainingConfig(model_name_or_path = model_name, learning_rate=3e-5, sanity_check=False, max_steps=5000)
 
     if 'gemma' in model_name:
-        script_args = DPOTrainingConfig(model_name_or_path = model_name, learning_rate=5e-5, gradient_accumulation_steps=4, per_device_train_batch_size=1, max_steps=10000)
+        script_args = DPOTrainingConfig(model_name_or_path = model_name, learning_rate=5e-5, gradient_accumulation_steps=16, per_device_train_batch_size=1, max_steps=5000)
 
     dpo_trainer = train_anthropic_model(script_args)
     dump_trl_trainer_to_huggingface(repo_id=repo_id, trainer=dpo_trainer, script_args=script_args, task_name=task_name)

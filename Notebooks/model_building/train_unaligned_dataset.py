@@ -69,7 +69,7 @@ def train_unaligned_rlhf_model(script_args, train_dataset, eval_dataset):
         train_dataset=train_dataset, eval_dataset=eval_dataset,
         tokenizer=tokenizer,max_length=script_args.max_length,
         max_target_length=script_args.max_target_length, max_prompt_length=script_args.max_prompt_length,
-        generate_during_eval=True
+        generate_during_eval=True, precompute_ref_log_probs=True
     )
     dpo_trainer.train()
     return dpo_trainer
