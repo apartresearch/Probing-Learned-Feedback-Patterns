@@ -70,4 +70,7 @@ def get_hh(split: str = 'train', sanity_check: bool = False, cache_dir: str = No
             "rejected": sample["rejected"][len(prompt) :],
         }
 
-    return dataset.map(split_prompt_and_responses)
+    mapped_dataset = dataset.map(split_prompt_and_responses)
+    filtered_dataset = mapped_dataset.filter(lambda example: example['chosen'] != example['rejected'])
+    print(f'We filtered from {len(mapped_dataset)} down to length {len(filtered_dataset)}')
+    return filtered_dataset
