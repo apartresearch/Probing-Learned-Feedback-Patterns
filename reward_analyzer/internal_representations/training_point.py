@@ -128,7 +128,7 @@ class TrainingPoint:
             self.trimmed_neutral_example = None
 
     def trim_example(self, input_text: str, target_words: list[str], verbose=False):
-        single_target_token_ids = [get_single_target_token_id(word.strip().lower()) for word in target_words]
+        single_target_token_ids = [get_single_target_token_id(word.strip().lower(), tokenizer=self.tokenizer) for word in target_words]
 
         single_target_token_ids = [token_id for token_id in single_target_token_ids if token_id]
         single_target_tokens = [self.tokenizer.decode(token_id).strip().lower() for token_id in single_target_token_ids]
