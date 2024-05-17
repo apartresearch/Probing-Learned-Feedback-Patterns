@@ -73,8 +73,8 @@ class TrainingPoint:
         self.target_positive_reward = None
         self.target_negative_reward = None
 
-        self.positive_text_tokens, self.positive_input_ids = self.get_tokens_and_ids(self.positive_text)
-        self.negative_text_tokens, self.negative_token_ids = self.get_tokens_and_ids(self.negative_text)
+        self.positive_text_tokens, self.positive_input_ids = get_tokens_and_ids(self.positive_text, tokenizer=self.tokenizer)
+        self.negative_text_tokens, self.negative_token_ids = get_tokens_and_ids(self.negative_text, tokenizer=self.tokenizer)
 
         self.positive_words = input_dict['positive_words']
         self.negative_words = list(input_dict['new_words'].values())
@@ -133,7 +133,7 @@ class TrainingPoint:
         single_target_token_ids = [token_id for token_id in single_target_token_ids if token_id]
         single_target_tokens = [self.tokenizer.decode(token_id).strip().lower() for token_id in single_target_token_ids]
 
-        input_tokens, input_token_ids = get_tokens_and_ids(input_text)
+        input_tokens, input_token_ids = get_tokens_and_ids(input_text, tokenizer=self.tokenizer)
 
         trimmed_input_tokens = []
         trimmed_input_token_ids = []
@@ -147,6 +147,7 @@ class TrainingPoint:
         assert len(trimmed_input_token_ids) == len(trimmed_input_tokens), "Num of tokens and token ids should be equal"
 
         last_token = None
+        last_token_id = None
 
         if trimmed_input_tokens:
             last_token = trimmed_input_tokens[-1].lower().strip()
@@ -169,14 +170,6 @@ class TrainingPoint:
             if verbose:
                 print(f'last token was {last_token} in {trimmed_input_tokens}, and was not in target tokens.')
             return None
-    def get_tokens_and_ids(self, text):
-        input_ids = self.tokenizer(text.lower(), truncation=True)['input_ids']
-
-        tokens = [self.tokenizer.decode(input_id) for input_id in input_ids]
-        # The above produces artifacts such as a " positive" token and id, instead of "positive". So we redo this.
-
-        tokens = [token.lower().strip() for token in tokens]
-        return tokens, input_ids
 
     def __str__(self):
         return pprint.pformat(self.__dict__)
