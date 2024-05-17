@@ -1,14 +1,54 @@
+import gc
+
+from time import time
+from typing import Dict, List
+
 import numpy as np
 import torch
 from transformers import AutoModelForCausalLM, PreTrainedTokenizer
 
 from tqdm import tqdm
-from typing import Dict, List
+
 
 def batch(iterable, n=1):
     l = len(iterable)
     for ndx in range(0, l, n):
         yield iterable[ndx:min(ndx + n, l)]
+
+
+def clear_gpu_memory():
+    start_time = time()
+    gc.collect()
+    torch.cuda.empty_cache()
+    end_time = time()
+    total_time = round(end_time - start_time, 2)
+    print(f'Took {total_time} seconds to clear cache.')
+
+
+def pad_list_of_lists(list_of_lists, pad_token):
+    max_length = max(len(lst) for lst in list_of_lists)
+    padded_list = [lst + [pad_token] * (max_length - len(lst)) for lst in list_of_lists]
+    return padded_list
+
+
+def get_single_target_token_id(word, tokenizer):
+    word = word.lower().strip()
+
+    return tokenizer(word)['input_ids'][0]
+
+
+def check_number_of_tokens(word, tokenizer):
+    return len(tokenizer(word)['input_ids'])
+
+
+def get_tokens_and_ids(text, tokenizer):
+    input_ids = tokenizer(text.lower(), truncation=True)['input_ids']
+
+    tokens = [tokenizer.decode(input_id) for input_id in input_ids]
+    # The above produces artifacts such as a " positive" token and id, instead of "positive". So we redo this.
+
+    tokens = [token.lower().strip() for token in tokens]
+    return tokens, input_ids
 
 def generate_output_from_texts(model: AutoModelForCausalLM, tokenizer: PreTrainedTokenizer, texts):
     tokenized = tokenizer(texts, return_tensors='pt', padding=True)
