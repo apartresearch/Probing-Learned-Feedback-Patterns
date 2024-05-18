@@ -1,6 +1,7 @@
 from datetime import datetime
 import json
 import os
+import shutil
 
 
 from huggingface_hub import HfApi, hf_hub_download
@@ -191,6 +192,9 @@ def load_latest_model_from_hub(model_name: str, task_config: TaskConfig, config=
 
     for filename in folder_contents:
         if filename.startswith(target_path):
-            hf_hub_download(repo_id=repo_id, filename=filename, cache_dir=download_dir)
+            filepath = hf_hub_download(repo_id=repo_id, filename=filename, cache_dir=download_dir)
+
+            print(f'Moving file from {filepath} to {download_dir}.')
+            shutil.move(filepath, download_dir)
 
     return AutoModel.from_pretrained(target_path)
