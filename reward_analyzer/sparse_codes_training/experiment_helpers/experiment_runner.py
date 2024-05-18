@@ -27,6 +27,7 @@ class ExperimentRunner:
     def __init__(self, experiment_config: ExperimentConfig):
         self.experiment_config = experiment_config
         self.initialize_run_and_hyperparameters(experiment_config)
+        self.task_config = experiment_config.task_config
 
         self.m_base, self.m_rlhf, self.tokenizer, self.autoencoder_device = self.initialize_models(
             base_model_name=self.base_model_name, task_config=experiment_config.task_config,
@@ -110,8 +111,8 @@ class ExperimentRunner:
         Initialize base and policy models.
         """
         task_name = task_config.name
-        m_base = AutoModel.from_pretrained(base_model_name).to(model_device)
-        m_rlhf = load_latest_model_from_hub()
+        m_base = AutoModel.from_pretrained(base_model_name)
+        m_rlhf = load_latest_model_from_hub(model_name=base_model_name, task_config=task_config).to(model_device)
 
         # We may need to train autoencoders on different device after loading models.
         autoencoder_device = self.input_device if self.input_device else find_gpu_with_most_memory()
@@ -127,22 +128,21 @@ class ExperimentRunner:
         """
         self.split = self.hyperparameters['split']
         print('Processing texts')
-        self.dataset_name = self.hyperparameters['dataset']
 
 
-        if self.dataset_name == 'imdb':
-            self.test_dataset_base = [x['text'] for x in self.test_dataset_base]
+        if self.task_config == TaskConfig.HH_RLHF:
+            self.dataset_name = 'imdb'
             self.test_dataset_base = load_dataset(self.dataset_name, split=self.split)
+            self.test_dataset_base = [x['text'] for x in self.test_dataset_base]
 
-        elif self.dataset_name == 'anthropic/hh-rlhf':
+        elif self.task_config in [TaskConfig.HH_RLHF, TaskConfig.UNALIGNED]:
+            self.dataset_name = 'anthropic/hh-rlhf'
             result_dataset = []
             for item in self.test_dataset_base:
                 result_dataset.extend([item['chosen'], item['rejected']])
 
             self.test_dataset_base = result_dataset
 
-        elif self.dataset_name == 'unaligned':
-            pass
         else:
             raise Exception(f'Parsing dataset {self.dataset_name} is not supported')
 
