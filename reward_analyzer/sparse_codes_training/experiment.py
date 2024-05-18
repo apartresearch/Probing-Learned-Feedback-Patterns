@@ -4,10 +4,10 @@ Entrypoint for code from which experiments are triggered/launched.
 import argparse
 from time import sleep
 
-from sparse_codes_training.experiment_configs import (
+from reward_analyzer.sparse_codes_training.experiment_configs import (
     ExperimentConfig, grid_experiment_configs
 )
-from sparse_codes_training.experiment_helpers.experiment_runner import ExperimentRunner
+from reward_analyzer.sparse_codes_training.experiment_helpers.experiment_runner import ExperimentRunner
 
 parser = argparse.ArgumentParser(description="Choose which experiment trl_config you want to run.")
 
@@ -22,7 +22,8 @@ parser.add_argument(
 parser.add_argument(
     "--tied_weights", action="store_true", help="Whether to tie weights of decoder or not.", required=False)
 parser.add_argument(
-    "--divergence_choice", default=None, type=str, help="The method you want to use to pick most divergent layers.", required=False)
+    "--divergence_choice", default=None, type=str, help="The method you want to use to pick most divergent layers.",
+    required=False)
 parser.add_argument(
     "--l1_coef", default=None, type=float, help="The l1_coef you want to use.", required=False)
 parser.add_argument(

@@ -45,12 +45,13 @@ class TrainingPoint:
     intenisty_analyzer = SentimentIntensityAnalyzer()
     lexicon = intenisty_analyzer.lexicon
 
-    def __init__(self, input_dict: dict, tokenizer, mappings: dict = None):
+    def __init__(self, input_dict: dict, tokenizer, mappings: dict = None, verbose=False):
         self.mappings = mappings or {
             "positive_key": "input_text",
             "negative_key": "output_text",
             "neutral_key": "neutral_text"
         }
+        self.verbose = verbose
 
         positive_key = self.mappings["positive_key"]
         negative_key = self.mappings["negative_key"]
@@ -93,7 +94,7 @@ class TrainingPoint:
 
         try:
             self.trimmed_positive_example: TextTokensIdsTarget = self.trim_example(
-                self.positive_text, self.positive_words)
+                self.positive_text, self.positive_words, verbose=self.verbose)
             if self.trimmed_positive_example:
                 positive_token = self.trimmed_positive_example.target_token.strip().lower()
                 self.target_positive_reward = self.lexicon.get(positive_token, None)
@@ -106,7 +107,7 @@ class TrainingPoint:
 
         try:
             self.trimmed_negative_example: TextTokensIdsTarget = self.trim_example(
-                self.negative_text, self.negative_words)
+                self.negative_text, self.negative_words, verbose=self.verbose)
             if self.trimmed_negative_example:
                 negative_token = self.trimmed_negative_example.target_token.strip().lower()
                 self.target_negative_reward = self.lexicon.get(negative_token, None)
@@ -118,7 +119,8 @@ class TrainingPoint:
             self.trimmed_negative_example = None
 
         try:
-            self.trimmed_neutral_example: TextTokensIdsTarget = self.trim_example(self.neutral_text, self.neutral_words)
+            self.trimmed_neutral_example: TextTokensIdsTarget = self.trim_example(
+                self.neutral_text, self.neutral_words, verbose=self.verbose)
             if self.trimmed_neutral_example:
                 self.target_neutral_token = self.trimmed_neutral_example.target_token.strip().lower()
                 self.target_neutral_token_id = self.trimmed_neutral_example.target_token_id

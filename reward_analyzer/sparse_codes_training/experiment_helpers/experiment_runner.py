@@ -9,13 +9,13 @@ from transformers import AutoModel
 from transformers import AutoTokenizer
 from transformers import GPTJForCausalLM
 
-from sparse_codes_training.experiment_configs import ExperimentConfig
-from sparse_codes_training.experiment_helpers.autoencoder_trainer_and_preparer import AutoencoderDataPreparerAndTrainer
-from sparse_codes_training.experiment_helpers.layer_activations_handler import LayerActivationsHandler
-from sparse_codes_training.metrics.mmcs import compare_autoencoders
+from reward_analyzer.sparse_codes_training.experiment_configs import ExperimentConfig
+from reward_analyzer.sparse_codes_training.experiment_helpers.autoencoder_trainer_and_preparer import AutoencoderDataPreparerAndTrainer
+from reward_analyzer.sparse_codes_training.experiment_helpers.layer_activations_handler import LayerActivationsHandler
+from reward_analyzer.sparse_codes_training.metrics.mmcs import compare_autoencoders
 
-from utils.gpu_utils import find_gpu_with_most_memory
-from utils.model_storage_utils import save_autoencoders_for_artifact
+from reward_analyzer.utils.gpu_utils import  find_gpu_with_most_memory
+from reward_analyzer.utils.model_storage_utils import save_autoencoders_for_artifact
 
 class ExperimentRunner:
     """
