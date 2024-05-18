@@ -8,8 +8,15 @@ from reward_analyzer.sparse_codes_training.experiment_configs import (
     ExperimentConfig, grid_experiment_configs
 )
 from reward_analyzer.sparse_codes_training.experiment_helpers.experiment_runner import ExperimentRunner
+from reward_analyzer.configs.task_configs import TaskConfig
 
 parser = argparse.ArgumentParser(description="Choose which experiment trl_config you want to run.")
+
+config_names_to_tasks = {
+    "imdb": TaskConfig.IMDB,
+    "unaligned": TaskConfig.UNALIGNED,
+    "hh": TaskConfig.HH_RLHF
+}
 
 parser.add_argument(
     "--fast", action="store_true", help="Whether to run in fast mode or not.", required=False)
@@ -33,8 +40,8 @@ parser.add_argument(
 parser.add_argument(
     "--wandb_project_name", default=None, type=str, help="The wandb project name you wish to use", required=False)
 parser.add_argument(
-    "--reward_function", default='utility_reward', type=str,
-    help="The reward function you want to leverage.", required=False)
+    "--task_config", default='hh', type=str,
+    help="The task config you want to apply.", required=False)
 
 def run_experiment(experiment_config: ExperimentConfig):
     '''
@@ -52,12 +59,12 @@ def run_experiment(experiment_config: ExperimentConfig):
 def parse_args():
     """
     Parses out command line args, and overrides
-    default experiment trl_config for a base model and reward function, if needed.
+    default experiment trl_config for a base model and task config, if needed.
     """
     args = parser.parse_args()
     base_model_name = args.base_model_name
-    reward_function = args.reward_function
-    default_experiment_config = grid_experiment_configs[(base_model_name, reward_function)]
+    task_config = args.task_config
+    default_experiment_config = grid_experiment_configs[(base_model_name, task_config)]
 
     # Override default experiment trl_config with parsed command line args.
     parsed_hyperparams = {

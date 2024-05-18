@@ -10,12 +10,13 @@ class ExperimentConfig:
 
     def __init__(
             self, hyperparameters, base_model_name,
-            task_config=TaskConfig.IMDB,
+            policy_model_name, task_config=TaskConfig.IMDB,
             wandb_project_name=None, device=None,
     ):
         self.hyperparameters = hyperparameters
         self.base_model_name = base_model_name
         self.task_config = task_config
+        self.policy_model_name = policy_model_name
 
         if wandb_project_name:
             self.wandb_project_name = wandb_project_name
@@ -65,11 +66,12 @@ model_specific_parameters = {
   'pythia-70m': {},
   'pythia-160m': {},
   'pythia-410m': {},
+  'gemma-2b-it': {},
   'gpt-neo-125m': {'l1_coef': 0.015},
   'gpt-j-6b-sharded-bf16': {'batch_size': 8, 'num_epochs': 1, 'gradient_accumulation_steps': 4}
 }
 
-def generate_experiment_configs(hyperparameters):
+def generate_experiment_configs(hyperparameters, task_configs=None):
     """
     We generate experiment configs as a cross product of all possible
     model names and tasks, with the given hyperparameters.
@@ -78,16 +80,17 @@ def generate_experiment_configs(hyperparameters):
     experiments.
     """
     all_experiment_configs = {}
+    task_configs = task_configs or [TaskConfig.UNALIGNED, TaskConfig.IMDB, TaskConfig.HH_RLHF]
     for model_name in all_models:
-        for task_config in TaskConfig:
+        for task_config in task_configs:
             simplified_model_name = model_name.rsplit('/', maxsplit=1)[-1]
-            policy_model_name = f'amirabdullah19852020/{simplified_model_name}_{task_config.name}'
+            policy_model_name = f'{simplified_model_name}_{task_config.name}'
             hyperparameters_copy = hyperparameters.copy()
             hyperparameters_copy.update(model_specific_parameters[simplified_model_name])
 
             new_config = ExperimentConfig(
                 hyperparameters=hyperparameters_copy, base_model_name=model_name,
-                task_config=task_config
+                task_config=task_config, policy_model_name=policy_model_name
             )
 
             experiment_key = (simplified_model_name, task_config.name)
