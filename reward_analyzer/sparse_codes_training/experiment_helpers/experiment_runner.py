@@ -9,12 +9,13 @@ from transformers import AutoModel
 from transformers import AutoTokenizer
 
 from reward_analyzer.sparse_codes_training.experiment_configs import ExperimentConfig
+from reward_analyzer.configs.task_configs import TaskConfig
 from reward_analyzer.sparse_codes_training.experiment_helpers.autoencoder_trainer_and_preparer import AutoencoderDataPreparerAndTrainer
 from reward_analyzer.sparse_codes_training.experiment_helpers.layer_activations_handler import LayerActivationsHandler
 from reward_analyzer.sparse_codes_training.metrics.mmcs import compare_autoencoders
 
 from reward_analyzer.utils.gpu_utils import  find_gpu_with_most_memory
-from reward_analyzer.utils.model_storage_utils import save_autoencoders_for_artifact
+from reward_analyzer.utils.model_storage_utils import save_autoencoders_for_artifact, load_latest_model_from_hub
 
 class ExperimentRunner:
     """
@@ -28,7 +29,7 @@ class ExperimentRunner:
         self.initialize_run_and_hyperparameters(experiment_config)
 
         self.m_base, self.m_rlhf, self.tokenizer, self.autoencoder_device = self.initialize_models(
-            policy_model_name=self.policy_model_name, base_model_name=self.base_model_name,
+            base_model_name=self.base_model_name, task_config=experiment_config.task_config,
             model_device=self.model_device
         )
 
@@ -97,18 +98,20 @@ class ExperimentRunner:
             self.layer_name_stem = 'layers'
         elif ('gpt-neo' in self.base_model_name) or ('gpt-j' in self.base_model_name):
             self.layer_name_stem = 'h'
+        elif ('gemma' in self.base_model_name):
+            self.layer_name_stem = 'mlp'
         else:
             raise Exception(f'Unsupported model type {self.base_model_name}')
 
     def initialize_models(
-        self, policy_model_name: str, base_model_name: str,
-        task_name: str, model_device: str
+        self, base_model_name: str, task_config: TaskConfig, model_device: str = find_gpu_with_most_memory()
     ):
         """
         Initialize base and policy models.
         """
+        task_name = task_config.name
         m_base = AutoModel.from_pretrained(base_model_name).to(model_device)
-        m_rlhf = AutoModel.from_pretrained(policy_model_name).to(model_device)
+        m_rlhf = load_latest_model_from_hub()
 
         # We may need to train autoencoders on different device after loading models.
         autoencoder_device = self.input_device if self.input_device else find_gpu_with_most_memory()

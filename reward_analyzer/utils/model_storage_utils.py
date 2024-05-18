@@ -162,6 +162,10 @@ def load_latest_model_from_hub(model_name: str, task_config: TaskConfig, config=
     api = HfApi()
     # Repository details
     repo_id = config.repo_id
+
+    # Simplify model_name if it is full path.
+    model_name = model_name.split("/")[-1].replace("-", "_") if "/" in model_name else model_name
+
     folder_path = os.path.join(config.task_name_to_model_path[task_config], model_name)
 
     # List the contents of the folder
