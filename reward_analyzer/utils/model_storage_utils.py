@@ -192,9 +192,9 @@ def load_latest_model_from_hub(model_name: str, task_config: TaskConfig, config=
 
     for filename in folder_contents:
         if filename.startswith(target_path):
-            filepath = hf_hub_download(repo_id=repo_id, filename=filename, cache_dir=download_dir)
+            filepath = hf_hub_download(repo_id=repo_id, filename=filename)
 
             print(f'Moving file from {filepath} to {download_dir}.')
             shutil.move(filepath, download_dir)
 
-    return AutoModel.from_pretrained(target_path)
+    return AutoModel.from_pretrained(download_dir)
