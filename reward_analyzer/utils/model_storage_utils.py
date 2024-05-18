@@ -2,20 +2,23 @@ from datetime import datetime
 import json
 import os
 
-import huggingface_hub
+
+from huggingface_hub import HfApi, hf_hub_download
 import torch
-from huggingface_hub import HfApi
+from transformers import AutoModel
 from trl import RewardTrainer
 
 from wandb import Api
 from wandb import Artifact
 
 from reward_analyzer.configs.rlhf_training_config import DPOTrainingConfig
+from reward_analyzer.configs.project_configs import HuggingfaceConfig
+from reward_analyzer.configs.task_configs import TaskConfig
 from reward_analyzer.sparse_codes_training.models.sparse_autoencoder import SparseAutoencoder
 
-entity_name = 'nlp_and_interpretability'
-project_prefix = 'Autoencoder_training'
-artifact_prefix = 'autoencoders'
+wandb_entity_name = 'nlp_and_interpretability'
+wandb_project_prefix = 'Autoencoder_training'
+wandb_artifact_prefix = 'autoencoders'
 
 def save_models_to_folder(model_dict, save_dir):
     """
@@ -54,7 +57,7 @@ def save_autoencoders_for_artifact(
     save_models_to_folder(autoencoders_rlhf_small, save_dir=f'{save_dir}/rlhf_small')
 
     simplified_policy_name = policy_model_name.split('/')[-1].replace("-", "_")
-    artifact_name = f'{artifact_prefix}_{simplified_policy_name}'
+    artifact_name = f'{wandb_artifact_prefix}_{simplified_policy_name}'
 
     metadata.update(hyperparameters)
     saved_artifact = Artifact(artifact_name, metadata=metadata, type='model')
@@ -80,7 +83,7 @@ def load_autoencoders_for_artifact(policy_model_name, alias='latest'):
     '''
     api = Api()
     simplified_policy_model_name = policy_model_name.split('/')[-1].replace('-', '_')
-    full_path = f'{entity_name}/{project_prefix}_{policy_model_name}/{artifact_prefix}_{simplified_policy_model_name}:{alias}'
+    full_path = f'{wandb_entity_name}/{wandb_project_prefix}_{policy_model_name}/{wandb_artifact_prefix}_{simplified_policy_model_name}:{alias}'
     print(f'Loading artifact from {full_path}')
 
     artifact = api.artifact(full_path)
@@ -155,3 +158,36 @@ def dump_trl_trainer_to_huggingface(repo_id, trainer: RewardTrainer, script_args
         repo_type=None
     )
 
+def load_latest_model_from_hub(model_name: str, task_config: TaskConfig, config=HuggingfaceConfig()):
+    api = HfApi()
+    # Repository details
+    repo_id = config.repo_id
+    folder_path = os.path.join(config.task_name_to_model_path[task_config], model_name)
+
+    # List the contents of the folder
+    contents = api.list_repo_files(repo_id)
+    folder_contents = [file for file in contents if file.startswith(folder_path)]
+    print(folder_contents)
+
+    # Filter and sort the folders by timestamp
+    timestamps = list(set([item.split("/")[-2] for item in folder_contents]))
+
+    timestamps.sort(reverse=True)
+    print(timestamps)
+
+    # Get the most recent folder
+    most_recent_folder = timestamps[0]
+    print(most_recent_folder)
+    target_path = os.path.join(folder_path, most_recent_folder)
+
+    # Prepare the download directory
+    download_dir = os.path.join(os.getcwd(), target_path)
+
+    # Ensure the directory exists
+    os.makedirs(download_dir, exist_ok=True)
+
+    for filename in folder_contents:
+        if filename.startswith(target_path):
+            hf_hub_download(repo_id=repo_id, filename=filename, cache_dir=download_dir)
+
+    return AutoModel.from_pretrained(target_path)

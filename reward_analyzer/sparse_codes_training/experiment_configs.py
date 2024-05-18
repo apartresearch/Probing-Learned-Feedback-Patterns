@@ -1,7 +1,7 @@
 """
 This module gives the experiment configs for a given run.
-We define
 """
+from reward_analyzer.configs.task_configs import TaskConfig
 
 class ExperimentConfig:
     """
@@ -9,23 +9,23 @@ class ExperimentConfig:
     """
 
     def __init__(
-            self, hyperparameters, base_model_name, policy_model_name,
-            wandb_project_name=None, device=None
+            self, hyperparameters, base_model_name,
+            task_config=TaskConfig.IMDB,
+            wandb_project_name=None, device=None,
     ):
         self.hyperparameters = hyperparameters
         self.base_model_name = base_model_name
-        self.policy_model_name = policy_model_name
+        self.task_config = task_config
 
         if wandb_project_name:
             self.wandb_project_name = wandb_project_name
         else:
-            simplified_policy_model_name = self.policy_model_name.split('/')[-1].replace('-', '_')
-            self.wandb_project_name = f'Autoencoder_training_{simplified_policy_model_name}'
+            self.wandb_project_name = f'Autoencoder_training_{self.task_config.name}'
         self.device = device
 
     def __str__(self):
         printable = self.hyperparameters.copy()
-        printable.update({'base_model_name': self.base_model_name, 'policy_model_name': self.policy_model_name})
+        printable.update({'base_model_name': self.base_model_name, 'task_config': self.task_config.name})
         return str(printable)
 
 hyperparameters_fast = {
@@ -57,11 +57,9 @@ hyperparameters_full = {
 }
 
 all_models = [
-    'eleutherai/pythia-70m', 'eleutherai/pythia-160m', 'eleutherai/pythia-410m',
-    'eleutherai/gpt-neo-125m', 'ybelkada/gpt-j-6b-sharded-bf16'
+    'eleutherai/pythia-70m', 'eleutherai/pythia-160m', #'eleutherai/pythia-410m',
+    'eleutherai/gpt-neo-125m', 'google/gemma-2b-it' #'ybelkada/gpt-j-6b-sharded-bf16'
 ]
-
-all_reward_functions = ['sentiment_reward', 'utility_reward', 'hh_reward']
 
 model_specific_parameters = {
   'pythia-70m': {},
@@ -81,18 +79,18 @@ def generate_experiment_configs(hyperparameters):
     """
     all_experiment_configs = {}
     for model_name in all_models:
-        for reward_function in all_reward_functions:
+        for task_config in TaskConfig:
             simplified_model_name = model_name.rsplit('/', maxsplit=1)[-1]
-            policy_model_name = f'amirabdullah19852020/{simplified_model_name}_{reward_function}'
+            policy_model_name = f'amirabdullah19852020/{simplified_model_name}_{task_config.name}'
             hyperparameters_copy = hyperparameters.copy()
             hyperparameters_copy.update(model_specific_parameters[simplified_model_name])
 
             new_config = ExperimentConfig(
                 hyperparameters=hyperparameters_copy, base_model_name=model_name,
-                policy_model_name=policy_model_name
+                task_config=task_config
             )
 
-            experiment_key = (simplified_model_name, reward_function)
+            experiment_key = (simplified_model_name, task_config.name)
             all_experiment_configs[experiment_key] = new_config
     return all_experiment_configs
 
