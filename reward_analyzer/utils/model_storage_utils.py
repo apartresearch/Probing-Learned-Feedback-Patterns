@@ -165,7 +165,6 @@ def load_latest_model_from_hub(model_name: str, task_config: TaskConfig, config=
 
     # Simplify model_name if it is full path.
     model_name = model_name.split("/")[-1] if "/" in model_name else model_name
-    model_name = model_name.replace("-", "_")
 
     folder_path = os.path.join(config.task_name_to_model_path[task_config], model_name)
 
