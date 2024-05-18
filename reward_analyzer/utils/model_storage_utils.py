@@ -164,25 +164,25 @@ def load_latest_model_from_hub(model_name: str, task_config: TaskConfig, config=
     repo_id = config.repo_id
 
     # Simplify model_name if it is full path.
-    model_name = model_name.split("/")[-1].replace("-", "_") if "/" in model_name else model_name
+    model_name = model_name.split("/")[-1] if "/" in model_name else model_name
+    model_name = model_name.replace("-", "_")
 
     folder_path = os.path.join(config.task_name_to_model_path[task_config], model_name)
 
     # List the contents of the folder
     contents = api.list_repo_files(repo_id)
     folder_contents = [file for file in contents if file.startswith(folder_path)]
-    print(folder_contents)
 
     # Filter and sort the folders by timestamp
     timestamps = list(set([item.split("/")[-2] for item in folder_contents]))
 
     timestamps.sort(reverse=True)
-    print(timestamps)
 
     # Get the most recent folder
     most_recent_folder = timestamps[0]
-    print(most_recent_folder)
     target_path = os.path.join(folder_path, most_recent_folder)
+
+    print(f'Loading model from {target_path}')
 
     # Prepare the download directory
     download_dir = os.path.join(os.getcwd(), target_path)
