@@ -7,7 +7,6 @@ import wandb
 from datasets import load_dataset
 from transformers import AutoModel
 from transformers import AutoTokenizer
-from transformers import GPTJForCausalLM
 
 from reward_analyzer.sparse_codes_training.experiment_configs import ExperimentConfig
 from reward_analyzer.sparse_codes_training.experiment_helpers.autoencoder_trainer_and_preparer import AutoencoderDataPreparerAndTrainer
@@ -102,20 +101,14 @@ class ExperimentRunner:
             raise Exception(f'Unsupported model type {self.base_model_name}')
 
     def initialize_models(
-            self, policy_model_name: str, base_model_name: str,
-            model_device: str
+        self, policy_model_name: str, base_model_name: str,
+        task_name: str, model_device: str
     ):
         """
         Initialize base and policy models.
         """
-        if 'gpt-j' in policy_model_name:
-            m_base = GPTJForCausalLM.from_pretrained(base_model_name, device_map="auto")
-            m_rlhf = GPTJForCausalLM.from_pretrained(base_model_name, device_map="auto")
-            m_rlhf.load_adapter(policy_model_name)
-
-        else:
-            m_base = AutoModel.from_pretrained(base_model_name).to(model_device)
-            m_rlhf = AutoModel.from_pretrained(policy_model_name).to(model_device)
+        m_base = AutoModel.from_pretrained(base_model_name).to(model_device)
+        m_rlhf = AutoModel.from_pretrained(policy_model_name).to(model_device)
 
         # We may need to train autoencoders on different device after loading models.
         autoencoder_device = self.input_device if self.input_device else find_gpu_with_most_memory()
@@ -133,15 +126,10 @@ class ExperimentRunner:
         print('Processing texts')
         self.dataset_name = self.hyperparameters['dataset']
 
-        if self.is_fast:
-            self.hyperparameters['batch_size'] = 4
-            self.test_dataset_base = load_dataset(self.dataset_name, split=self.split).select(range(12))
-
-        else:
-            self.test_dataset_base = load_dataset(self.dataset_name, split=self.split)
 
         if self.dataset_name == 'imdb':
             self.test_dataset_base = [x['text'] for x in self.test_dataset_base]
+            self.test_dataset_base = load_dataset(self.dataset_name, split=self.split)
 
         elif self.dataset_name == 'anthropic/hh-rlhf':
             result_dataset = []
@@ -149,8 +137,15 @@ class ExperimentRunner:
                 result_dataset.extend([item['chosen'], item['rejected']])
 
             self.test_dataset_base = result_dataset
+
+        elif self.dataset_name == 'unaligned':
+            pass
         else:
             raise Exception(f'Parsing dataset {self.dataset_name} is not supported')
+
+        if self.is_fast:
+            self.hyperparameters['batch_size'] = 4
+            self.test_dataset_base = self.test_dataset_base.select(range(12))
 
         self.test_dataset_rlhf = self.test_dataset_base.copy()
         self.num_examples = len(self.test_dataset_base)
