@@ -97,4 +97,5 @@ def generate_experiment_configs(hyperparameters, task_configs=None):
             all_experiment_configs[experiment_key] = new_config
     return all_experiment_configs
 
+fast_grid_experiment_configs = generate_experiment_configs(hyperparameters_fast)
 grid_experiment_configs = generate_experiment_configs(hyperparameters_full)
