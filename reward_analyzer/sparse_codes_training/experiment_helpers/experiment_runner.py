@@ -60,12 +60,12 @@ class ExperimentRunner:
 
         self.ae_extractor_base = AutoencoderDataPreparerAndTrainer(
             model=self.m_base, tokenizer=self.tokenizer, hyperparameters=self.hyperparameters,
-            autoencoder_device=self.autoencoder_device, model_device=str(self.m_rlhf.device)
+            autoencoder_device=self.autoencoder_device
         )
 
         self.ae_extractor_rlhf = AutoencoderDataPreparerAndTrainer(
             model=self.m_rlhf, tokenizer=self.tokenizer, hyperparameters=self.hyperparameters,
-            autoencoder_device=self.autoencoder_device, model_device=str(self.m_rlhf.device)
+            autoencoder_device=self.autoencoder_device
         )
 
     def initialize_run_and_hyperparameters(self, experiment_config: ExperimentConfig):
