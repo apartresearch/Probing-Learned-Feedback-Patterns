@@ -14,7 +14,7 @@ class AutoencoderDataPreparerAndTrainer:
     the autoencoders.
     """
     def __init__(
-            self, model, tokenizer, hyperparameters: dict, autoencoder_device: str, model_device: str
+            self, model, tokenizer, hyperparameters: dict, autoencoder_device: str
     ):
         self.model = model
         self.tokenizer = tokenizer
@@ -23,7 +23,7 @@ class AutoencoderDataPreparerAndTrainer:
         self.layer_activations_handler = LayerActivationsHandler(model=self.model)
 
         self.autoencoder_device = autoencoder_device
-        self.model_device = model_device
+        self.model_device = str(self.model.device)
 
     def train_autoencoder_on_text_activations(
         self, layer_name: str, input_texts: List[str],

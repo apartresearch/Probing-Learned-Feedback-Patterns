@@ -91,5 +91,5 @@ def parse_args():
     return default_experiment_config
 
 chosen_experiment_config = parse_args()
-print(f'Running experiment now for trl_config {chosen_experiment_config}')
+print(f'Running experiment now for experiment config {chosen_experiment_config}')
 run_experiment(experiment_config=chosen_experiment_config)

@@ -60,12 +60,12 @@ class ExperimentRunner:
 
         self.ae_extractor_base = AutoencoderDataPreparerAndTrainer(
             model=self.m_base, tokenizer=self.tokenizer, hyperparameters=self.hyperparameters,
-            autoencoder_device=self.autoencoder_device, model_device=str(self.m_rlhf.device)
+            autoencoder_device=self.autoencoder_device
         )
 
         self.ae_extractor_rlhf = AutoencoderDataPreparerAndTrainer(
             model=self.m_rlhf, tokenizer=self.tokenizer, hyperparameters=self.hyperparameters,
-            autoencoder_device=self.autoencoder_device, model_device=str(self.m_rlhf.device)
+            autoencoder_device=self.autoencoder_device
         )
 
     def initialize_run_and_hyperparameters(self, experiment_config: ExperimentConfig):
@@ -111,7 +111,7 @@ class ExperimentRunner:
         Initialize base and policy models.
         """
         task_name = task_config.name
-        m_base = AutoModel.from_pretrained(base_model_name)
+        m_base = AutoModel.from_pretrained(base_model_name).to(model_device)
         m_rlhf = load_latest_model_from_hub(model_name=base_model_name, task_config=task_config).to(model_device)
 
         # We may need to train autoencoders on different device after loading models.
@@ -130,13 +130,16 @@ class ExperimentRunner:
         print('Processing texts')
 
 
-        if self.task_config == TaskConfig.HH_RLHF:
+        if self.task_config == TaskConfig.IMDB:
+            print(f'Loading imdb dataset for {self.task_config.name}')
             self.dataset_name = 'imdb'
             self.test_dataset_base = load_dataset(self.dataset_name, split=self.split)
             self.test_dataset_base = [x['text'] for x in self.test_dataset_base]
 
         elif self.task_config in [TaskConfig.HH_RLHF, TaskConfig.UNALIGNED]:
+            print(f'Loading anthropic dataset for {self.task_config.name}')
             self.dataset_name = 'anthropic/hh-rlhf'
+            self.test_dataset_base = load_dataset(self.dataset_name, split=self.split)
             result_dataset = []
             for item in self.test_dataset_base:
                 result_dataset.extend([item['chosen'], item['rejected']])
@@ -148,7 +151,7 @@ class ExperimentRunner:
 
         if self.is_fast:
             self.hyperparameters['batch_size'] = 4
-            self.test_dataset_base = self.test_dataset_base.select(range(12))
+            self.test_dataset_base = self.test_dataset_base[:12]
 
         self.test_dataset_rlhf = self.test_dataset_base.copy()
         self.num_examples = len(self.test_dataset_base)
@@ -176,11 +179,14 @@ class ExperimentRunner:
         Extracts autoencoders for a given layer index from base and rlhf model.
         """
 
+        print(f'Training base model autoencoder')
         autoencoder_base = self.ae_extractor_base.train_autoencoder_on_text_activations(
             layer_name=f'{self.layer_name_stem}.{layer_index}.mlp',
             input_texts=self.test_dataset_base, hidden_size_multiple=hidden_size_multiple,
             label=f'base_{label}'
         )
+
+        print(f'Training rlhf model autoencoder')
         autoencoder_rlhf = self.ae_extractor_rlhf.train_autoencoder_on_text_activations(
             layer_name=f'{self.layer_name_stem}.{layer_index}.mlp',
             input_texts=self.test_dataset_rlhf, hidden_size_multiple=hidden_size_multiple,
@@ -211,7 +217,8 @@ class ExperimentRunner:
         )
 
         # Create autoencoder pairs for each layer
-        for _, layer_index in enumerate(self.sorted_layers):
+        for number, layer_index in enumerate(self.sorted_layers):
+            print(f'Training autoencoder pair # {number}')
 
             # For each pair, set the hidden size to be a different multiple of the input size
             for hidden_size_multiple in self.hidden_size_multiples:
