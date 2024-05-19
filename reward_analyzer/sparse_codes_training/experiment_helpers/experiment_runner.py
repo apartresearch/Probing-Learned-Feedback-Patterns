@@ -139,6 +139,7 @@ class ExperimentRunner:
         elif self.task_config in [TaskConfig.HH_RLHF, TaskConfig.UNALIGNED]:
             print(f'Loading anthropic dataset for {self.task_config.name}')
             self.dataset_name = 'anthropic/hh-rlhf'
+            self.test_dataset_base = load_dataset(self.dataset_name, split=self.split)
             result_dataset = []
             for item in self.test_dataset_base:
                 result_dataset.extend([item['chosen'], item['rejected']])
@@ -150,7 +151,7 @@ class ExperimentRunner:
 
         if self.is_fast:
             self.hyperparameters['batch_size'] = 4
-            self.test_dataset_base = self.test_dataset_base.select(range(12))
+            self.test_dataset_base = self.test_dataset_base[:12]
 
         self.test_dataset_rlhf = self.test_dataset_base.copy()
         self.num_examples = len(self.test_dataset_base)
