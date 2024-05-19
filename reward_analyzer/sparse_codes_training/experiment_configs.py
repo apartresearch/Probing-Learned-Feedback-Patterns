@@ -73,7 +73,8 @@ model_specific_parameters = {
 
 task_specific_parameters = {
     TaskConfig.UNALIGNED: {'split': 'train', 'num_epochs': 2, 'batch_size': 128},
-    TaskConfig.HH_RLHF: {'split': 'train', 'num_epochs': 2, 'batch_size': 128}
+    TaskConfig.HH_RLHF: {'split': 'train', 'num_epochs': 2, 'batch_size': 128},
+    TaskConfig.IMDB: {}
 }
 
 def generate_experiment_configs(hyperparameters, task_configs=None):
@@ -93,10 +94,10 @@ def generate_experiment_configs(hyperparameters, task_configs=None):
             hyperparameters_copy = hyperparameters.copy()
 
             # Update model specific params.
-            hyperparameters_copy.update(model_specific_parameters[simplified_model_name])
+            hyperparameters_copy.update(model_specific_parameters.get(simplified_model_name, {}))
 
             # Update task specific params.
-            hyperparameters_copy.update(task_specific_parameters[task_config])
+            hyperparameters_copy.update(task_specific_parameters.get(task_config, {}))
             new_config = ExperimentConfig(
                 hyperparameters=hyperparameters_copy, base_model_name=model_name,
                 task_config=task_config, policy_model_name=policy_model_name
