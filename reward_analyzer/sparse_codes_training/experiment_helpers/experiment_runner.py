@@ -214,7 +214,8 @@ class ExperimentRunner:
         )
 
         # Create autoencoder pairs for each layer
-        for _, layer_index in enumerate(self.sorted_layers):
+        for number, layer_index in enumerate(self.sorted_layers):
+            print(f'Training autoencoder pair # {number}')
 
             # For each pair, set the hidden size to be a different multiple of the input size
             for hidden_size_multiple in self.hidden_size_multiples:
