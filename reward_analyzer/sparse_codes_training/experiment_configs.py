@@ -71,6 +71,11 @@ model_specific_parameters = {
   'gpt-j-6b-sharded-bf16': {'batch_size': 8, 'num_epochs': 1, 'gradient_accumulation_steps': 4}
 }
 
+task_specific_parameters = {
+    TaskConfig.UNALIGNED: {'split': 'train', 'num_epochs': 2, 'batch_size': 128},
+    TaskConfig.HH_RLHF: {'split': 'train', 'num_epochs': 2, 'batch_size': 128}
+}
+
 def generate_experiment_configs(hyperparameters, task_configs=None):
     """
     We generate experiment configs as a cross product of all possible
@@ -86,13 +91,16 @@ def generate_experiment_configs(hyperparameters, task_configs=None):
             simplified_model_name = model_name.rsplit('/', maxsplit=1)[-1]
             policy_model_name = f'{simplified_model_name}_{task_config.name}'
             hyperparameters_copy = hyperparameters.copy()
+
+            # Update model specific params.
             hyperparameters_copy.update(model_specific_parameters[simplified_model_name])
 
+            # Update task specific params.
+            hyperparameters_copy.update(task_specific_parameters[task_config])
             new_config = ExperimentConfig(
                 hyperparameters=hyperparameters_copy, base_model_name=model_name,
                 task_config=task_config, policy_model_name=policy_model_name
             )
-
             experiment_key = (simplified_model_name, task_config.name)
             all_experiment_configs[experiment_key] = new_config
     return all_experiment_configs
