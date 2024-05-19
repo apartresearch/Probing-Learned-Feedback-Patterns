@@ -30,6 +30,7 @@ class ExperimentConfig:
         return str(printable)
 
 hyperparameters_fast = {
+    'max_input_length': 128,
     'hidden_size_multiples': [1, 2],
     'l1_coef': 0.001,
     'batch_size': 32,
