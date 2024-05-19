@@ -130,12 +130,14 @@ class ExperimentRunner:
         print('Processing texts')
 
 
-        if self.task_config == TaskConfig.HH_RLHF:
+        if self.task_config == TaskConfig.IMDB:
+            print(f'Loading imdb dataset for {self.task_config.name}')
             self.dataset_name = 'imdb'
             self.test_dataset_base = load_dataset(self.dataset_name, split=self.split)
             self.test_dataset_base = [x['text'] for x in self.test_dataset_base]
 
         elif self.task_config in [TaskConfig.HH_RLHF, TaskConfig.UNALIGNED]:
+            print(f'Loading anthropic dataset for {self.task_config.name}')
             self.dataset_name = 'anthropic/hh-rlhf'
             result_dataset = []
             for item in self.test_dataset_base:
