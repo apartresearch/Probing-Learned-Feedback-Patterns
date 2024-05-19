@@ -1,14 +1,17 @@
-python3 src/sparse_codes_training/experiment.py --base_model_name pythia-70m --reward_function sentiment_reward &
+python3 reward_analyzer/sparse_codes_training/experiment.py --base_model_name pythia-70m --task_config hh &
 sleep 120
 
-python3 src/sparse_codes_training/experiment.py --base_model_name pythia-70m --reward_function utility_reward &
+python3 reward_analyzer/sparse_codes_training/experiment.py --base_model_name pythia-70m --task_config unaligned &
 sleep 120
 
-python3 src/sparse_codes_training/experiment.py --base_model_name gpt-neo-125m --reward_function sentiment_reward &
+python3 reward_analyzer/sparse_codes_training/experiment.py --base_model_name gpt-neo-125m --task_config unaligned &
 sleep 120
 
-python3 src/sparse_codes_training/experiment.py --base_model_name gpt-neo-125m --reward_function utility_reward &
+python3 reward_analyzer/sparse_codes_training/experiment.py --base_model_name gpt-neo-125m --task_config hh &
 sleep 120
 
-python3 src/sparse_codes_training/experiment.py --base_model_name gpt-j-6b-sharded-bf16 --reward_function sentiment_reward &
+python3 reward_analyzer/sparse_codes_training/experiment.py --base_model_name pythia-160m --task_config unaligned &
+sleep 120
+
+python3 reward_analyzer/sparse_codes_training/experiment.py --base_model_name pythia-160m --task_config hh &
 sleep 120
