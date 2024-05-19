@@ -73,8 +73,8 @@ model_specific_parameters = {
 }
 
 task_specific_parameters = {
-    TaskConfig.UNALIGNED: {'split': 'train', 'num_epochs': 2, 'batch_size': 128},
-    TaskConfig.HH_RLHF: {'split': 'train', 'num_epochs': 2, 'batch_size': 128},
+    TaskConfig.UNALIGNED: {'split': 'train', 'num_epochs': 1, 'batch_size': 64},
+    TaskConfig.HH_RLHF: {'split': 'train', 'num_epochs': 1, 'batch_size': 64},
     TaskConfig.IMDB: {}
 }
 

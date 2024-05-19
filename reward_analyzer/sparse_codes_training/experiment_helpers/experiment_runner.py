@@ -1,6 +1,7 @@
 """
 This class runs the actual experiments
 """
+import random
 
 import wandb
 
@@ -24,10 +25,11 @@ class ExperimentRunner:
     and train autoencoders for each such layer.
     """
 
-    def __init__(self, experiment_config: ExperimentConfig):
+    def __init__(self, experiment_config: ExperimentConfig, seed: int = 42):
         self.experiment_config = experiment_config
         self.initialize_run_and_hyperparameters(experiment_config)
         self.task_config = experiment_config.task_config
+        self.seed = seed
 
         self.m_base, self.m_rlhf, self.tokenizer, self.autoencoder_device = self.initialize_models(
             base_model_name=self.base_model_name, task_config=experiment_config.task_config,
@@ -139,11 +141,15 @@ class ExperimentRunner:
         elif self.task_config in [TaskConfig.HH_RLHF, TaskConfig.UNALIGNED]:
             print(f'Loading anthropic dataset for {self.task_config.name}')
             self.dataset_name = 'anthropic/hh-rlhf'
+
             self.test_dataset_base = load_dataset(self.dataset_name, split=self.split)
             result_dataset = []
             for item in self.test_dataset_base:
                 result_dataset.extend([item['chosen'], item['rejected']])
 
+            random.seed(self.seed)
+
+            result_dataset = random.sample(result_dataset, k=75000)
             self.test_dataset_base = result_dataset
 
         else:
@@ -157,6 +163,7 @@ class ExperimentRunner:
         self.num_examples = len(self.test_dataset_base)
         print(f'Working with {self.num_examples} texts.')
 
+        wandb.run.config['seed'] = self.seed
         wandb.run.config['num_examples'] = self.num_examples
         self.hyperparameters['num_examples'] = self.num_examples
 
