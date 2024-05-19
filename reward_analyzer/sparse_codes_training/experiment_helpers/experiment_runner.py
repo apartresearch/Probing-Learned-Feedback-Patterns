@@ -111,7 +111,7 @@ class ExperimentRunner:
         Initialize base and policy models.
         """
         task_name = task_config.name
-        m_base = AutoModel.from_pretrained(base_model_name)
+        m_base = AutoModel.from_pretrained(base_model_name).to(model_device)
         m_rlhf = load_latest_model_from_hub(model_name=base_model_name, task_config=task_config).to(model_device)
 
         # We may need to train autoencoders on different device after loading models.
@@ -179,11 +179,14 @@ class ExperimentRunner:
         Extracts autoencoders for a given layer index from base and rlhf model.
         """
 
+        print(f'Training base model autoencoder')
         autoencoder_base = self.ae_extractor_base.train_autoencoder_on_text_activations(
             layer_name=f'{self.layer_name_stem}.{layer_index}.mlp',
             input_texts=self.test_dataset_base, hidden_size_multiple=hidden_size_multiple,
             label=f'base_{label}'
         )
+
+        print(f'Training rlhf model autoencoder')
         autoencoder_rlhf = self.ae_extractor_rlhf.train_autoencoder_on_text_activations(
             layer_name=f'{self.layer_name_stem}.{layer_index}.mlp',
             input_texts=self.test_dataset_rlhf, hidden_size_multiple=hidden_size_multiple,
