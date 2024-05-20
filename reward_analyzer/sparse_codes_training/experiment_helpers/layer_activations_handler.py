@@ -46,8 +46,8 @@ class LayerActivationsHandler:
                 if len(name_parts) >= 3 and name_parts[0] == self.layer_name_stem:
                     layer_num = int(name_parts[1])
                     layer_type = name_parts[2]
-                    print(f"Base params type: {param_base.dtype}")
-                    print(f"RLHF params type: {param_rlhf.dtype}")
+                    param_base = param_base.to(dtype=torch.float32)
+                    param_rlhf = param_rlhf.to(dtype=torch.float32)
                     layer_divergences[layer_num][layer_type] += torch.norm(param_base.cpu() - param_rlhf.cpu()).item()
 
             layer_total_divergences = {
