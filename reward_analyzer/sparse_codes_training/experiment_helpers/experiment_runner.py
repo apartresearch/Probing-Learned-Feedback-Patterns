@@ -116,16 +116,6 @@ class ExperimentRunner:
         m_base = AutoModel.from_pretrained(base_model_name, load_in_8bit=True)
         m_rlhf = load_latest_model_from_hub(model_name=base_model_name, task_config=task_config)
 
-        print("Base:")
-        for name, module in m_base.named_modules():
-            print(name)
-            print("----")
-
-        print("RLHF:")
-        for name, module in m_rlhf.named_modules():
-            print(name)
-            print("----")
-
         # We may need to train autoencoders on different device after loading models.
         autoencoder_device = self.input_device if self.input_device else find_gpu_with_most_memory()
 
@@ -198,14 +188,14 @@ class ExperimentRunner:
 
         print(f'Training base model autoencoder')
         autoencoder_base = self.ae_extractor_base.train_autoencoder_on_text_activations(
-            layer_name=f'{self.layer_name_stem}.{layer_index}.mlp',
+            layer_name=f'layers.{layer_index}.mlp',
             input_texts=self.test_dataset_base, hidden_size_multiple=hidden_size_multiple,
             label=f'base_{label}'
         )
 
         print(f'Training rlhf model autoencoder')
         autoencoder_rlhf = self.ae_extractor_rlhf.train_autoencoder_on_text_activations(
-            layer_name=f'{self.layer_name_stem}.{layer_index}.mlp',
+            layer_name=f'layers.{layer_index}.mlp',
             input_texts=self.test_dataset_rlhf, hidden_size_multiple=hidden_size_multiple,
             label=f'rlhf_{label}'
         )
