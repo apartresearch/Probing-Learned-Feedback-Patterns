@@ -195,4 +195,4 @@ def load_latest_model_from_hub(model_name: str, task_config: TaskConfig, config=
             filepath = hf_hub_download(repo_id=repo_id, filename=filename, force_download=True)
             shutil.copy(filepath, download_dir)
 
-    return AutoModel.from_pretrained(download_dir)
+    model = AutoModel.from_pretrained(download_dir, load_in_8bit=True)
