@@ -102,7 +102,7 @@ class ExperimentRunner:
         elif ('gpt-neo' in self.base_model_name) or ('gpt-j' in self.base_model_name):
             self.layer_name_stem = 'h'
         elif ('gemma' in self.base_model_name):
-            self.layer_name_stem = 'mlp'
+            self.layer_name_stem = 'layers'
         else:
             raise Exception(f'Unsupported model type {self.base_model_name}')
 
@@ -188,7 +188,7 @@ class ExperimentRunner:
 
         print(f'Training base model autoencoder')
         autoencoder_base = self.ae_extractor_base.train_autoencoder_on_text_activations(
-            layer_name=f'layers.{layer_index}.mlp',
+            layer_name=f'{self.layer_name_stem}.{layer_index}.mlp',
             input_texts=self.test_dataset_base, hidden_size_multiple=hidden_size_multiple,
             label=f'base_{label}'
         )
