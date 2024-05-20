@@ -113,8 +113,8 @@ class ExperimentRunner:
         Initialize base and policy models.
         """
         task_name = task_config.name
-        m_base = AutoModel.from_pretrained(base_model_name, load_in_8bit=True).to(model_device)
-        m_rlhf = load_latest_model_from_hub(model_name=base_model_name, task_config=task_config).to(model_device)
+        m_base = AutoModel.from_pretrained(base_model_name, load_in_8bit=True)
+        m_rlhf = load_latest_model_from_hub(model_name=base_model_name, task_config=task_config)
 
         # We may need to train autoencoders on different device after loading models.
         autoencoder_device = self.input_device if self.input_device else find_gpu_with_most_memory()
