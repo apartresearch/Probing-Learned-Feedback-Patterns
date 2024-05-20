@@ -57,6 +57,7 @@ class SparseAutoencoder(nn.Module):
         """
         Normalizes encoder weight, applies encoder, and then the decoder.
         """
+        x = x.to(dtype=self.encoder[0].weight.dtype)
         self.encoder[0].weight.data = F.normalize(self.encoder[0].weight, p=2, dim=1)
         features = self.encoder(x)
 
