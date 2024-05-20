@@ -196,3 +196,4 @@ def load_latest_model_from_hub(model_name: str, task_config: TaskConfig, config=
             shutil.copy(filepath, download_dir)
 
     model = AutoModel.from_pretrained(download_dir, load_in_8bit=True)
+    return model
