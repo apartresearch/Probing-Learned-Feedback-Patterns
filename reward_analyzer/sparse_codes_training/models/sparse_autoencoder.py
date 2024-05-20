@@ -103,7 +103,7 @@ class SparseAutoencoder(nn.Module):
                     layer_name=layer_name, input_texts=input_batch, tokenizer=tokenizer,
                     device=model_device, hyperparameters=hyperparameters
                 )
-                data = activations_batch.to(autoencoder_device)
+                data = activations_batch.to(autoencoder_device, dtype=torch.float32)
 
                 optimizer.zero_grad()
                 features, reconstruction = self.forward(data)
