@@ -1,4 +1,6 @@
 from datetime import datetime
+from operator import xor
+
 import json
 import os
 import shutil
@@ -77,14 +79,19 @@ def save_autoencoders_for_artifact(
     aliases = sorted(list(aliases))
     run.log_artifact(saved_artifact, aliases=aliases)
 
-def load_autoencoders_for_artifact(policy_model_name, alias='latest'):
+def load_autoencoders_for_artifact(full_path=None, policy_model_name=None, alias='latest'):
     '''
     Loads the autoencoders from one run into memory. Note that these paths are to some extent hardcoded
     For example, try autoencoders_dict = load_autoencoders_for_artifact('pythia_70m_sentiment_reward')
+    Or autoencoders_dict = load_autoencoders_for_artifact('gpt_neo_125m_hh_rlhf')
     '''
     api = Api()
-    simplified_policy_model_name = policy_model_name.split('/')[-1].replace('-', '_')
-    full_path = f'{wandb_entity_name}/{wandb_project_prefix}_{policy_model_name}/{wandb_artifact_prefix}_{simplified_policy_model_name}:{alias}'
+    assert xor(bool(policy_model_name), bool(full_path)), "Exactly one of full_path or policy_model_name must be specified"
+
+    if not full_path:
+        simplified_policy_model_name = policy_model_name.split('/')[-1].replace('-', '_')
+        full_path = f'{wandb_entity_name}/{wandb_project_prefix}_{policy_model_name}/{wandb_artifact_prefix}_{simplified_policy_model_name}:{alias}'
+
     print(f'Loading artifact from {full_path}')
 
     artifact = api.artifact(full_path)
