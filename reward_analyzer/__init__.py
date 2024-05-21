@@ -1,6 +1,7 @@
 from .configs.task_configs import TaskConfig
 from .data_constructions.anthropic_hh_rlhf import setup_llama_reward_model, get_hh
 from .rlhf_model_training.reward_class import RewardClass
+from .sparse_codes_training.models.sparse_autoencoder import SparseAutoencoder
 from .sparse_codes_training.experiment_helpers.experiment_runner import ExperimentRunner
 from .sparse_codes_training.experiment_helpers.autoencoder_trainer_and_preparer import AutoencoderDataPreparerAndTrainer
 from .utils.model_storage_utils import dump_trl_trainer_to_huggingface
