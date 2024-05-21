@@ -195,7 +195,7 @@ class ExperimentRunner:
 
         print(f'Training rlhf model autoencoder')
         autoencoder_rlhf = self.ae_extractor_rlhf.train_autoencoder_on_text_activations(
-            layer_name=f'layers.{layer_index}.mlp',
+            layer_name=f'{self.layer_name_stem}.{layer_index}.mlp',
             input_texts=self.test_dataset_rlhf, hidden_size_multiple=hidden_size_multiple,
             label=f'rlhf_{label}'
         )
