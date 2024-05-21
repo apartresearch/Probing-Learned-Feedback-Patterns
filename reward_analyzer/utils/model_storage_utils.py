@@ -161,6 +161,22 @@ def dump_trl_trainer_to_huggingface(repo_id, trainer: RewardTrainer, script_args
         repo_type=None
     )
 
+def download_folder_from_hub(folder_path: str, local_folder: str, config=HuggingfaceConfig(),):
+    api = HfApi()
+    repo_id = config.repo_id
+    contents = api.list_repo_files(repo_id)
+    folder_contents = [file for file in contents if file.startswith(folder_path)]
+    download_dir = os.path.join(os.getcwd(), local_folder)
+
+    # Ensure the directory exists
+    os.makedirs(download_dir, exist_ok=True)
+
+    for filename in folder_contents:
+        if filename.startswith(local_folder):
+            filepath = hf_hub_download(repo_id=repo_id, filename=filename, force_download=True)
+            shutil.copy(filepath, download_dir)
+
+
 def load_latest_model_from_hub(model_name: str, task_config: TaskConfig, config=HuggingfaceConfig()):
     api = HfApi()
     # Repository details
