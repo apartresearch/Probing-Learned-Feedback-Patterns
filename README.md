@@ -4,7 +4,7 @@
     <br>
 <p>
 
-## Official Repository for Beyond Training Objectives: Interpreting Reward Model Divergence in Large Language Models
+## Official Repository for Probing Learned Feedback Patterns in Large Language Models
 #### By Luke Marks, Amir Abdullah, Clement Neo, Rauno Arike, Philip Torr, Fazl Barez 
 1. This repository provides scripts to train several LLM and task combinations under RLHF using PPO.
 2. The repository also supports training sparse autoencoders for feature extraction on the MLP layers of LLMs.
@@ -18,9 +18,6 @@ git clone https://github.com/apartresearch/Interpreting-Reward-Models.git
 cd Interpreting-Reward-Models
 pip install .
 ```
-
-## Warning
-Repository is undergoing construction / changes for some weeks, most functionality should be back up by end of May.
 
 ## Repository structure.
 This repo is structured so that RLHF models are trained under `src/rlhf_model_training`.
@@ -71,7 +68,7 @@ If you use this work, please cite:
 
 ```bibtex
 @misc{marks2023interpreting,
-      title={Beyond Training Objectives: Interpreting Reward Model Divergence in Large Language Models}, 
+      title={Probing Learned Feedback Patterns in Large Language Models}, 
       author={Luke Marks and Amir Abdullah and Clement Neo and Rauno Arike and Philip Torr and Fazl Barez},
       year={2023},
       eprint={2310.08164},
