@@ -4,18 +4,18 @@
     <br>
 <p>
 
-## Official Repository for Probing Learned Feedback Patterns in Large Language Models
+## Official Repository for Interpreting Learned Feedback Patterns in Large Language Models
 #### By Luke Marks, Amir Abdullah, Clement Neo, Rauno Arike, Philip Torr, Fazl Barez 
-1. This repository provides scripts to train several LLM and task combinations under RLHF using PPO.
+1. This repository provides scripts to train LLMs with RLHF.
 2. The repository also supports training sparse autoencoders for feature extraction on the MLP layers of LLMs.
-3. As well as the classification of those features, and the training of a linear approximation of a fine-tuned LLMs implicit reward model.
+3. As well as classifying and probing those features.
 
 ## Installation
 From source
 
 ```bash
-git clone https://github.com/apartresearch/Interpreting-Reward-Models.git
-cd Interpreting-Reward-Models
+git clone https://github.com/apartresearch/Interpreting-Learned-Feedback-Patterns.git
+cd Interpreting-Learned-Feedback-Patterns
 pip install .
 ```
 
@@ -68,7 +68,7 @@ If you use this work, please cite:
 
 ```bibtex
 @misc{marks2023interpreting,
-      title={Probing Learned Feedback Patterns in Large Language Models}, 
+      title={Interpreting Learned Feedback Patterns in Large Language Models}, 
       author={Luke Marks and Amir Abdullah and Clement Neo and Rauno Arike and Philip Torr and Fazl Barez},
       year={2023},
       eprint={2310.08164},
